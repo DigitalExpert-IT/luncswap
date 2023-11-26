@@ -1,4 +1,4 @@
-use cosmwasm_std::Decimal;
+use cosmwasm_std::{Decimal, Uint128};
 use cw20::Denom;
 use serde::{Deserialize, Serialize};
 
@@ -9,4 +9,39 @@ pub struct InstantiateMsg {
     pub owner: Option<String>,
     pub protocol_fee_recipient: String,
     pub protocol_fee_percent: Decimal,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum QueryMsg {
+    Balance { address: String },
+    Info {},
+    Token1ForToken2Price { token1_amount: Uint128 },
+    Token2ForToken1Price { token2_amount: Uint128 },
+    Fee {},
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct InfoResponse {
+    pub token1_reserve: Uint128,
+    pub token1_denom: Denom,
+    pub token2_reserve: Uint128,
+    pub token2_denom: Denom,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct FeeResponse {
+    pub owner: Option<String>,
+    pub protocol_fee_percent: Decimal,
+    pub protocol_fee_recipient: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct Token1ForToken2PriceResponse {
+    pub token2_amount: Uint128,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct Token2ForToken1PriceResponse {
+    pub token1_amount: Uint128,
 }
