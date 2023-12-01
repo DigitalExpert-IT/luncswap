@@ -1,24 +1,26 @@
 use crate::msg::{
-    FeeResponse, QueryMsg, Token1ForToken2PriceResponse, Token2ForToken1PriceResponse,
+    ExecuteMsg, FeeResponse, QueryMsg, Token1ForToken2PriceResponse, Token2ForToken1PriceResponse,
 };
 use crate::{
     error::ContractError,
     msg::{InfoResponse, InstantiateMsg},
-    state::{Fees, Token, FEES, OWNER, TOKEN1, TOKEN2},
+    state::{Fees, Token, FEES, LP_TOKEN, OWNER, TOKEN1, TOKEN2},
 };
 use cosmwasm_std::{
-    to_json_binary, Binary, Decimal, Deps, DepsMut, Empty, Env, MessageInfo, Response, StdError,
-    StdResult, Uint128, Uint512,
+    attr, to_json_binary, Addr, Binary, Coin, CosmosMsg, Decimal, Deps, DepsMut, Env, MessageInfo,
+    Response, StdError, StdResult, SubMsg, Uint128, Uint512, WasmMsg,
 };
+use cw20::Denom;
 use cw20_base::contract::query_balance;
 
+const INSTANTIATE_LP_TOKEN_REPLY_ID: u64 = 0;
 const FEE_SCALE_FACTOR: Uint128 = Uint128::new(10_000);
 // const MAX_FEE_PERCENT: &str = "1";
 const FEE_DECIMAL_PRECISION: Uint128 = Uint128::new(10u128.pow(20));
 
 pub fn instantiate(
     deps: DepsMut,
-    _env: Env,
+    env: Env,
     _info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
@@ -45,11 +47,208 @@ pub fn instantiate(
     };
     FEES.save(deps.storage, &fees)?;
 
-    Ok(Response::new())
+    let instantiate_lp_token_msg = WasmMsg::Instantiate {
+        admin: None,
+        code_id: msg.lp_token_code_id,
+        msg: to_json_binary(&cw20_base::msg::InstantiateMsg {
+            name: "Luncswap_Liquidity_Token".into(),
+            symbol: "lslpt".into(),
+            decimals: 6,
+            initial_balances: vec![],
+            marketing: None,
+            mint: Some(cw20::MinterResponse {
+                minter: env.contract.address.into(),
+                cap: None,
+            }),
+        })?,
+        funds: vec![],
+        label: "lp_token".to_string(),
+    };
+
+    let reply_msg =
+        SubMsg::reply_on_success(instantiate_lp_token_msg, INSTANTIATE_LP_TOKEN_REPLY_ID);
+
+    Ok(Response::new().add_submessage(reply_msg))
 }
 
-pub fn execute(_deps: DepsMut, _env: Env, _info: MessageInfo, _msg: Empty) -> StdResult<Response> {
-    unimplemented!()
+pub fn execute(
+    deps: DepsMut,
+    env: Env,
+    info: MessageInfo,
+    msg: ExecuteMsg,
+) -> Result<Response, ContractError> {
+    use ExecuteMsg::*;
+
+    match msg {
+        AddLiquidity {
+            token1_amount,
+            min_liquidity,
+            max_token2,
+        } => execute_add_liquidity(deps, &info, env, min_liquidity, token1_amount, max_token2),
+        RemoveLiquidity {
+            amount: _,
+            min_token1: _,
+            min_token2: _,
+        } => {
+            unimplemented!()
+        }
+        Swap {
+            input_token: _,
+            input_amount: _,
+            min_output: _,
+        } => {
+            unimplemented!()
+        }
+    }
+}
+
+fn get_amount_for_denom(coins: &[Coin], denom: &str) -> Coin {
+    let amount: Uint128 = coins
+        .iter()
+        .filter(|c| c.denom == denom)
+        .map(|c| c.amount)
+        .sum();
+
+    Coin {
+        amount,
+        denom: denom.to_string(),
+    }
+}
+
+fn validate_input_amount(
+    actual_funds: &[Coin],
+    given_amount: Uint128,
+    given_denom: &Denom,
+) -> Result<(), ContractError> {
+    match given_denom {
+        Denom::Cw20(_) => Ok(()),
+        Denom::Native(denom) => {
+            let actual = get_amount_for_denom(actual_funds, denom);
+            if actual.amount != given_amount {
+                return Err(ContractError::InsufficientFunds {});
+            }
+
+            if &actual.denom != denom {
+                return Err(ContractError::IncorrectNativeDenom {
+                    provided: actual.denom,
+                    required: denom.to_string(),
+                });
+            }
+            Ok(())
+        }
+    }
+}
+
+fn get_lp_token_supply(deps: Deps, lp_token_addr: &Addr) -> StdResult<Uint128> {
+    let resp: cw20::TokenInfoResponse = deps
+        .querier
+        .query_wasm_smart(lp_token_addr, &cw20_base::msg::QueryMsg::TokenInfo {})?;
+    Ok(resp.total_supply)
+}
+
+fn get_token2_amount_required(
+    max_token: Uint128,
+    token1_amount: Uint128,
+    liquidity_supply: Uint128,
+    token2_reserve: Uint128,
+    token1_reserve: Uint128,
+) -> Result<Uint128, StdError> {
+    if liquidity_supply == Uint128::zero() {
+        Ok(max_token)
+    } else {
+        Ok(token1_amount
+            .checked_mul(token2_reserve)
+            .map_err(StdError::overflow)?
+            .checked_div(token1_reserve)
+            .map_err(StdError::divide_by_zero)?
+            .checked_add(Uint128::new(1))
+            .map_err(StdError::overflow)?)
+    }
+}
+
+fn get_lp_token_amount_to_mint(
+    token1_amount: Uint128,
+    liquidity_supply: Uint128,
+    token1_reserve: Uint128,
+) -> Result<Uint128, ContractError> {
+    if liquidity_supply == Uint128::zero() {
+        Ok(token1_amount)
+    } else {
+        Ok(token1_amount
+            .checked_mul(liquidity_supply)
+            .map_err(StdError::overflow)?
+            .checked_div(token1_reserve)
+            .map_err(StdError::divide_by_zero)?)
+    }
+}
+
+fn mint_lp_tokens(
+    recipient: &Addr,
+    liquidity_amount: Uint128,
+    lp_token_address: &Addr,
+) -> StdResult<CosmosMsg> {
+    let mint_msg = cw20_base::msg::ExecuteMsg::Mint {
+        recipient: recipient.to_string(),
+        amount: liquidity_amount,
+    };
+
+    Ok(WasmMsg::Execute {
+        contract_addr: lp_token_address.to_string(),
+        msg: to_json_binary(&mint_msg)?,
+        funds: vec![],
+    }
+    .into())
+}
+
+pub fn execute_add_liquidity(
+    deps: DepsMut,
+    info: &MessageInfo,
+    _env: Env,
+    min_liquidity: Uint128,
+    token1_amount: Uint128,
+    max_token2: Uint128,
+) -> Result<Response, ContractError> {
+    let token1 = TOKEN1.load(deps.storage)?;
+    let token2 = TOKEN2.load(deps.storage)?;
+    let lp_token_addr = LP_TOKEN.load(deps.storage)?;
+
+    validate_input_amount(&info.funds, token1_amount, &token1.denom)?;
+    validate_input_amount(&info.funds, max_token2, &token2.denom)?;
+
+    let lp_token_supply = get_lp_token_supply(deps.as_ref(), &lp_token_addr)?;
+    let liquidity_amount =
+        get_lp_token_amount_to_mint(token1_amount, lp_token_supply, token1.reserve)?;
+
+    let token2_amount = get_token2_amount_required(
+        max_token2,
+        token1_amount,
+        lp_token_supply,
+        token2.reserve,
+        token1.reserve,
+    )?;
+
+    if liquidity_amount < min_liquidity {
+        return Err(ContractError::MinLiquidityError {
+            provided: liquidity_amount,
+            minimum: min_liquidity,
+        });
+    }
+
+    if token2_amount > max_token2 {
+        return Err(ContractError::MaxTokenError {
+            provided: token2_amount,
+            max: max_token2,
+        });
+    }
+
+    // TODO: generate msg
+
+    let mint_msg = mint_lp_tokens(&info.sender, liquidity_amount, &lp_token_addr)?;
+    Ok(Response::new().add_message(mint_msg).add_attributes(vec![
+        attr("token1_amount", token1_amount),
+        attr("token2_amount", token2_amount),
+        attr("liquidity_received", liquidity_amount),
+    ]))
 }
 
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
