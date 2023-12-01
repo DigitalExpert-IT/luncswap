@@ -88,6 +88,7 @@ fn instantiate() {
         &mut router,
         &owner,
         InstantiateMsg {
+            lp_token_code_id: 0,
             token1_denom: Denom::Native(NATIVE_TOKEN_DENOM.into()),
             token2_denom: Denom::Cw20(cw20_token.addr()),
             owner: Some(owner.to_string()),
