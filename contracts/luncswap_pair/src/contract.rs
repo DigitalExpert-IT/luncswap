@@ -75,7 +75,7 @@ pub fn instantiate(
         code_id: msg.lp_token_code_id,
         msg: to_json_binary(&cw20_base::msg::InstantiateMsg {
             name: "Luncswap_Liquidity_Token".into(),
-            symbol: "lslpt".into(),
+            symbol: "lswpt".into(),
             decimals: 6,
             initial_balances: vec![],
             marketing: None,
@@ -290,7 +290,24 @@ pub fn execute_add_liquidity(
                 max_token2 - token2_amount,
             ))
         }
+    } else if Denom::Cw20(addr) = token2.denom {
+        transfer_msgs.push(get_cw20_transfer_from_msg(
+            &info.sender,
+            &env.contract.address,
+            &addr,
+            token2_amount,
+        )?)
     }
+
+    TOKEN1.update(deps.storage, |mut token1| -> Result<_, ContractError> {
+        token1.reserve += token1_amount;
+        Ok(token1)
+    })?;
+
+    TOKEN2.update(deps.storage, |mut token2| -> Result<_, ContractError> {
+        token2.reserve += token2_amount;
+        Ok(token2)
+    })?;
 
     let mint_msg = mint_lp_tokens(&info.sender, liquidity_amount, &lp_token_addr)?;
     Ok(Response::new()
