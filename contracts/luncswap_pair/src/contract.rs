@@ -1,5 +1,6 @@
 use crate::msg::{
     ExecuteMsg, FeeResponse, QueryMsg, Token1ForToken2PriceResponse, Token2ForToken1PriceResponse,
+    TokenSelect,
 };
 use crate::{
     error::ContractError,
@@ -7,16 +8,38 @@ use crate::{
     state::{Fees, Token, FEES, LP_TOKEN, OWNER, TOKEN1, TOKEN2},
 };
 use cosmwasm_std::{
-    attr, to_json_binary, Addr, Binary, Coin, CosmosMsg, Decimal, Deps, DepsMut, Env, MessageInfo,
-    Response, StdError, StdResult, SubMsg, Uint128, Uint512, WasmMsg,
+    attr, entry_point, to_json_binary, Addr, Binary, BlockInfo, Coin, CosmosMsg, Decimal, Deps,
+    DepsMut, Env, MessageInfo, Reply, Response, StdError, StdResult, SubMsg, Uint128, Uint256,
+    Uint512, WasmMsg,
 };
-use cw20::Denom;
+use cw0::parse_reply_instantiate_data;
+use cw20::{Cw20ExecuteMsg, Denom, Expiration};
 use cw20_base::contract::query_balance;
 
 const INSTANTIATE_LP_TOKEN_REPLY_ID: u64 = 0;
 const FEE_SCALE_FACTOR: Uint128 = Uint128::new(10_000);
 // const MAX_FEE_PERCENT: &str = "1";
 const FEE_DECIMAL_PRECISION: Uint128 = Uint128::new(10u128.pow(20));
+
+#[entry_point]
+pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractError> {
+    if msg.id != INSTANTIATE_LP_TOKEN_REPLY_ID {
+        return Err(ContractError::UnknownReplyId { id: msg.id });
+    };
+    let res = parse_reply_instantiate_data(msg);
+    match res {
+        Ok(res) => {
+            // Validate contract address
+            let cw20_addr = deps.api.addr_validate(&res.contract_address)?;
+
+            // Save gov token
+            LP_TOKEN.save(deps.storage, &cw20_addr)?;
+
+            Ok(Response::new())
+        }
+        Err(_) => Err(ContractError::InstantiateLpTokenError {}),
+    }
+}
 
 pub fn instantiate(
     deps: DepsMut,
@@ -93,12 +116,19 @@ pub fn execute(
             unimplemented!()
         }
         Swap {
-            input_token: _,
-            input_amount: _,
-            min_output: _,
-        } => {
-            unimplemented!()
-        }
+            input_token,
+            input_amount,
+            min_output,
+        } => execute_swap(
+            deps,
+            &info,
+            input_amount,
+            env,
+            input_token,
+            info.sender.to_string(),
+            min_output,
+            None,
+        ),
     }
 }
 
@@ -203,7 +233,7 @@ fn mint_lp_tokens(
 pub fn execute_add_liquidity(
     deps: DepsMut,
     info: &MessageInfo,
-    _env: Env,
+    env: Env,
     min_liquidity: Uint128,
     token1_amount: Uint128,
     max_token2: Uint128,
@@ -241,14 +271,230 @@ pub fn execute_add_liquidity(
         });
     }
 
-    // TODO: generate msg
+    let mut transfer_msgs: Vec<CosmosMsg> = vec![];
+    if let cw20::Denom::Cw20(addr) = token1.denom {
+        transfer_msgs.push(get_cw20_transfer_from_msg(
+            &info.sender,
+            &env.contract.address,
+            &addr,
+            token1_amount,
+        )?)
+    }
+
+    // Refund token 2 if is a native token and not all is spent
+    if let Denom::Native(denom) = token2.denom {
+        if token2_amount < max_token2 {
+            transfer_msgs.push(get_bank_transfer_to_msg(
+                &info.sender,
+                &denom,
+                max_token2 - token2_amount,
+            ))
+        }
+    }
 
     let mint_msg = mint_lp_tokens(&info.sender, liquidity_amount, &lp_token_addr)?;
-    Ok(Response::new().add_message(mint_msg).add_attributes(vec![
-        attr("token1_amount", token1_amount),
-        attr("token2_amount", token2_amount),
-        attr("liquidity_received", liquidity_amount),
+    Ok(Response::new()
+        .add_messages(transfer_msgs)
+        .add_message(mint_msg)
+        .add_attributes(vec![
+            attr("token1_amount", token1_amount),
+            attr("token2_amount", token2_amount),
+            attr("liquidity_received", liquidity_amount),
+        ]))
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn execute_swap(
+    deps: DepsMut,
+    info: &MessageInfo,
+    input_amount: Uint128,
+    env: Env,
+    input_token_enum: TokenSelect,
+    recipient: String,
+    min_token: Uint128,
+    expiration: Option<Expiration>,
+) -> Result<Response, ContractError> {
+    check_expiration(&expiration, &env.block)?;
+
+    let input_token_item = match input_token_enum {
+        TokenSelect::Token1 => TOKEN1,
+        TokenSelect::Token2 => TOKEN2,
+    };
+    let input_token = input_token_item.load(deps.storage)?;
+    let output_token_item = match input_token_enum {
+        TokenSelect::Token1 => TOKEN2,
+        TokenSelect::Token2 => TOKEN1,
+    };
+    let output_token = output_token_item.load(deps.storage)?;
+
+    // validate input_amount if native input token
+    validate_input_amount(&info.funds, input_amount, &input_token.denom)?;
+
+    let fees = FEES.load(deps.storage)?;
+    let total_fee_percent = fees.protocol_fee_percent;
+    let token_bought = get_input_price(
+        input_amount,
+        input_token.reserve,
+        output_token.reserve,
+        total_fee_percent,
+    )?;
+
+    if min_token > token_bought {
+        return Err(ContractError::SwapMinError {
+            min: min_token,
+            available: token_bought,
+        });
+    }
+    // Calculate fees
+    let protocol_fee_amount = get_protocol_fee_amount(input_amount, fees.protocol_fee_percent)?;
+    let input_amount_minus_protocol_fee = input_amount - protocol_fee_amount;
+
+    let mut msgs = match input_token.denom.clone() {
+        Denom::Cw20(addr) => vec![get_cw20_transfer_from_msg(
+            &info.sender,
+            &env.contract.address,
+            &addr,
+            input_amount_minus_protocol_fee,
+        )?],
+        Denom::Native(_) => vec![],
+    };
+
+    // Send protocol fee to protocol fee recipient
+    if !protocol_fee_amount.is_zero() {
+        msgs.push(get_fee_transfer_msg(
+            &info.sender,
+            &fees.protocol_fee_recipient,
+            &input_token.denom,
+            protocol_fee_amount,
+        )?)
+    }
+
+    let recipient = deps.api.addr_validate(&recipient)?;
+    // Create transfer to message
+    msgs.push(match output_token.denom {
+        Denom::Cw20(addr) => get_cw20_transfer_to_msg(&recipient, &addr, token_bought)?,
+        Denom::Native(denom) => get_bank_transfer_to_msg(&recipient, &denom, token_bought),
+    });
+
+    input_token_item.update(
+        deps.storage,
+        |mut input_token| -> Result<_, ContractError> {
+            input_token.reserve = input_token
+                .reserve
+                .checked_add(input_amount_minus_protocol_fee)
+                .map_err(StdError::overflow)?;
+            Ok(input_token)
+        },
+    )?;
+
+    output_token_item.update(
+        deps.storage,
+        |mut output_token| -> Result<_, ContractError> {
+            output_token.reserve = output_token
+                .reserve
+                .checked_sub(token_bought)
+                .map_err(StdError::overflow)?;
+            Ok(output_token)
+        },
+    )?;
+
+    Ok(Response::new().add_messages(msgs).add_attributes(vec![
+        attr("native_sold", input_amount),
+        attr("token_bought", token_bought),
     ]))
+}
+
+fn get_cw20_transfer_to_msg(
+    recipient: &Addr,
+    token_addr: &Addr,
+    token_amount: Uint128,
+) -> StdResult<CosmosMsg> {
+    // create transfer cw20 msg
+    let transfer_cw20_msg = Cw20ExecuteMsg::Transfer {
+        recipient: recipient.into(),
+        amount: token_amount,
+    };
+    let exec_cw20_transfer = WasmMsg::Execute {
+        contract_addr: token_addr.into(),
+        msg: to_json_binary(&transfer_cw20_msg)?,
+        funds: vec![],
+    };
+    let cw20_transfer_cosmos_msg: CosmosMsg = exec_cw20_transfer.into();
+    Ok(cw20_transfer_cosmos_msg)
+}
+
+fn get_protocol_fee_amount(input_amount: Uint128, fee_percent: Decimal) -> StdResult<Uint128> {
+    if fee_percent.is_zero() {
+        return Ok(Uint128::zero());
+    }
+
+    let fee_percent = fee_decimal_to_uint128(fee_percent)?;
+    Ok(input_amount
+        .full_mul(fee_percent)
+        .checked_div(Uint256::from(FEE_SCALE_FACTOR))
+        .map_err(StdError::divide_by_zero)?
+        .try_into()?)
+}
+
+fn get_fee_transfer_msg(
+    sender: &Addr,
+    recipient: &Addr,
+    fee_denom: &Denom,
+    amount: Uint128,
+) -> StdResult<CosmosMsg> {
+    match fee_denom {
+        Denom::Cw20(addr) => get_cw20_transfer_from_msg(sender, recipient, addr, amount),
+        Denom::Native(denom) => Ok(get_bank_transfer_to_msg(recipient, denom, amount)),
+    }
+}
+
+fn check_expiration(
+    expiration: &Option<Expiration>,
+    block: &BlockInfo,
+) -> Result<(), ContractError> {
+    match expiration {
+        Some(e) => {
+            if e.is_expired(block) {
+                return Err(ContractError::MsgExpirationError {});
+            }
+            Ok(())
+        }
+        None => Ok(()),
+    }
+}
+
+fn get_bank_transfer_to_msg(recipient: &Addr, denom: &str, native_amount: Uint128) -> CosmosMsg {
+    let transfer_bank_msg = cosmwasm_std::BankMsg::Send {
+        to_address: recipient.into(),
+        amount: vec![Coin {
+            denom: denom.to_string(),
+            amount: native_amount,
+        }],
+    };
+
+    let transfer_bank_cosmos_msg: CosmosMsg = transfer_bank_msg.into();
+    transfer_bank_cosmos_msg
+}
+
+fn get_cw20_transfer_from_msg(
+    owner: &Addr,
+    recipient: &Addr,
+    token_addr: &Addr,
+    token_amount: Uint128,
+) -> StdResult<CosmosMsg> {
+    // create transfer cw20 msg
+    let transfer_cw20_msg = Cw20ExecuteMsg::TransferFrom {
+        owner: owner.into(),
+        recipient: recipient.into(),
+        amount: token_amount,
+    };
+    let exec_cw20_transfer = WasmMsg::Execute {
+        contract_addr: token_addr.into(),
+        msg: to_json_binary(&transfer_cw20_msg)?,
+        funds: vec![],
+    };
+    let cw20_transfer_cosmos_msg: CosmosMsg = exec_cw20_transfer.into();
+    Ok(cw20_transfer_cosmos_msg)
 }
 
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
