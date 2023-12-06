@@ -282,7 +282,7 @@ pub fn execute_add_liquidity(
     }
 
     // Refund token 2 if is a native token and not all is spent
-    if let Denom::Native(denom) = token2.denom {
+    if let Denom::Native(denom) = token2.denom.clone() {
         if token2_amount < max_token2 {
             transfer_msgs.push(get_bank_transfer_to_msg(
                 &info.sender,
@@ -290,7 +290,9 @@ pub fn execute_add_liquidity(
                 max_token2 - token2_amount,
             ))
         }
-    } else if Denom::Cw20(addr) = token2.denom {
+    }
+    
+    if let Denom::Cw20(addr) = token2.denom {
         transfer_msgs.push(get_cw20_transfer_from_msg(
             &info.sender,
             &env.contract.address,
