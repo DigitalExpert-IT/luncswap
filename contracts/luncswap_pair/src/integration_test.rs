@@ -17,7 +17,8 @@ fn luncswap_factory() -> Box<dyn Contract<Empty>> {
         crate::contract::execute,
         crate::contract::instantiate,
         crate::contract::query,
-    );
+    )
+    .with_reply(crate::contract::reply);
 
     Box::new(contract)
 }
@@ -45,7 +46,7 @@ fn create_cw20_contract(
     name: String,
     symbol: String,
     balance: Uint128,
-) -> Cw20Contract {
+) -> (Cw20Contract, u64) {
     let cw20_id = router.store_code(cw20_factory());
     let msg = cw20_base::msg::InstantiateMsg {
         name,
@@ -61,7 +62,7 @@ fn create_cw20_contract(
     let addr = router
         .instantiate_contract(cw20_id, owner.clone(), &msg, &[], symbol, None)
         .unwrap();
-    Cw20Contract(addr)
+    (Cw20Contract(addr), cw20_id)
 }
 
 #[test]
@@ -75,11 +76,11 @@ fn instantiate() {
         router.bank.init_balance(storage, &owner, funds).unwrap()
     });
 
-    let cw20_token = create_cw20_contract(
+    let (cw20_token, cw20_code_id) = create_cw20_contract(
         &mut router,
         &owner,
-        "lunc".to_string(),
-        "LUNC".to_string(),
+        "lunct".to_string(),
+        "LUNCT".to_string(),
         Uint128::new(5000),
     );
 
@@ -88,7 +89,7 @@ fn instantiate() {
         &mut router,
         &owner,
         InstantiateMsg {
-            lp_token_code_id: 0,
+            lp_token_code_id: cw20_code_id,
             token1_denom: Denom::Native(NATIVE_TOKEN_DENOM.into()),
             token2_denom: Denom::Cw20(cw20_token.addr()),
             owner: Some(owner.to_string()),

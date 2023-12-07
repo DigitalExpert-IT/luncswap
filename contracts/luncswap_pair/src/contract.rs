@@ -8,9 +8,8 @@ use crate::{
     state::{Fees, Token, FEES, LP_TOKEN, OWNER, TOKEN1, TOKEN2},
 };
 use cosmwasm_std::{
-    attr, entry_point, to_json_binary, Addr, Binary, BlockInfo, Coin, CosmosMsg, Decimal, Deps,
-    DepsMut, Env, MessageInfo, Reply, Response, StdError, StdResult, SubMsg, Uint128, Uint256,
-    Uint512, WasmMsg,
+    attr, to_json_binary, Addr, Binary, BlockInfo, Coin, CosmosMsg, Decimal, Deps, DepsMut, Env,
+    MessageInfo, Reply, Response, StdError, StdResult, SubMsg, Uint128, Uint256, Uint512, WasmMsg,
 };
 use cw0::parse_reply_instantiate_data;
 use cw20::{Cw20ExecuteMsg, Denom, Expiration};
@@ -21,7 +20,6 @@ const FEE_SCALE_FACTOR: Uint128 = Uint128::new(10_000);
 // const MAX_FEE_PERCENT: &str = "1";
 const FEE_DECIMAL_PRECISION: Uint128 = Uint128::new(10u128.pow(20));
 
-#[entry_point]
 pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractError> {
     if msg.id != INSTANTIATE_LP_TOKEN_REPLY_ID {
         return Err(ContractError::UnknownReplyId { id: msg.id });
@@ -291,7 +289,7 @@ pub fn execute_add_liquidity(
             ))
         }
     }
-    
+
     if let Denom::Cw20(addr) = token2.denom {
         transfer_msgs.push(get_cw20_transfer_from_msg(
             &info.sender,
