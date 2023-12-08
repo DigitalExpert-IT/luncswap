@@ -2,14 +2,7 @@
   "global": {
     "useCargoWorkspace": true,
     "prefix": "terra",
-    "network": "localterra",
-    "base": {
-      "instantiation": {
-        "instantiateMsg": {
-          "count": 0
-        }
-      }
-    }
+    "network": "localterra"
   },
   "classic": {
     "axelar-dojo-1": {
@@ -148,6 +141,53 @@
     }
   },
   "mainnet": {
+    "columbus-5": {
+      "chainID": "columbus-5",
+      "lcd": "https://terra-classic-lcd.publicnode.com",
+      "gasAdjustment": 5,
+      "gasPrices": {
+        "uluna": 28.325,
+        "usdr": 0.52469,
+        "uusd": 0.75,
+        "ukrw": 850,
+        "umnt": 2142.855,
+        "ueur": 0.625,
+        "ucny": 4.9,
+        "ujpy": 81.85,
+        "ugbp": 0.55,
+        "uinr": 54.4,
+        "ucad": 0.95,
+        "uchf": 0.7,
+        "uaud": 0.95,
+        "usgd": 1,
+        "uthb": 23.1,
+        "usek": 6.25,
+        "unok": 6.25,
+        "udkk": 4.5,
+        "uidr": 10900,
+        "uphp": 38,
+        "uhkd": 5.85,
+        "umyr": 3,
+        "utwd": 20
+      },
+      "prefix": "terra",
+      "coinType": "330",
+      "baseAsset": "uluna",
+      "name": "Terra Classic",
+      "icon": "https://station-assets.terra.dev/img/chains/TerraClassic.svg",
+      "isClassic": true,
+      "explorer": {
+        "address": "https://finder.station.money/classic/address/{}",
+        "tx": "https://finder.station.money/classic/tx/{}",
+        "validator": "https://finder.station.money/classic/validator/{}",
+        "block": "https://finder.station.money/classic/block/{}"
+      },
+      "channels": {
+        "juno-1": "channel-20",
+        "crescent-1": "channel-49",
+        "axelar-dojo-1": "channel-19"
+      }
+    },
     "akashnet-2": {
       "chainID": "akashnet-2",
       "lcd": "https://rest.cosmos.directory/akash",

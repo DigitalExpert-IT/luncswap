@@ -1,9 +1,8 @@
 {
   "testnet": {
-    "pisco-1": {
-      "luncswap_pair": {
-        "codeId": "12224"
-      }
-    }
+    "pisco-1": {}
+  },
+  "mainnet": {
+    "columbus-5": {}
   }
 }

@@ -1,0 +1,15 @@
+{
+  "testnet": {
+    "pisco-1": {
+      "luncswap_pair": {
+        "codeId": "12225"
+      },
+      "luncswap_token": {
+        "codeId": "12228",
+        "contractAddresses": {
+          "default": "terra1vrg65vgm6knfu387tstw0l5e0mccqmguy9m5up4c3mq0vpmmg66s7q9uru"
+        }
+      }
+    }
+  }
+}
