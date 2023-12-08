@@ -17,5 +17,8 @@
     "patchedDependencies": {
       "@terra-money/terrain@0.8.0": "patches/@terra-money__terrain@0.8.0.patch"
     }
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
   }
 }
