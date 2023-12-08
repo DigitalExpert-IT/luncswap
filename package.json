@@ -1,0 +1,13 @@
+{
+  "name": "luncswap",
+  "version": "1.0.0",
+  "description": "",
+  "dependencies": {
+    "@terra-money/feather.js": "^1.2.1",
+    "@terra-money/terrain": "^0.8.0"
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "license": "MIT"
+}
