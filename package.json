@@ -4,10 +4,13 @@
   "description": "",
   "dependencies": {
     "@terra-money/feather.js": "^1.2.1",
-    "@terra-money/terrain": "^0.8.0"
+    "@terra-money/terrain": "^0.8.0",
+    "@terra-money/wallet-kit": "^1.0.16"
   },
-  "workspaces": [
-    "frontend"
-  ],
-  "license": "MIT"
+  "license": "MIT",
+  "pnpm": {
+    "patchedDependencies": {
+      "@terra-money/terrain@0.8.0": "patches/@terra-money__terrain@0.8.0.patch"
+    }
+  }
 }

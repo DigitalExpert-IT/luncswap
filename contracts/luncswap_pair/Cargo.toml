@@ -1,5 +1,5 @@
 [package]
-name = "luncswap-pair"
+name = "luncswap_pair"
 version = "0.1.0"
 edition = "2021"
 

@@ -1,0 +1,54 @@
+diff --git a/lib/lib/deployment.js b/lib/lib/deployment.js
+index ac731982656f7374d31ca71967fce168af570675..6dd078c81d413674d0ea842eeeaa226edad958a8 100644
+--- a/lib/lib/deployment.js
++++ b/lib/lib/deployment.js
+@@ -39,7 +39,7 @@ const execDockerOptimization = (image, cache) => {
+         ${image}`, { stdio: 'inherit' });
+     }
+     catch (err) {
+-        TerrainCLI_1.default.error((0, dedent_1.default) `
++        TerrainCLI_1.default.error((0, dedent_1.default)`
+       Please ensure that "Docker" is installed and running in the background before executing this command:\n
+       "${(0, hyperlinker_1.default)('https://docs.docker.com/get-docker/', 'https://docs.docker.com/get-docker/')}"
+     `, 'Docker Unavailable');
+@@ -49,12 +49,12 @@ const optimizeContract = async ({ contract, arm64, }) => {
+     const startingDirectory = process.cwd();
+     const folder = path_1.default.join('contracts', contract);
+     process.chdir(folder);
+-    const image = `cosmwasm/rust-optimizer${arm64 ? '-arm64' : ''}:0.12.6`;
++    const image = `cosmwasm/rust-optimizer${arm64 ? '-arm64' : ''}:0.15.0`;
+     execDockerOptimization(image, contract);
+     process.chdir(startingDirectory);
+ };
+ const optimizeWorkspace = async ({ contract, arm64, }) => {
+-    const image = `cosmwasm/workspace-optimizer${arm64 ? '-arm64' : ''}:0.12.6`;
++    const image = `cosmwasm/workspace-optimizer${arm64 ? '-arm64' : ''}:0.15.0`;
+     execDockerOptimization(image, contract);
+ };
+ const optimize = async ({ contract, useCargoWorkspace, network, }) => {
+@@ -82,14 +82,14 @@ const storeCode = async ({ contract, signer, network, refsPath, lcd, codeId, noR
+     }
+     wasmByteCodeFilename += '.wasm';
+     // Create boolean to check if user is attempting to store ARM64 wasm binary on mainnet.
+-    const wasmFiles = fs.readdirSync(path_1.default.join('contracts', contract, 'artifacts'));
++    const wasmFiles = useCargoWorkspace ? fs.readdirSync(path_1.default.join('artifacts')) : fs.readdirSync(path_1.default.join('contracts', contract, 'artifacts'));
+     const storingARM64Mainnet = !wasmFiles.includes(wasmByteCodeFilename)
+         && process.arch === 'arm64'
+         && network === 'mainnet';
+     // Check if user is attempting to store ARM64 wasm binary on mainnet.
+     // If so, reoptimize to default wasm binary to store on mainnet.
+     if (storingARM64Mainnet) {
+-        TerrainCLI_1.default.error((0, dedent_1.default) `
++        TerrainCLI_1.default.error((0, dedent_1.default)`
+       ARM64 wasm files should not be stored on "Mainnet". Rebuilding contract to deploy default wasm binary.
+     `, 'ARM64 Wasm Detected');
+         await (0, exports.optimize)({ contract, useCargoWorkspace, network });
+@@ -158,7 +158,7 @@ const instantiate = async ({ conf, refsPath, network, lcd, signer, admin, contra
+         memo,
+         msgs: [
+             new feather_js_1.MsgInstantiateContract(signer.key.accAddress(prefix), admin, // can migrate
+-            actualCodeId, instantiation.instantiateMsg, undefined, 'Instantiate'),
++                actualCodeId, instantiation.instantiateMsg, undefined, 'Instantiate'),
+         ],
+     };
+     if (!txOptions.feeDenoms) {
