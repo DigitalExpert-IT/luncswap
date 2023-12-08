@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TokenSelect",
+  "type": "string",
+  "enum": [
+    "Token1",
+    "Token2"
+  ]
+}

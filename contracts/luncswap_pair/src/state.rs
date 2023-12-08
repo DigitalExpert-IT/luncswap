@@ -1,9 +1,10 @@
 use cosmwasm_std::{Addr, Decimal, Uint128};
 use cw20::Denom;
 use cw_storage_plus::Item;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Token {
     pub reserve: Uint128,
     pub denom: Denom,
@@ -15,7 +16,7 @@ pub const LP_TOKEN: Item<Addr> = Item::new("lp_token");
 
 pub const OWNER: Item<Option<Addr>> = Item::new("owner");
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Fees {
     pub protocol_fee_recipient: Addr,
     pub protocol_fee_percent: Decimal,

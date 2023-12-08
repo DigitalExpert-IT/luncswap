@@ -7,8 +7,8 @@ use msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 mod contract;
 mod error;
 mod integration_test;
-mod msg;
-mod state;
+pub mod msg;
+pub mod state;
 
 #[entry_point]
 pub fn instantiate(
