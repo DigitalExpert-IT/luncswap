@@ -1,14 +1,17 @@
+use crate::error::ContractError;
 use cosmwasm_std::{
     entry_point, Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdResult,
 };
 use msg::{ExecuteMsg, QueryMsg};
 
 mod contract;
+mod error;
+mod integration_test;
 mod msg;
 mod state;
 
 #[entry_point]
-pub fn reply(deps: DepsMut, env: Env, msg: Reply) -> StdResult<Response> {
+pub fn reply(deps: DepsMut, env: Env, msg: Reply) -> Result<Response, ContractError> {
     contract::reply(deps, env, msg)
 }
 

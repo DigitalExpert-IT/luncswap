@@ -1,4 +1,4 @@
-use cosmwasm_std::{CanonicalAddr, Decimal};
+use cosmwasm_std::{Addr, CanonicalAddr, Decimal};
 use cw20::Denom;
 use cw_storage_plus::{Item, Map};
 use schemars::JsonSchema;
@@ -22,9 +22,9 @@ pub struct Asset {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Pair {
     pub pair_key: Vec<u8>,
-    pub assets: [Asset; 2],
-    pub contract_address: String,
-    pub lp_address: String,
+    pub assets: [Denom; 2],
+    pub contract_address: Addr,
+    pub lp_token_address: Addr,
 }
 
 fn denom_to_bytes<'a>(denom: &'a Denom) -> &[u8] {

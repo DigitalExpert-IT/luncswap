@@ -3,12 +3,16 @@
   "title": "InfoResponse",
   "type": "object",
   "required": [
+    "lp_token_address",
     "token1_denom",
     "token1_reserve",
     "token2_denom",
     "token2_reserve"
   ],
   "properties": {
+    "lp_token_address": {
+      "$ref": "#/definitions/Addr"
+    },
     "token1_denom": {
       "$ref": "#/definitions/Denom"
     },

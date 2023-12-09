@@ -35,4 +35,10 @@ pub enum ContractError {
 
     #[error("Failed to instantiate lp token")]
     InstantiateLpTokenError {},
+
+    #[error("No liquidity")]
+    NoLiquidityError {},
+
+    #[error("Conversion Overflow")]
+    ConversionOverflowError {},
 }

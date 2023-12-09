@@ -1,27 +1,53 @@
 use cosmwasm_std::{
-    to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdResult, SubMsg,
-    WasmMsg,
+    to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, QueryRequest, Reply, Response,
+    StdResult, SubMsg, WasmMsg, WasmQuery,
 };
 use cw0::parse_reply_instantiate_data;
 use cw20::Denom;
 
 use crate::{
+    error::ContractError,
     msg::{ExecuteMsg, InstantiateMsg, PairResponse, QueryMsg},
     state::{get_pair_key, Config, Pair, CONFIG, PAIRS},
 };
 
 const INSTANTIATE_PAIR_REPLY_ID: u64 = 0;
 
-pub fn reply(_deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
+pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractError> {
     if msg.id != INSTANTIATE_PAIR_REPLY_ID {
-        return Err(cosmwasm_std::StdError::GenericErr {
-            msg: "unknown reply code".into(),
-        });
+        return Err(ContractError::InvalidReply { code: msg.id });
     }
 
     let res = parse_reply_instantiate_data(msg);
     match res {
-        Ok(_) => Ok(Response::new()),
+        Ok(res) => {
+            use luncswap_pair::msg::*;
+            let contract_address = deps.api.addr_validate(&res.contract_address)?;
+            let query_msg: QueryMsg = QueryMsg::Info {};
+            let query_response: InfoResponse =
+                deps.querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
+                    contract_addr: contract_address.clone().into(),
+                    msg: to_json_binary(&query_msg)?,
+                }))?;
+
+            let pair_key = get_pair_key(&[
+                query_response.token1_denom.clone(),
+                query_response.token2_denom.clone(),
+            ]);
+
+            PAIRS.save(
+                deps.storage,
+                &pair_key.clone(),
+                &Pair {
+                    pair_key,
+                    contract_address,
+                    assets: [query_response.token1_denom, query_response.token2_denom],
+                    lp_token_address: query_response.lp_token_address,
+                },
+            )?;
+
+            Ok(Response::new())
+        }
         Err(_) => Ok(Response::new()),
     }
 }
@@ -103,7 +129,7 @@ fn query_pair(deps: Deps, denoms: [Denom; 2]) -> StdResult<PairResponse> {
     let pair: Pair = PAIRS.load(deps.storage, &pair_key)?;
 
     Ok(PairResponse {
-        contract_address: pair.contract_address,
-        lp_address: pair.lp_address,
+        contract_address: pair.contract_address.into(),
+        lp_address: pair.lp_token_address.into(),
     })
 }

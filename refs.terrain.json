@@ -1,6 +1,22 @@
 {
   "testnet": {
-    "pisco-1": {}
+    "pisco-1": {
+      "luncswap_token": {
+        "codeId": "12289",
+        "contractAddresses": {
+          "default": "terra1sw3dzla83vjsyfyf08687fqemkjc36cu7nlvtlvcfynrscxz26ps6gfacs"
+        }
+      },
+      "luncswap_pair": {
+        "codeId": "12290"
+      },
+      "luncswap_factory": {
+        "codeId": "12291",
+        "contractAddresses": {
+          "default": "terra147f4wmuvgej0z9969gs5sz5rfhxr8ck0zvdrzu0cqx8q0f7m3lpqt0jql3"
+        }
+      }
+    }
   },
   "mainnet": {
     "columbus-5": {}

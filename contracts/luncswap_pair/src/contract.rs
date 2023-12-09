@@ -533,12 +533,14 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 pub fn query_info(deps: Deps) -> StdResult<InfoResponse> {
     let token1 = TOKEN1.load(deps.storage)?;
     let token2 = TOKEN2.load(deps.storage)?;
+    let lp_token = LP_TOKEN.load(deps.storage)?;
 
     Ok(InfoResponse {
         token1_reserve: token1.reserve,
         token1_denom: token1.denom,
         token2_reserve: token2.reserve,
         token2_denom: token2.denom,
+        lp_token_address: lp_token,
     })
 }
 
@@ -558,8 +560,8 @@ fn get_input_price(
     fee_percent: Decimal,
 ) -> StdResult<Uint128> {
     if input_reserve == Uint128::zero() || output_reserve == Uint128::zero() {
-        return Err(cosmwasm_std::StdError::GenericErr {
-            msg: "No liquidity".into(),
+        return Err(StdError::GenericErr {
+            msg: "No Liquidity".into(),
         });
     };
 

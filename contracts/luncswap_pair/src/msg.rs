@@ -1,4 +1,4 @@
-use cosmwasm_std::{Decimal, Uint128};
+use cosmwasm_std::{Addr, Decimal, Uint128};
 use cw20::Denom;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -55,6 +55,7 @@ pub struct InfoResponse {
     pub token1_denom: Denom,
     pub token2_reserve: Uint128,
     pub token2_denom: Denom,
+    pub lp_token_address: Addr,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, JsonSchema)]
