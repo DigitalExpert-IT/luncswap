@@ -270,12 +270,14 @@ fn instantiate() {
     assert_eq!(native_balance, Coin::new(1000 - 10, "lunc"));
 
 
-    // need to approve first 
+    // need to increase allowance before swap first 
     router.execute_contract(swapper.clone(), cw20_token, &cw20_base::msg::ExecuteMsg::IncreaseAllowance {
         spender: pair.contract_address.clone().into(),
         amount: Uint128::from_str("100").unwrap(),
         expires:None
     }, &vec![]).unwrap();
+
+    // todo check both balance before swap
 
     // token need approval
     router.execute_contract(
@@ -287,4 +289,6 @@ fn instantiate() {
             min_output: Uint128::from_str("1").unwrap() },
         &vec![]
     ).unwrap();
+
+    // todo expect both balance after swapping 
 }
