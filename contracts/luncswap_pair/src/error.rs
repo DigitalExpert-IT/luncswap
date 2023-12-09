@@ -41,4 +41,16 @@ pub enum ContractError {
 
     #[error("Conversion Overflow")]
     ConversionOverflowError {},
+
+    #[error("Minimum Token1 Error, requested: {requested}, available: {available}")]
+    MinToken1Error {
+        requested: Uint128,
+        available: Uint128,
+    },
+
+    #[error("Minimum Token2 Error, requested: {requested}, available: {available}")]
+    MinToken2Error {
+        requested: Uint128,
+        available: Uint128,
+    },
 }

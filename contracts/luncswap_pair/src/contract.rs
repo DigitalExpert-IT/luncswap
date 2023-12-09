@@ -107,12 +107,10 @@ pub fn execute(
             max_token2,
         } => execute_add_liquidity(deps, &info, env, min_liquidity, token1_amount, max_token2),
         RemoveLiquidity {
-            amount: _,
-            min_token1: _,
-            min_token2: _,
-        } => {
-            unimplemented!()
-        }
+            amount,
+            min_token1,
+            min_token2,
+        } => execute_remove_liquidity(deps, info, amount, min_token1, min_token2),
         Swap {
             input_token,
             input_amount,
@@ -226,6 +224,109 @@ fn mint_lp_tokens(
         funds: vec![],
     }
     .into())
+}
+
+pub fn execute_remove_liquidity(
+    deps: DepsMut,
+    info: MessageInfo,
+    amount: Uint128,
+    min_token1: Uint128,
+    min_token2: Uint128,
+) -> Result<Response, ContractError> {
+    let lp_token_addr = LP_TOKEN.load(deps.storage)?;
+    let token1 = TOKEN1.load(deps.storage)?;
+    let token2 = TOKEN2.load(deps.storage)?;
+    let lp_token_balance: cw20::BalanceResponse = deps.querier.query_wasm_smart(
+        &lp_token_addr,
+        &cw20_base::msg::QueryMsg::Balance {
+            address: info.sender.clone().to_string(),
+        },
+    )?;
+
+    let lp_token_info: cw20::TokenInfoResponse = deps
+        .querier
+        .query_wasm_smart(&lp_token_addr, &cw20_base::msg::QueryMsg::TokenInfo {})?;
+
+    if amount > lp_token_balance.balance {
+        return Err(ContractError::InsufficientLiquidityError {
+            requested: amount,
+            available: lp_token_balance.balance,
+        });
+    }
+
+    let token1_amount = amount
+        .checked_mul(token1.reserve)
+        .map_err(StdError::overflow)?
+        .checked_div(lp_token_info.total_supply)
+        .map_err(StdError::divide_by_zero)?;
+
+    if token1_amount < min_token1 {
+        return Err(ContractError::MinToken1Error {
+            requested: min_token1,
+            available: token1_amount,
+        });
+    }
+
+    let token2_amount = amount
+        .checked_mul(token2.reserve)
+        .map_err(StdError::overflow)?
+        .checked_div(lp_token_info.total_supply)
+        .map_err(StdError::divide_by_zero)?;
+
+    if token2_amount < min_token2 {
+        return Err(ContractError::MinToken1Error {
+            requested: min_token2,
+            available: token2_amount,
+        });
+    }
+
+    TOKEN1.update(deps.storage, |mut token1| -> Result<_, ContractError> {
+        token1.reserve = token1
+            .reserve
+            .checked_sub(token1_amount)
+            .map_err(StdError::overflow)?;
+        Ok(token1)
+    })?;
+
+    TOKEN2.update(deps.storage, |mut token2| -> Result<_, ContractError> {
+        token2.reserve = token2
+            .reserve
+            .checked_sub(token2_amount)
+            .map_err(StdError::overflow)?;
+        Ok(token2)
+    })?;
+
+    let token1_transfer_msg = match token1.denom {
+        Denom::Cw20(addr) => get_cw20_transfer_to_msg(&info.sender.clone(), &addr, token1_amount)?,
+        Denom::Native(denom) => get_bank_transfer_to_msg(&info.sender, &denom, token1_amount),
+    };
+
+    let token2_transfer_msg = match token2.denom {
+        Denom::Cw20(addr) => get_cw20_transfer_to_msg(&info.sender, &addr, token2_amount)?,
+        Denom::Native(denom) => get_bank_transfer_to_msg(&info.sender, &denom, token2_amount),
+    };
+
+    let lp_token_burn_msg: CosmosMsg = WasmMsg::Execute {
+        contract_addr: lp_token_addr.into(),
+        msg: to_json_binary(&cw20_base::msg::ExecuteMsg::BurnFrom {
+            owner: info.sender.into(),
+            amount,
+        })?,
+        funds: vec![],
+    }
+    .into();
+
+    Ok(Response::new()
+        .add_messages(vec![
+            token1_transfer_msg,
+            token2_transfer_msg,
+            lp_token_burn_msg,
+        ])
+        .add_attributes(vec![
+            attr("token1_returned", token1_amount),
+            attr("token2_returned", token2_amount),
+            attr("liquidity_burned", amount),
+        ]))
 }
 
 pub fn execute_add_liquidity(
