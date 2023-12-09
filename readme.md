@@ -23,3 +23,10 @@ install frontend deps & run deployment, make sure you already provide `MNEMONIC`
 pnpm install
 pnpm run deploy:testnet
 ```
+
+## FAQ
+
+- how to show result of `println!` in cargo test
+```bash
+cargo test -- --nocapture
+```

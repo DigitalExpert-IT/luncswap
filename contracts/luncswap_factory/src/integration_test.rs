@@ -1,5 +1,4 @@
 #![cfg(test)]
-
 use std::{borrow::BorrowMut, str::FromStr};
 
 use cosmwasm_std::{coins, Addr, Coin, Decimal, Empty, Uint128};
@@ -109,6 +108,26 @@ fn get_native_balance(owner: &Addr, app: &App) -> Coin {
     app.wrap().query_balance(owner, "lunc").unwrap()
 }
 
+fn transfer_cw20(
+    owner: &Addr,
+    receiver: &Addr,
+    amount: &Uint128,
+    contract_address: &Addr,
+    app: &mut App,
+) -> cw20::BalanceResponse {
+    app.execute_contract(
+        owner.clone(),
+        contract_address.clone(),
+        &cw20_base::msg::ExecuteMsg::Transfer {
+            recipient: receiver.into(),
+            amount: *amount,
+        },
+        &vec![],
+    )
+    .unwrap();
+    get_token_balance(receiver, contract_address, app)
+}
+
 #[test]
 fn instantiate() {
     let mut router = mock_app();
@@ -117,6 +136,7 @@ fn instantiate() {
     let owner = Addr::unchecked("owner");
     let swapper = Addr::unchecked("swapper");
     let funds = coins(1000, NATIVE_TOKEN_DENOM);
+
     router.borrow_mut().init_modules(|router, _, storage| {
         router.bank.init_balance(storage, &owner, funds).unwrap();
         router
@@ -133,6 +153,15 @@ fn instantiate() {
         "LUNCT".to_string(),
         INITIAL_TOKEN_BALANCE,
     );
+    let swapper_token_balance = transfer_cw20(
+        &owner,
+        &swapper,
+        &Uint128::new(1000),
+        &cw20_token,
+        &mut router,
+    );
+
+    assert_eq!(swapper_token_balance.balance, Uint128::new(1000));
 
     let protocol_fee_percent = Decimal::from_str("0.5").unwrap();
     let (_, pair_id) = create_luncswap_pair_contract(
@@ -171,7 +200,7 @@ fn instantiate() {
         )
         .unwrap();
 
-    // create new pair
+    // query newly created pair
     let pair: crate::msg::PairResponse = router
         .wrap()
         .query_wasm_smart(
@@ -197,7 +226,7 @@ fn instantiate() {
         .checked_add(pair_info.token2_reserve)
         .unwrap();
 
-    assert_eq!(total_reserve, Uint128::from_str("0").unwrap());
+    assert_eq!(total_reserve, Uint128::new(0));
 
     // increase allowance before adding liquidity
     router
@@ -228,9 +257,12 @@ fn instantiate() {
         .unwrap();
 
     let token_balance = get_token_balance(&owner, &cw20_token, &router);
+    println!("{:?}", token_balance);
     assert_eq!(
         token_balance.balance,
         INITIAL_TOKEN_BALANCE
+            .checked_sub(Uint128::new(1000))
+            .unwrap()
             .checked_sub(Uint128::new(1000))
             .unwrap()
     );
