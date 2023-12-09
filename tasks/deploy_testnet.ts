@@ -39,25 +39,6 @@ task(async ({ wallets, client, deploy }) => {
       factoryAddress,
       factoryCodeId,
     }])
-
-    await client.execute(factoryAddress, wallets.default, {
-      AddPair: {
-        token1_denom: {
-          native: "uluna",
-        },
-        token2_denom: {
-          cw20: tokenAddress
-        }
-      }
-    });
-
-    const res = await client.query(factoryAddress, {
-      Pair: {
-        token1: {native: "uluna"},
-        token2: {cw20: tokenAddress}
-      }
-    })
-    console.log(res)
   } catch (err) {
     console.log(err)
   }
