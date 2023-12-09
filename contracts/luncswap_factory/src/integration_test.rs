@@ -256,7 +256,7 @@ fn instantiate() {
         )
         .unwrap();
 
-    let token_balance = get_token_balance(&owner, &cw20_token, &router);
+    let token_balance = get_token_balance(&owner, &cw20_token.clone(), &router);
     println!("{:?}", token_balance);
     assert_eq!(
         token_balance.balance,
@@ -268,4 +268,23 @@ fn instantiate() {
     );
     let native_balance = get_native_balance(&owner, &router);
     assert_eq!(native_balance, Coin::new(1000 - 10, "lunc"));
+
+
+    // need to approve first 
+    router.execute_contract(swapper.clone(), cw20_token, &cw20_base::msg::ExecuteMsg::IncreaseAllowance {
+        spender: pair.contract_address.clone().into(),
+        amount: Uint128::from_str("100").unwrap(),
+        expires:None
+    }, &vec![]).unwrap();
+
+    // token need approval
+    router.execute_contract(
+        swapper,
+        Addr::unchecked(&pair.contract_address),
+        &luncswap_pair::msg::ExecuteMsg::Swap { 
+            input_token: luncswap_pair::msg::TokenSelect::Token1, 
+            input_amount: Uint128::from_str("1").unwrap(), 
+            min_output: Uint128::from_str("1").unwrap() },
+        &vec![]
+    ).unwrap();
 }
