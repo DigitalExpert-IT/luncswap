@@ -3,7 +3,7 @@
   "title": "TokenSelect",
   "type": "string",
   "enum": [
-    "Token1",
-    "Token2"
+    "token1",
+    "token2"
   ]
 }
