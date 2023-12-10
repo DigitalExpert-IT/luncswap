@@ -290,9 +290,6 @@ fn instantiate() {
     let balance_before_swapper_token1 = get_native_balance(&swapper, &router);
     let balance_before_swapper_token2 = get_token_balance(&swapper, &cw20_token, &router);
 
-    println!("token balance {:?}", balance_before_swapper_token2);
-    println!("native balance {:?}", balance_before_swapper_token1);
-
     // token need approval
     router
         .execute_contract(
@@ -309,8 +306,10 @@ fn instantiate() {
 
     let balance_after_swapper_token1 = get_native_balance(&swapper, &router);
     let balance_after_swapper_token2 = get_token_balance(&swapper, &cw20_token, &router);
-    println!("token balance after swap {:?}", balance_after_swapper_token2);
-    println!("native balance after swap {:?}", balance_after_swapper_token1);
+    
+    assert_eq!(balance_after_swapper_token2.balance, balance_before_swapper_token2.balance.checked_sub(Uint128::new(1000000)).unwrap());
+    assert_ne!(balance_before_swapper_token1, balance_after_swapper_token1);
+
 
     // todo expect both balance after swapping
 }
