@@ -269,26 +269,50 @@ fn instantiate() {
     let native_balance = get_native_balance(&owner, &router);
     assert_eq!(native_balance, Coin::new(1000 - 10, "lunc"));
 
+    // need to increase allowance before swap first
+    let tx = router
+        .execute_contract(
+            swapper.clone(),
+            cw20_token.clone(),
+            &cw20_base::msg::ExecuteMsg::IncreaseAllowance {
+                spender: pair.contract_address.clone().into(),
+                amount: Uint128::from_str("1000").unwrap(),
+                expires: None,
+            },
+            &vec![],
+        )
+        .is_ok();
 
-    // need to increase allowance before swap first 
-    router.execute_contract(swapper.clone(), cw20_token, &cw20_base::msg::ExecuteMsg::IncreaseAllowance {
-        spender: pair.contract_address.clone().into(),
-        amount: Uint128::from_str("100").unwrap(),
-        expires:None
-    }, &vec![]).unwrap();
+    assert_eq!(tx, true);
 
     // todo check both balance before swap
 
-    // token need approval
-    router.execute_contract(
-        swapper,
-        Addr::unchecked(&pair.contract_address),
-        &luncswap_pair::msg::ExecuteMsg::Swap { 
-            input_token: luncswap_pair::msg::TokenSelect::Token1, 
-            input_amount: Uint128::from_str("1").unwrap(), 
-            min_output: Uint128::from_str("1").unwrap() },
-        &vec![]
-    ).unwrap();
+    let balance_before_swapper_token1 = get_native_balance(&swapper, &router);
+    let balance_before_swapper_token2 = get_token_balance(&swapper, &cw20_token, &router);
+    let pool_balance = get_native_balance(&Addr::unchecked(&pair.contract_address), &router);
 
-    // todo expect both balance after swapping 
+    println!("token balance {:?}", balance_before_swapper_token2);
+    println!("native balance {:?}", balance_before_swapper_token1);
+    println!("pool native balance {:?}", pool_balance);
+
+    // token need approval
+    router
+        .execute_contract(
+            swapper.clone(),
+            Addr::unchecked(pair.contract_address),
+            &luncswap_pair::msg::ExecuteMsg::Swap {
+                input_token: luncswap_pair::msg::TokenSelect::Token2,
+                input_amount: Uint128::new(1),
+                min_output: Uint128::zero(),
+            },
+            &coins(1, NATIVE_TOKEN_DENOM),
+        )
+        .unwrap();
+
+    let balance_after_swapper_token1 = get_native_balance(&swapper, &router);
+    let balance_after_swapper_token2 = get_token_balance(&swapper, &cw20_token, &router);
+    println!("token balance {:?}", balance_after_swapper_token2);
+    println!("native balance {:?}", balance_after_swapper_token1);
+
+    // todo expect both balance after swapping
 }
