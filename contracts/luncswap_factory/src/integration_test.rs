@@ -135,14 +135,9 @@ fn instantiate() {
 
     let owner = Addr::unchecked("owner");
     let swapper = Addr::unchecked("swapper");
-    // let funds = coins(1000000, NATIVE_TOKEN_DENOM);
 
     router.borrow_mut().init_modules(|router, _, storage| {
         router.bank.init_balance(storage, &owner, coins(1000000000000, NATIVE_TOKEN_DENOM)).unwrap()
-        // router
-        //     .bank
-        //     .init_balance(storage, &swapper, coins(10000000000, NATIVE_TOKEN_DENOM))
-        //     .unwrap()
     });
 
     const INITIAL_TOKEN_BALANCE: Uint128 = Uint128::new(1000000000000000);
@@ -306,7 +301,7 @@ fn instantiate() {
 
     let balance_after_swapper_token1 = get_native_balance(&swapper, &router);
     let balance_after_swapper_token2 = get_token_balance(&swapper, &cw20_token, &router);
-    
+
     assert_eq!(balance_after_swapper_token2.balance, balance_before_swapper_token2.balance.checked_sub(Uint128::new(1000000)).unwrap());
     assert_ne!(balance_before_swapper_token1, balance_after_swapper_token1);
 
