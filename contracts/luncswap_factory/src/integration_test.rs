@@ -135,17 +135,17 @@ fn instantiate() {
 
     let owner = Addr::unchecked("owner");
     let swapper = Addr::unchecked("swapper");
-    let funds = coins(1000, NATIVE_TOKEN_DENOM);
+    // let funds = coins(1000000, NATIVE_TOKEN_DENOM);
 
     router.borrow_mut().init_modules(|router, _, storage| {
-        router.bank.init_balance(storage, &owner, funds).unwrap();
-        router
-            .bank
-            .init_balance(storage, &swapper, coins(10, NATIVE_TOKEN_DENOM))
-            .unwrap()
+        router.bank.init_balance(storage, &owner, coins(1000000000000, NATIVE_TOKEN_DENOM)).unwrap()
+        // router
+        //     .bank
+        //     .init_balance(storage, &swapper, coins(10000000000, NATIVE_TOKEN_DENOM))
+        //     .unwrap()
     });
 
-    const INITIAL_TOKEN_BALANCE: Uint128 = Uint128::new(1000000000);
+    const INITIAL_TOKEN_BALANCE: Uint128 = Uint128::new(1000000000000000);
     let (cw20_token, cw20_code_id) = create_cw20_contract(
         &mut router,
         &owner,
@@ -156,12 +156,12 @@ fn instantiate() {
     let swapper_token_balance = transfer_cw20(
         &owner,
         &swapper,
-        &Uint128::new(1000),
+        &Uint128::new(1000000000),
         &cw20_token,
         &mut router,
     );
 
-    assert_eq!(swapper_token_balance.balance, Uint128::new(1000));
+    assert_eq!(swapper_token_balance.balance, Uint128::new(1000000000));
 
     let protocol_fee_percent = Decimal::from_str("0.5").unwrap();
     let (_, pair_id) = create_luncswap_pair_contract(
@@ -235,7 +235,7 @@ fn instantiate() {
             cw20_token.clone(),
             &cw20_base::msg::ExecuteMsg::IncreaseAllowance {
                 spender: pair.contract_address.clone().into(),
-                amount: Uint128::from_str("1000").unwrap(),
+                amount: Uint128::new(1000000000000),
                 expires: None,
             },
             &vec![],
@@ -248,26 +248,26 @@ fn instantiate() {
             owner.clone(),
             Addr::unchecked(&pair.contract_address),
             &luncswap_pair::msg::ExecuteMsg::AddLiquidity {
-                token1_amount: Uint128::new(10),
+                token1_amount: Uint128::new(100000000000),
                 min_liquidity: Uint128::zero(),
-                max_token2: Uint128::new(1000),
+                max_token2: Uint128::new(100000000000),
             },
-            &vec![Coin::new(Uint128::new(10).into(), NATIVE_TOKEN_DENOM)],
+            &vec![Coin::new(Uint128::new(100000000000).into(), NATIVE_TOKEN_DENOM)],
         )
         .unwrap();
 
     let token_balance = get_token_balance(&owner, &cw20_token.clone(), &router);
-    println!("{:?}", token_balance);
+    // check transfer
     assert_eq!(
         token_balance.balance,
         INITIAL_TOKEN_BALANCE
-            .checked_sub(Uint128::new(1000))
+            .checked_sub(Uint128::new(1000000000))
             .unwrap()
-            .checked_sub(Uint128::new(1000))
+            .checked_sub(Uint128::new(100000000000))
             .unwrap()
     );
     let native_balance = get_native_balance(&owner, &router);
-    assert_eq!(native_balance, Coin::new(1000 - 10, "lunc"));
+    assert_eq!(native_balance, Coin::new(1000000000000 - 100000000000, "lunc"));
 
     // need to increase allowance before swap first
     let tx = router
@@ -276,7 +276,7 @@ fn instantiate() {
             cw20_token.clone(),
             &cw20_base::msg::ExecuteMsg::IncreaseAllowance {
                 spender: pair.contract_address.clone().into(),
-                amount: Uint128::from_str("1000").unwrap(),
+                amount: Uint128::new(1000000),
                 expires: None,
             },
             &vec![],
@@ -289,11 +289,9 @@ fn instantiate() {
 
     let balance_before_swapper_token1 = get_native_balance(&swapper, &router);
     let balance_before_swapper_token2 = get_token_balance(&swapper, &cw20_token, &router);
-    let pool_balance = get_native_balance(&Addr::unchecked(&pair.contract_address), &router);
 
     println!("token balance {:?}", balance_before_swapper_token2);
     println!("native balance {:?}", balance_before_swapper_token1);
-    println!("pool native balance {:?}", pool_balance);
 
     // token need approval
     router
@@ -302,17 +300,17 @@ fn instantiate() {
             Addr::unchecked(pair.contract_address),
             &luncswap_pair::msg::ExecuteMsg::Swap {
                 input_token: luncswap_pair::msg::TokenSelect::Token2,
-                input_amount: Uint128::new(1),
+                input_amount: Uint128::new(1000000),
                 min_output: Uint128::zero(),
             },
-            &coins(1, NATIVE_TOKEN_DENOM),
+            &vec![],
         )
         .unwrap();
 
     let balance_after_swapper_token1 = get_native_balance(&swapper, &router);
     let balance_after_swapper_token2 = get_token_balance(&swapper, &cw20_token, &router);
-    println!("token balance {:?}", balance_after_swapper_token2);
-    println!("native balance {:?}", balance_after_swapper_token1);
+    println!("token balance after swap {:?}", balance_after_swapper_token2);
+    println!("native balance after swap {:?}", balance_after_swapper_token1);
 
     // todo expect both balance after swapping
 }
