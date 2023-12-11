@@ -3,13 +3,7 @@ use cosmwasm_std::Uint128;
 
 pub fn try_human_value(num: &str, decimal: Option<u128>) -> Result<Uint128> {
     let multiplier = match decimal {
-        Some(val) => {
-            let mut m = 1;
-            for _ in 0..val {
-                m *= 10;
-            }
-            m
-        }
+        Some(val) => 10_u128.pow(val as u32),
         None => 1000000,
     };
 
