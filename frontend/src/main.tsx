@@ -6,8 +6,6 @@ import { LCDClientConfig } from "@terra-money/feather.js";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme";
 
-console.log(theme);
-
 const piscoLCD: LCDClientConfig = {
   lcd: "https://pisco-lcd.terra.dev",
   chainID: "pisco-1",
