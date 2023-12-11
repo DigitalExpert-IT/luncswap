@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import { WalletProvider } from "@terra-money/wallet-kit";
 import { LCDClientConfig } from "@terra-money/feather.js";
-import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
+import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./theme";
 
 console.log(theme);
@@ -20,7 +20,6 @@ const defaultNetworks = { "pisco-1": piscoLCD };
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <ChakraProvider theme={theme}>
       <WalletProvider defaultNetworks={defaultNetworks}>
         <App />
