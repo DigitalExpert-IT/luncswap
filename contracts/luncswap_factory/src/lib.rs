@@ -4,9 +4,9 @@ use cosmwasm_std::{
 };
 use msg::{ExecuteMsg, QueryMsg};
 
+mod tests;
 mod contract;
 mod error;
-mod integration_test;
 mod msg;
 mod state;
 
