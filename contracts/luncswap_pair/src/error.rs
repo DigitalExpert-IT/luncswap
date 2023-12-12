@@ -53,4 +53,7 @@ pub enum ContractError {
         requested: Uint128,
         available: Uint128,
     },
+
+    #[error("Invalid pair initiation")]
+    InvalidPairInitiation {},
 }

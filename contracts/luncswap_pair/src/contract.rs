@@ -45,6 +45,10 @@ pub fn instantiate(
     _info: MessageInfo,
     msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
+    if msg.token1_denom == msg.token2_denom {
+        return Err(ContractError::InvalidPairInitiation {});
+    }
+
     let token1 = Token {
         reserve: Uint128::zero(),
         denom: msg.token1_denom.clone(),

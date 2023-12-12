@@ -58,7 +58,7 @@ pub fn instantiate(
     _env: Env,
     info: MessageInfo,
     msg: InstantiateMsg,
-) -> StdResult<Response> {
+) -> Result<Response, ContractError> {
     let config = Config {
         owner: deps.api.addr_canonicalize(info.sender.as_str())?,
         pair_code_id: msg.pair_code_id,
