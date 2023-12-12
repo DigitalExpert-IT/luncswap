@@ -32,9 +32,21 @@ importers:
 
   frontend:
     dependencies:
+      '@chakra-ui/anatomy':
+        specifier: ^2.2.2
+        version: 2.2.2
       '@chakra-ui/react':
         specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.42)(framer-motion@10.16.16)(react-dom@18.2.0)(react@18.2.0)
+      '@chakra-ui/shared-utils':
+        specifier: ^2.0.4
+        version: 2.0.4
+      '@chakra-ui/styled-system':
+        specifier: ^2.9.2
+        version: 2.9.2
+      '@chakra-ui/theme-tools':
+        specifier: ^2.1.2
+        version: 2.1.2(@chakra-ui/styled-system@2.9.2)
       '@emotion/react':
         specifier: ^11.11.1
         version: 11.11.1(@types/react@18.2.42)(react@18.2.0)
@@ -2171,6 +2183,10 @@ packages:
       '@chakra-ui/shared-utils': 2.0.5
       '@chakra-ui/system': 2.6.2(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(react@18.2.0)
       react: 18.2.0
+    dev: false
+
+  /@chakra-ui/shared-utils@2.0.4:
+    resolution: {integrity: sha512-JGWr+BBj3PXGZQ2gxbKSD1wYjESbYsZjkCeE2nevyVk4rN3amV1wQzCnBAhsuJktMaZD6KC/lteo9ou9QUDzpA==}
     dev: false
 
   /@chakra-ui/shared-utils@2.0.5:
