@@ -1,10 +1,9 @@
+use cosmwasm_schema::cw_serde;
 use cosmwasm_std::{Addr, CanonicalAddr, Decimal};
 use cw20::Denom;
 use cw_storage_plus::{Item, Map};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct Config {
     pub owner: CanonicalAddr,
     pub pair_code_id: u64,
@@ -13,18 +12,28 @@ pub struct Config {
     pub protocol_fee_percent: Decimal,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[cw_serde]
 pub struct Asset {
     pub denom: Denom,
     pub decimal: u8,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[cw_serde]
 pub struct Pair {
     pub pair_key: Vec<u8>,
     pub assets: [Denom; 2],
     pub contract_address: Addr,
     pub lp_token_address: Addr,
+}
+
+impl Pair {
+    pub fn to_pair_response(&self) -> crate::msg::PairResponse {
+        crate::msg::PairResponse {
+            contract_address: self.contract_address.clone().into(),
+            lp_address: self.lp_token_address.clone().into(),
+            assets: self.assets.clone(),
+        }
+    }
 }
 
 fn denom_to_bytes<'a>(denom: &'a Denom) -> &[u8] {

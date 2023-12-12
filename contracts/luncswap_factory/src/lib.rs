@@ -4,11 +4,12 @@ use cosmwasm_std::{
 };
 use msg::{ExecuteMsg, QueryMsg};
 
-mod tests;
 mod contract;
 mod error;
 mod msg;
+mod queries;
 mod state;
+mod tests;
 
 #[entry_point]
 pub fn reply(deps: DepsMut, env: Env, msg: Reply) -> Result<Response, ContractError> {

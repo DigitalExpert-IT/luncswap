@@ -19,12 +19,20 @@ pub enum ExecuteMsg {
 }
 
 #[cw_serde]
+pub struct PairMsg {
+    pub token1: Denom,
+    pub token2: Denom,
+}
+
+#[cw_serde]
 pub enum QueryMsg {
     Pair { token1: Denom, token2: Denom },
+    PairList { after: Option<PairMsg> },
 }
 
 #[cw_serde]
 pub struct PairResponse {
     pub contract_address: String,
     pub lp_address: String,
+    pub assets: [Denom; 2],
 }

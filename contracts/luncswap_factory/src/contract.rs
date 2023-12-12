@@ -8,6 +8,7 @@ use cw20::Denom;
 use crate::{
     error::ContractError,
     msg::{ExecuteMsg, InstantiateMsg, PairResponse, QueryMsg},
+    queries::pair_list::query_pair_list,
     state::{get_pair_key, Config, Pair, CONFIG, PAIRS},
 };
 
@@ -121,15 +122,12 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
 
     match msg {
         Pair { token1, token2 } => to_json_binary(&query_pair(deps, [token1, token2])?),
+        PairList { after } => to_json_binary(&query_pair_list(deps, after)?),
     }
 }
 
 fn query_pair(deps: Deps, denoms: [Denom; 2]) -> StdResult<PairResponse> {
     let pair_key = get_pair_key(&denoms);
     let pair: Pair = PAIRS.load(deps.storage, &pair_key)?;
-
-    Ok(PairResponse {
-        contract_address: pair.contract_address.into(),
-        lp_address: pair.lp_token_address.into(),
-    })
+    Ok(pair.to_pair_response())
 }
