@@ -53,6 +53,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.11.0
         version: 11.11.0(@emotion/react@11.11.1)(@types/react@18.2.42)(react@18.2.0)
+      '@fontsource/galindo':
+        specifier: ^5.0.18
+        version: 5.0.18
       framer-motion:
         specifier: ^10.16.16
         version: 10.16.16(react-dom@18.2.0)(react@18.2.0)
@@ -3198,6 +3201,10 @@ packages:
       '@ethersproject/logger': 5.7.0
       '@ethersproject/properties': 5.7.0
       '@ethersproject/strings': 5.7.0
+    dev: false
+
+  /@fontsource/galindo@5.0.18:
+    resolution: {integrity: sha512-TyFadoGVjN5Yr9CC3kEAQOYUXy2LoDzNZP4CISItUIx0aAubOS7nhLTNgr+Nl+7WTa9Z79RNwOZqDgJWwMv+zw==}
     dev: false
 
   /@humanwhocodes/config-array@0.11.13:
