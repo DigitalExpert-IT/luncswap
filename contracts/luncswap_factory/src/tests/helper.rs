@@ -1,7 +1,7 @@
 #![cfg(test)]
 use std::str::FromStr;
 
-use cosmwasm_std::{Addr, Decimal, Empty, Uint128};
+use cosmwasm_std::{coins, Addr, Coin, Decimal, Empty, StdResult, Uint128};
 use cw20::{Cw20Coin, Denom};
 use cw_multi_test::{App, Contract, ContractWrapper, Executor};
 
@@ -87,42 +87,55 @@ pub fn create_cw20_contract(
     (addr, cw20_id)
 }
 
+pub fn increase_allowance<'a>(
+    router: &'a mut cw_multi_test::App,
+    sender: Addr,
+    contract_addr: Addr,
+    spender: Addr,
+    amount: Uint128,
+) -> StdResult<()> {
+    router
+        .execute_contract(
+            sender,
+            contract_addr,
+            &cw20_base::msg::ExecuteMsg::IncreaseAllowance {
+                spender: spender.into(),
+                amount,
+                expires: None,
+            },
+            &vec![],
+        )
+        .unwrap();
+    Ok(())
+}
+
 // get cw20 balance
-// pub fn get_token_balance(owner: &Addr, contract: &Addr, app: &App) -> cw20::BalanceResponse {
-//     app.wrap()
-//         .query_wasm_smart(
-//             contract,
-//             &cw20_base::msg::QueryMsg::Balance {
-//                 address: owner.into(),
-//             },
-//         )
-//         .unwrap()
-// }
+pub fn get_token_balance(app: &App, owner: &Addr, contract: &Addr) -> cw20::BalanceResponse {
+    app.wrap()
+        .query_wasm_smart(
+            contract,
+            &cw20_base::msg::QueryMsg::Balance {
+                address: owner.into(),
+            },
+        )
+        .unwrap()
+}
 
-// // get native balance
-// pub fn get_native_balance(owner: &Addr, app: &App) -> Coin {
-//     app.wrap().query_balance(owner, "lunc").unwrap()
-// }
+// get native balance
+pub fn get_native_balance(app: &App, owner: &Addr) -> Coin {
+    app.wrap().query_balance(owner, "lunc").unwrap()
+}
 
-// pub fn transfer_cw20(
-//     owner: &Addr,
-//     receiver: &Addr,
-//     amount: &Uint128,
-//     contract_address: &Addr,
-//     app: &mut App,
-// ) -> cw20::BalanceResponse {
-//     app.execute_contract(
-//         owner.clone(),
-//         contract_address.clone(),
-//         &cw20_base::msg::ExecuteMsg::Transfer {
-//             recipient: receiver.into(),
-//             amount: *amount,
-//         },
-//         &vec![],
-//     )
-//     .unwrap();
-//     get_token_balance(receiver, contract_address, app)
-// }
+pub fn faucet<'a>(router: &'a mut App, account_list: Vec<(Addr, Uint128)>) -> StdResult<()> {
+    router.init_modules(|r, _, storage| {
+        for item in account_list.iter() {
+            r.bank
+                .init_balance(storage, &item.0, coins(item.1.into(), "lunc"))
+                .unwrap();
+        }
+    });
+    Ok(())
+}
 
 pub fn instantiate_factory<'a>(router: &'a mut App, protocol_fee_percent: &str) -> (Addr, Addr) {
     const NATIVE_TOKEN_DENOM: &str = "lunc";

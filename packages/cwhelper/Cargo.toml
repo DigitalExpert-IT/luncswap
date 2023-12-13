@@ -8,3 +8,8 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.75"
 cosmwasm-std = "1.5.0"
+cw20 = { version = "1.1.1" }
+cw20-base = { version = "1.1.1", features = ["library"] }
+
+[dev-dependencies]
+cw-multi-test = "0.13.4"
