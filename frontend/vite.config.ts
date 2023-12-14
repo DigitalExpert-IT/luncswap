@@ -10,4 +10,27 @@ export default defineConfig({
     react(),
     nodePolyfills({ globals: { Buffer: true } }),
   ],
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          chakra: [
+            "@chakra-ui/anatomy",
+            "@chakra-ui/react",
+            "@chakra-ui/shared-utils",
+            "@chakra-ui/styled-system",
+            "@chakra-ui/theme-tools",
+            "@emotion/react",
+            "@emotion/styled",
+          ],
+          ["wallet-kit"]: [
+            "@terra-money/wallet-kit",
+            "@terra-money/feather.js",
+          ],
+        },
+      },
+    },
+  },
 });

@@ -1,12 +1,14 @@
+/* eslint-disable react-refresh/only-export-components */
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Home from "@/routes/home";
 import theme from "@/theme";
+import ErrorPage from "@/routes/errorPage.tsx";
 import { WalletProvider } from "@terra-money/wallet-kit";
 import { LCDClientConfig } from "@terra-money/feather.js";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import ErrorPage from "@/routes/errorPage.tsx";
+
+const Home = React.lazy(() => import("@/routes/home"));
 
 const piscoLCD: LCDClientConfig = {
   lcd: "https://pisco-lcd.terra.dev",

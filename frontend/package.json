@@ -18,6 +18,8 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fontsource/galindo": "^5.0.18",
+    "@terra-money/feather.js": "^1.2.1",
+    "@terra-money/wallet-kit": "^1.0.16",
     "framer-motion": "^10.16.16",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",
