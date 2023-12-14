@@ -103,6 +103,13 @@ pub fn execute(
 
 fn execute_add_pair(deps: DepsMut, msg: luncswap_pair::msg::InstantiateMsg) -> StdResult<Response> {
     let config = CONFIG.load(deps.storage)?;
+    let pair_key = get_pair_key(&[msg.token1_denom.clone(), msg.token2_denom.clone()]);
+
+    if let Some(_) = PAIRS.may_load(deps.storage, &pair_key)? {
+        return Err(cosmwasm_std::StdError::GenericErr {
+            msg: "Duplicate pair".into(),
+        });
+    }
 
     let instantiate_pair_msg = WasmMsg::Instantiate {
         admin: None,
