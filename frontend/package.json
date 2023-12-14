@@ -19,8 +19,12 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/galindo": "^5.0.18",
     "framer-motion": "^10.16.16",
+    "localforage": "^1.10.0",
+    "match-sorter": "^6.3.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.21.0",
+    "sort-by": "^1.2.0"
   },
   "devDependencies": {
     "@rollup/plugin-inject": "^5.0.5",

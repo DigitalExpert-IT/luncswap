@@ -1,10 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+import Home from "./routes/home";
+import theme from "./theme";
 import { WalletProvider } from "@terra-money/wallet-kit";
 import { LCDClientConfig } from "@terra-money/feather.js";
 import { ChakraProvider } from "@chakra-ui/react";
-import theme from "./theme";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import ErrorPage from "./routes/errorPage.tsx";
 
 const piscoLCD: LCDClientConfig = {
   lcd: "https://pisco-lcd.terra.dev",
@@ -15,12 +17,15 @@ const piscoLCD: LCDClientConfig = {
 };
 
 const defaultNetworks = { "pisco-1": piscoLCD };
+const routes = createBrowserRouter([
+  { path: "/", element: <Home />, errorElement: <ErrorPage />, children: [] },
+]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
       <WalletProvider defaultNetworks={defaultNetworks}>
-        <App />
+        <RouterProvider router={routes} />
       </WalletProvider>
     </ChakraProvider>
   </React.StrictMode>,

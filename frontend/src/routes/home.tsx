@@ -1,8 +1,8 @@
 import { useConnectedWallet, useWallet } from "@terra-money/wallet-kit";
 import { Button, Container, Box, Text, Code } from "@chakra-ui/react";
-import { LayoutMain } from "./components/layout/LayoutMain";
+import { LayoutMain } from "../components/layout/LayoutMain";
 
-function App() {
+function Home() {
   const connectedWallet = useConnectedWallet();
   const { connect, disconnect, availableWallets, network, status } =
     useWallet();
@@ -36,4 +36,4 @@ function App() {
   );
 }
 
-export default App;
+export default Home;

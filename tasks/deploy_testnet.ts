@@ -2,7 +2,7 @@ import { task } from "@terra-money/terrain";
 
 task(async ({ wallets, client, deploy }) => {
   try {
-    const tokenCodeId = await deploy.storeCode("luncswap_token", wallets.default, {noRebuild: true});
+    const tokenCodeId = await deploy.storeCode("luncswap_token", wallets.default);
     const tokenAddress = await deploy.instantiate(
       "luncswap_token",
       wallets.default,
@@ -38,6 +38,7 @@ task(async ({ wallets, client, deploy }) => {
     console.table([{
       factoryAddress,
       factoryCodeId,
+      tokenAddress
     }])
   } catch (err) {
     console.log(err)
