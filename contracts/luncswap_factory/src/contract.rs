@@ -1,18 +1,16 @@
 use cosmwasm_std::{
     to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, QueryRequest, Reply, Response,
-    StdResult, SubMsg, WasmMsg, WasmQuery,
+    StdResult, WasmQuery,
 };
 use cw0::parse_reply_instantiate_data;
-use cw20::Denom;
 
 use crate::{
     error::ContractError,
-    msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, PairResponse, QueryMsg},
-    queries::pair_list::query_pair_list,
-    state::{get_pair_key, Config, Pair, CONFIG, PAIRS},
+    executes::add_pair::execute_add_pair,
+    msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg},
+    queries::{pair::query_pair, pair_list::query_pair_list},
+    state::{get_pair_key, Config, Pair, CONFIG, INSTANTIATE_PAIR_REPLY_ID, PAIRS},
 };
-
-const INSTANTIATE_PAIR_REPLY_ID: u64 = 0;
 
 pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractError> {
     if msg.id != INSTANTIATE_PAIR_REPLY_ID {
@@ -105,29 +103,6 @@ pub fn execute(
     }
 }
 
-fn execute_add_pair(deps: DepsMut, msg: luncswap_pair::msg::InstantiateMsg) -> StdResult<Response> {
-    let config = CONFIG.load(deps.storage)?;
-    let pair_key = get_pair_key(&[msg.token1_denom.clone(), msg.token2_denom.clone()]);
-
-    if let Some(_) = PAIRS.may_load(deps.storage, &pair_key)? {
-        return Err(cosmwasm_std::StdError::GenericErr {
-            msg: "Duplicate pair".into(),
-        });
-    }
-
-    let instantiate_pair_msg = WasmMsg::Instantiate {
-        admin: None,
-        code_id: config.pair_code_id,
-        msg: to_json_binary(&msg)?,
-        funds: vec![],
-        label: "pair".to_string(),
-    };
-
-    let reply_msg = SubMsg::reply_on_success(instantiate_pair_msg, INSTANTIATE_PAIR_REPLY_ID);
-
-    Ok(Response::new().add_submessage(reply_msg))
-}
-
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     use QueryMsg::*;
 
@@ -135,10 +110,4 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         Pair { token1, token2 } => to_json_binary(&query_pair(deps, [token1, token2])?),
         PairList { after } => to_json_binary(&query_pair_list(deps, after)?),
     }
-}
-
-fn query_pair(deps: Deps, denoms: [Denom; 2]) -> StdResult<PairResponse> {
-    let pair_key = get_pair_key(&denoms);
-    let pair: Pair = PAIRS.load(deps.storage, &pair_key)?;
-    Ok(pair.to_pair_response())
 }

@@ -6,6 +6,7 @@ use msg::{ExecuteMsg, MigrateMsg, QueryMsg};
 
 mod contract;
 mod error;
+mod executes;
 mod msg;
 mod queries;
 mod state;
