@@ -2,18 +2,18 @@
   "testnet": {
     "pisco-1": {
       "luncswap_token": {
-        "codeId": "12410",
+        "codeId": "12418",
         "contractAddresses": {
-          "default": "terra1w5c853etgdrhp5uhum0xade3qrz5a33pv52fhkxqzya9mkx2225sw58aq7"
+          "default": "terra1nnxgxlqa9m40w04rrf95mjzdcwz0gwalnfns6qt2jakcht7678yqhncc8k"
         }
       },
       "luncswap_pair": {
-        "codeId": "12411"
+        "codeId": "12419"
       },
       "luncswap_factory": {
-        "codeId": "12412",
+        "codeId": "12420",
         "contractAddresses": {
-          "default": "terra1qcwwlnyslha2hfgszwey7kjcfltf4n2jsj3wxxshy3233qyyutaszwrgxe"
+          "default": "terra1cpx25r0hqemfwjl6n0hcpcmrpsdycfl57ldp7h9ddz4eyu5ranzqyk6uvc"
         }
       }
     }

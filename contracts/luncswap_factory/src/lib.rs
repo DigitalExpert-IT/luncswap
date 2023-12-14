@@ -2,7 +2,7 @@ use crate::error::ContractError;
 use cosmwasm_std::{
     entry_point, Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdResult,
 };
-use msg::{ExecuteMsg, QueryMsg};
+use msg::{ExecuteMsg, MigrateMsg, QueryMsg};
 
 mod contract;
 mod error;
@@ -34,4 +34,9 @@ pub fn execute(deps: DepsMut, env: Env, info: MessageInfo, msg: ExecuteMsg) -> S
 #[entry_point]
 pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
     contract::query(deps, env, msg)
+}
+
+#[entry_point]
+pub fn migrate(deps: DepsMut, env: Env, msg: MigrateMsg) -> StdResult<Response> {
+    contract::migrate(deps, env, msg)
 }

@@ -7,7 +7,7 @@ use cw20::Denom;
 
 use crate::{
     error::ContractError,
-    msg::{ExecuteMsg, InstantiateMsg, PairResponse, QueryMsg},
+    msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, PairResponse, QueryMsg},
     queries::pair_list::query_pair_list,
     state::{get_pair_key, Config, Pair, CONFIG, PAIRS},
 };
@@ -70,6 +70,10 @@ pub fn instantiate(
     CONFIG.save(deps.storage, &config)?;
 
     Ok(Response::new())
+}
+
+pub fn migrate(_deps: DepsMut, _env: Env, _msg: MigrateMsg) -> StdResult<Response> {
+    Ok(Response::default())
 }
 
 pub fn execute(
