@@ -1,16 +1,21 @@
 use cosmwasm_std::{
     to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, QueryRequest, Reply, Response,
-    StdResult, WasmQuery,
+    StdError, StdResult, WasmQuery,
 };
 use cw0::parse_reply_instantiate_data;
+use cw2::{get_contract_version, set_contract_version};
+use semver::Version;
 
 use crate::{
     error::ContractError,
-    executes::add_pair::execute_add_pair,
+    executes::{add_pair::execute_add_pair, migrate_pair::execute_migrate_pair},
     msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg},
     queries::{pair::query_pair, pair_list::query_pair_list},
     state::{get_pair_key, Config, Pair, CONFIG, INSTANTIATE_PAIR_REPLY_ID, PAIRS},
 };
+
+const CONTRACT_NAME: &str = env!("CARGO_PKG_NAME");
+const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractError> {
     if msg.id != INSTANTIATE_PAIR_REPLY_ID {
@@ -66,20 +71,35 @@ pub fn instantiate(
     };
 
     CONFIG.save(deps.storage, &config)?;
+    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
 
     Ok(Response::new())
 }
 
-pub fn migrate(_deps: DepsMut, _env: Env, _msg: MigrateMsg) -> StdResult<Response> {
+pub fn migrate(deps: DepsMut, _env: Env, _msg: MigrateMsg) -> Result<Response, ContractError> {
+    let version: Version = CONTRACT_VERSION.parse()?;
+    let storage_version: Version = get_contract_version(deps.storage)?.version.parse()?;
+    let storage_name = get_contract_version(deps.storage)?.contract;
+
+    if CONTRACT_NAME != storage_name {
+        return Err(StdError::generic_err("Can only upgrade from same contract type").into());
+    }
+
+    if storage_version < version {
+        set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
+    } else {
+        return Err(StdError::generic_err("Cannot upgrade from a newer contract version").into());
+    }
+
     Ok(Response::default())
 }
 
 pub fn execute(
     deps: DepsMut,
-    _env: Env,
-    _info: MessageInfo,
+    env: Env,
+    info: MessageInfo,
     msg: ExecuteMsg,
-) -> StdResult<Response> {
+) -> Result<Response, ContractError> {
     use ExecuteMsg::*;
 
     match msg {
@@ -90,6 +110,7 @@ pub fn execute(
             let config = CONFIG.load(deps.storage)?;
             execute_add_pair(
                 deps,
+                env,
                 luncswap_pair::msg::InstantiateMsg {
                     token1_denom,
                     token2_denom,
@@ -100,6 +121,11 @@ pub fn execute(
                 },
             )
         }
+        MigratePair {
+            new_code_id,
+            token1_denom,
+            token2_denom,
+        } => execute_migrate_pair(deps, info, new_code_id, token1_denom, token2_denom),
     }
 }
 

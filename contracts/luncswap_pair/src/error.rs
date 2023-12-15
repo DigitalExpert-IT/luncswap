@@ -6,6 +6,9 @@ pub enum ContractError {
     #[error("{0}")]
     Std(#[from] StdError),
 
+    #[error("Semver parsing error: {0}")]
+    SemVer(String),
+
     #[error("Insufficient liquidity error: requested: {requested}, available: {available}")]
     InsufficientLiquidityError {
         requested: Uint128,
@@ -56,4 +59,10 @@ pub enum ContractError {
 
     #[error("Invalid pair initiation")]
     InvalidPairInitiation {},
+}
+
+impl From<semver::Error> for ContractError {
+    fn from(err: semver::Error) -> Self {
+        Self::SemVer(err.to_string())
+    }
 }

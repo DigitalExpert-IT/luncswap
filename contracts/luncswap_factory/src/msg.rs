@@ -16,6 +16,11 @@ pub enum ExecuteMsg {
         token1_denom: Denom,
         token2_denom: Denom,
     },
+    MigratePair {
+        new_code_id: u64,
+        token1_denom: Denom,
+        token2_denom: Denom,
+    },
 }
 
 #[cw_serde]

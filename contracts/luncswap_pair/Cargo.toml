@@ -17,6 +17,8 @@ thiserror = { version = "1.0.50" }
 schemars = "0.8.16"
 cw0 = "0.10.3"
 cosmwasm-schema = "1.5.0"
+cw2 = "1.1.2"
+semver = "1.0.20"
 
 [dev-dependencies]
 cosmwasm-schema = "1.5.0"
