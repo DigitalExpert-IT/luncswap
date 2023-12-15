@@ -1,7 +1,6 @@
 import React from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Box, Image } from "@chakra-ui/react";
-import { Footer } from "@/components/layout/Footer";
 import { NAVIGATION } from "@/constant/Navigation";
 
 interface LayoutMainProp {
@@ -17,10 +16,9 @@ export const LayoutMain: React.FC<LayoutMainProp> = props => {
         <Box zIndex={2} h="100vh">
           {children}
         </Box>
-        <Box zIndex={0} position="absolute" bottom="0">
+        <Box zIndex={0} position="fixed" bottom="-200px">
           <Image src="/pattern-bg.png" w="100vw" h="50vh" />
         </Box>
-        <Footer />
       </Box>
     </Box>
   );

@@ -7,7 +7,17 @@ interface INavbar {
 
 export const Navbar: React.FC<INavbar> = ({ data }) => {
   return (
-    <Stack bg="gray.800" w="100%" h="75px" justifyContent="center">
+    <Stack
+      as="nav"
+      position="sticky"
+      top="0"
+      left="0"
+      bg="gray.800"
+      w="100%"
+      h="75px"
+      zIndex="999"
+      justifyContent="center"
+    >
       <Container maxW="container.xl">
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>

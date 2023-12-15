@@ -8,9 +8,9 @@ import { LCDClientConfig } from "@terra-money/feather.js";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Root from "@/routes/root";
+import devtoolsRoute from "@/routes/devtools";
 
 const Home = React.lazy(() => import("@/routes/home"));
-const DevTools = React.lazy(() => import("@/routes/devtools"));
 
 const piscoLCD: LCDClientConfig = {
   lcd: "https://pisco-lcd.terra.dev",
@@ -31,10 +31,7 @@ const routes = createBrowserRouter([
         path: "/",
         element: <Home />,
       },
-      {
-        path: "devtools",
-        element: <DevTools />,
-      },
+      devtoolsRoute,
     ],
   },
 ]);
