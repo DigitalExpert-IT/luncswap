@@ -1,5 +1,5 @@
-import { Box, Text, Container, Stack, Image, Link } from "@chakra-ui/react";
-import { INavigation } from "../../constant/Navigation";
+import { Box, Text, Container, Stack, Link, Heading } from "@chakra-ui/react";
+import { INavigation } from "@/constant/Navigation";
 
 interface INavbar {
   data: INavigation[];
@@ -7,11 +7,11 @@ interface INavbar {
 
 export const Navbar: React.FC<INavbar> = ({ data }) => {
   return (
-    <Stack bg="gray.800" w="100%" h="8vh" justifyContent="center">
+    <Stack bg="gray.800" w="100%" h="75px" justifyContent="center">
       <Container maxW="container.xl">
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
-            <Image src="./logo.png" alt="logo" objectFit="cover" />
+            <Heading size="md">Luncswap.</Heading>
           </Box>
           <Stack direction="row" spacing="2rem">
             {data.map((item, idx) => (

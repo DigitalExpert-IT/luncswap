@@ -7,8 +7,10 @@ import { WalletProvider } from "@terra-money/wallet-kit";
 import { LCDClientConfig } from "@terra-money/feather.js";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Root from "@/routes/root";
 
 const Home = React.lazy(() => import("@/routes/home"));
+const DevTools = React.lazy(() => import("@/routes/devtools"));
 
 const piscoLCD: LCDClientConfig = {
   lcd: "https://pisco-lcd.terra.dev",
@@ -20,7 +22,21 @@ const piscoLCD: LCDClientConfig = {
 
 const defaultNetworks = { "pisco-1": piscoLCD };
 const routes = createBrowserRouter([
-  { path: "/", element: <Home />, errorElement: <ErrorPage />, children: [] },
+  {
+    path: "/",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "devtools",
+        element: <DevTools />,
+      },
+    ],
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
