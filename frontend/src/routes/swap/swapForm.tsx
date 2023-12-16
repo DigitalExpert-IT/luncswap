@@ -7,12 +7,18 @@ import {
   Image,
   Input,
   Text,
+  Icon,
 } from "@chakra-ui/react";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { ChakraStylesConfig, Select } from "chakra-react-select";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
-
+import { HiFire } from "react-icons/hi";
+import { IoMdSettings } from "react-icons/io";
+import { TbGraphFilled } from "react-icons/tb";
+import { FaSackDollar } from "react-icons/fa6";
+import { RiHistoryFill } from "react-icons/ri";
+import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
 interface IOptionSelect {
   children: React.ReactNode;
   imageUrl: string;
@@ -101,8 +107,13 @@ const optionStyles: ChakraStylesConfig = {
   }),
 };
 
-const SwapForm = () => {
+const SwapForm = ({
+  setSideContent,
+}: {
+  setSideContent: Dispatch<SetStateAction<string>>;
+}) => {
   const { t } = useTranslation();
+
   return (
     <Box bgColor={"#FCDD6F"} borderRadius={20}>
       <Box
@@ -120,10 +131,16 @@ const SwapForm = () => {
               {t("swap.description")}
             </Text>
             <Flex align={"center"} gap={1}>
-              <Image src="/fire.png" w={4} h={4} />
-              <Image src="/setting.png" w={4} h={4} />
-              <Image src="/square-line.png" w={4} h={4} />
-              <Image src="/dollar-bag.png" w={4} h={4} />
+              <Icon
+                as={IoMdSettings}
+                color={"black"}
+                fontSize={24}
+                onClick={() => setSideContent(SIDE_SWAP_CONTENTS.ALL_POOLS)}
+              />
+              <Icon as={FaSackDollar} color={"black"} fontSize={24} />
+              <Icon as={TbGraphFilled} color={"black"} fontSize={24} />
+              <Icon as={HiFire} color={"black"} fontSize={24} />
+              <Icon as={RiHistoryFill} color={"black"} fontSize={24} />
             </Flex>
           </Flex>
         </Box>
