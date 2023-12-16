@@ -1,0 +1,19 @@
+{
+  "title": "SWAP NOW",
+  "description": "Trade tokens in 1 minute.",
+  "buttonSwap": "SWAP",
+  "slippage": "Slippage Tolerance",
+  "from": "FROM",
+  "to": "TO",
+  "details": {
+    "rate": "Rate",
+    "minimumReceived": "Minimum Received",
+    "swapFee": "Swap Fee",
+    "route": "Route",
+    "priceImpact": "Price Impact"
+  },
+  "poolsTable": {
+    "title": "ALL POOLS",
+    "addLiquidity": "Add Liquidity"
+  }
+}

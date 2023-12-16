@@ -10,6 +10,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider as NiceModalProvider } from "@ebay/nice-modal-react";
 import Root from "@/routes/root";
 import devtoolsRoute from "@/routes/devtools";
+import Swap from "./routes/swap";
+import "./locales/index";
 
 const Home = React.lazy(() => import("@/routes/home"));
 
@@ -33,6 +35,17 @@ const routes = createBrowserRouter([
         element: <Home />,
       },
       devtoolsRoute,
+    ],
+  },
+  {
+    path: "/swap",
+    element: <Root />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/swap",
+        element: <Swap />,
+      },
     ],
   },
 ]);
