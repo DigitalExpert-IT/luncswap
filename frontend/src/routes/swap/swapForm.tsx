@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { ChakraStylesConfig, Select } from "chakra-react-select";
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { HiFire } from "react-icons/hi";
 import { IoMdSettings } from "react-icons/io";
@@ -47,7 +47,7 @@ const GridInfo = ({
 const OptionSelect = ({ children, imageUrl }: IOptionSelect) => (
   <Flex align={"center"} gap={3}>
     <Image src={imageUrl} w={5} h={5} />
-    <Box fontWeight={"700"} color={"#FCDD6F"}>
+    <Box fontWeight={"700"} color={"#FCDD6F"} fontSize={12}>
       {children}
     </Box>
   </Flex>
@@ -94,12 +94,14 @@ const optionStyles: ChakraStylesConfig = {
     ...provided,
     bgColor: "black",
     borderRadius: "20px",
+    width: { base: "140px", md: "160px" },
   }),
   dropdownIndicator: provided => ({
     ...provided,
     position: "relative",
     left: "-1px",
     bgColor: "black",
+    p: 1,
   }),
   control: provided => ({
     ...provided,
@@ -107,12 +109,49 @@ const optionStyles: ChakraStylesConfig = {
   }),
 };
 
+const menuContents = [
+  {
+    content: SIDE_SWAP_CONTENTS.SETTINGS,
+    icon: IoMdSettings,
+  },
+  {
+    content: SIDE_SWAP_CONTENTS.MONEY,
+    icon: FaSackDollar,
+  },
+  {
+    content: SIDE_SWAP_CONTENTS.GRAPH,
+    icon: TbGraphFilled,
+  },
+  {
+    content: SIDE_SWAP_CONTENTS.ALL_POOLS,
+    icon: HiFire,
+  },
+  {
+    content: SIDE_SWAP_CONTENTS.HISTORY,
+    icon: RiHistoryFill,
+  },
+];
+
 const SwapForm = ({
   setSideContent,
+  sideContent,
 }: {
   setSideContent: Dispatch<SetStateAction<string>>;
+  sideContent: string;
 }) => {
   const { t } = useTranslation();
+
+  const onClickMenu = (contentName: string) => () => {
+    setSideContent(contentName === sideContent ? "" : contentName);
+  };
+
+  const onSwap = () => {
+    setDetailsSwap(detail => ({ show: !detail.show }));
+  };
+
+  const [detailsSwap, setDetailsSwap] = useState({
+    show: false,
+  });
 
   return (
     <Box bgColor={"#FCDD6F"} borderRadius={20}>
@@ -131,16 +170,16 @@ const SwapForm = ({
               {t("swap.description")}
             </Text>
             <Flex align={"center"} gap={1}>
-              <Icon
-                as={IoMdSettings}
-                color={"black"}
-                fontSize={24}
-                onClick={() => setSideContent(SIDE_SWAP_CONTENTS.ALL_POOLS)}
-              />
-              <Icon as={FaSackDollar} color={"black"} fontSize={24} />
-              <Icon as={TbGraphFilled} color={"black"} fontSize={24} />
-              <Icon as={HiFire} color={"black"} fontSize={24} />
-              <Icon as={RiHistoryFill} color={"black"} fontSize={24} />
+              {menuContents.map((content, id) => (
+                <Icon
+                  key={id}
+                  as={content.icon}
+                  color={sideContent === content.content ? "#D9A900" : "black"}
+                  cursor={"pointer"}
+                  fontSize={24}
+                  onClick={onClickMenu(content.content)}
+                />
+              ))}
             </Flex>
           </Flex>
         </Box>
@@ -148,7 +187,7 @@ const SwapForm = ({
           <Box>
             <Text fontWeight={"600"}>{t("swap.from")}</Text>
             <Flex bgColor={"white"} p={"2px"} borderRadius={15} mt={1}>
-              <Box width={"100%"} flex={"0 1 170px"}>
+              <Box width={"100%"} flex={"1"}>
                 <Select
                   onChange={() => {}}
                   defaultValue={options[0]}
@@ -161,6 +200,7 @@ const SwapForm = ({
                 color={"black"}
                 flex={2}
                 height={"inherit"}
+                borderRadius={"20px"}
                 border={"unset"}
                 _focusVisible={{
                   border: "unset",
@@ -187,6 +227,7 @@ const SwapForm = ({
                 color={"black"}
                 flex={2}
                 height={"inherit"}
+                borderRadius={"20px"}
                 border={"unset"}
                 _focusVisible={{
                   border: "unset",
@@ -208,28 +249,33 @@ const SwapForm = ({
             borderRadius={12}
             color={"black"}
             fontWeight={"700"}
+            onClick={() => onSwap()}
           >
             {t("swap.buttonSwap")}
           </Button>
         </Box>
       </Box>
-      <Grid
-        color={"black"}
-        px={10}
-        py={4}
-        templateColumns={"repeat(2, 1fr)"}
-        fontWeight={"600"}
-      >
-        <GridInfo title={t("swap.details.rate")}>
-          1 BNB = 0.010157 LUNC
-        </GridInfo>
-        <GridInfo title={t("swap.details.minimumReceived")}>2155 LUNC</GridInfo>
-        <GridInfo title={t("swap.details.swapFee")}>0.0396 BNB</GridInfo>
-        <GridInfo title={t("swap.details.route")}>2 Separate Routes</GridInfo>
-        <GridInfo title={t("swap.details.priceImpact")}>
-          <Text color={"#039F00"}>0.007%</Text>
-        </GridInfo>
-      </Grid>
+      {detailsSwap.show ? (
+        <Grid
+          color={"black"}
+          px={10}
+          py={4}
+          templateColumns={"repeat(2, 1fr)"}
+          fontWeight={"600"}
+        >
+          <GridInfo title={t("swap.details.rate")}>
+            1 BNB = 0.010157 LUNC
+          </GridInfo>
+          <GridInfo title={t("swap.details.minimumReceived")}>
+            2155 LUNC
+          </GridInfo>
+          <GridInfo title={t("swap.details.swapFee")}>0.0396 BNB</GridInfo>
+          <GridInfo title={t("swap.details.route")}>2 Separate Routes</GridInfo>
+          <GridInfo title={t("swap.details.priceImpact")}>
+            <Text color={"#039F00"}>0.007%</Text>
+          </GridInfo>
+        </Grid>
+      ) : null}
     </Box>
   );
 };
