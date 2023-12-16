@@ -15,6 +15,7 @@
     "@chakra-ui/shared-utils": "^2.0.4",
     "@chakra-ui/styled-system": "^2.9.2",
     "@chakra-ui/theme-tools": "^2.1.2",
+    "@ebay/nice-modal-react": "^1.2.13",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@fontsource/galindo": "^5.0.18",

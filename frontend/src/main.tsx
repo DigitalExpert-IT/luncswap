@@ -7,6 +7,7 @@ import { WalletProvider } from "@terra-money/wallet-kit";
 import { LCDClientConfig } from "@terra-money/feather.js";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Provider as NiceModalProvider } from "@ebay/nice-modal-react";
 import Root from "@/routes/root";
 import devtoolsRoute from "@/routes/devtools";
 
@@ -38,10 +39,12 @@ const routes = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ChakraProvider theme={theme}>
-      <WalletProvider defaultNetworks={defaultNetworks}>
-        <RouterProvider router={routes} />
-      </WalletProvider>
-    </ChakraProvider>
+    <WalletProvider defaultNetworks={defaultNetworks}>
+      <ChakraProvider theme={theme}>
+        <NiceModalProvider>
+          <RouterProvider router={routes} />
+        </NiceModalProvider>
+      </ChakraProvider>
+    </WalletProvider>
   </React.StrictMode>,
 );

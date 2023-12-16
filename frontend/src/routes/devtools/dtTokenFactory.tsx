@@ -1,5 +1,9 @@
 import FormInput from "@/components/FormInput";
 import FormTextarea from "@/components/FormTextarea";
+import ShortAddress from "@/components/ShortAddress";
+import WrapWallet from "@/components/WrapWallet";
+import { useExecuteContract } from "@/hooks";
+import { findEventAttribute } from "@/lib";
 import {
   Box,
   Button,
@@ -8,7 +12,11 @@ import {
   Stack,
   Text,
   useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
+import { MsgInstantiateContract } from "@terra-money/feather.js";
+import { useConnectedWallet } from "@terra-money/wallet-kit";
+import { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { HiPlus, HiTrash } from "react-icons/hi2";
 
@@ -16,13 +24,13 @@ type FormType = {
   name: string;
   symbol: string;
   decimals: number;
-  minter: {
-    address: string;
+  mint: {
+    minter: string;
     cap: string;
   };
   initial_balances: {
     address: string;
-    amount: number;
+    amount: string;
   }[];
   marketing: {
     project: string;
@@ -34,6 +42,9 @@ type FormType = {
 
 function TokenFactory() {
   const bg = useColorModeValue("gray.50", "gray.900");
+  const toast = useToast();
+  const connectedWallet = useConnectedWallet();
+  const [deployToken, { isLoading }] = useExecuteContract();
 
   const {
     register,
@@ -46,8 +57,8 @@ function TokenFactory() {
       decimals: 6,
       initial_balances: [
         {
-          address: "",
-          amount: 0,
+          address: connectedWallet?.addresses["pisco-1"] ?? "",
+          amount: "0",
         },
       ],
     },
@@ -57,25 +68,96 @@ function TokenFactory() {
     name: "initial_balances",
   });
 
+  useEffect(() => {
+    if (connectedWallet) {
+      initialbalancesFields.update(0, {
+        address: connectedWallet.addresses["pisco-1"],
+        amount: "0",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectedWallet]);
+
   const handleReset = () => {
     reset({
       decimals: 6,
-      initial_balances: [{ address: "", amount: 0 }],
+      initial_balances: [{ address: "", amount: "0" }],
     });
   };
 
   const onSubmit = handleSubmit(async val => {
-    console.log(val);
+    if (!connectedWallet) return;
+    try {
+      val.initial_balances.forEach((item, idx) => {
+        val.initial_balances[idx].amount = String(
+          +`${item.amount}e${val.decimals}`,
+        );
+      });
+      if (val.mint.cap) {
+        val.mint.cap = String(+`${val.mint.cap}e${val.decimals}`);
+      }
+
+      const msg = new MsgInstantiateContract(
+        connectedWallet.addresses["pisco-1"],
+        undefined,
+        12410,
+        {
+          name: val.name,
+          symbol: val.symbol,
+          decimals: val.decimals,
+          initial_balances: val.initial_balances,
+          mint:
+            val.mint.minter !== ""
+              ? {
+                  minter: val.mint.minter,
+                  cap: val.mint.cap || undefined,
+                }
+              : undefined,
+          marketing: {
+            project: val.marketing.project || undefined,
+            description: val.marketing.description || undefined,
+            marketing: val.marketing.marketing || undefined,
+            logo: val.marketing.logo || undefined,
+          },
+        },
+        undefined,
+        val.name,
+      );
+      const res = deployToken([msg]);
+      toast.promise(res, {
+        success: txInfo => {
+          const contractAddress = findEventAttribute(
+            "_contract_address",
+            txInfo,
+          );
+          return {
+            title: "Token Deployed",
+            description: <ShortAddress>{contractAddress}</ShortAddress>,
+            position: "bottom-right",
+            duration: null,
+            isClosable: true,
+          };
+        },
+        error: {
+          title: "Ooops!",
+          description: "Something Went Wrong!",
+          position: "bottom-right",
+        },
+        loading: {
+          title: "Deploying Token",
+          position: "bottom-right",
+        },
+      });
+    } catch (error) {
+      // do nothing
+    }
   });
 
   return (
     <Box>
       <Heading>Deploy CW20 Token</Heading>
-      <Text>
-        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quisquam,
-        nobis nesciunt. Suscipit quos quod quaerat pariatur nemo debitis rem
-        libero, eos fuga reiciendis, quam quidem esse aliquam veniam eveniet
-        itaque!
+      <Text my="2">
+        You can deploy your own cw20 token standard using one click!
       </Text>
       <Box shadow="lg" mt="6" borderRadius="md" p="4" bg={bg}>
         <Stack direction="row">
@@ -116,7 +198,7 @@ function TokenFactory() {
                 icon={<HiPlus />}
                 aria-label="add"
                 onClick={() => {
-                  initialbalancesFields.append({ address: "", amount: 0 });
+                  initialbalancesFields.append({ address: "", amount: "0" });
                 }}
               />
             </Box>
@@ -137,7 +219,6 @@ function TokenFactory() {
                 type="number"
                 register={register(`initial_balances.${index}.amount`, {
                   required: true,
-                  valueAsNumber: true,
                 })}
                 label="Amount"
               />
@@ -161,12 +242,12 @@ function TokenFactory() {
           </Heading>
           <Stack>
             <FormInput
-              register={register("minter.address")}
+              register={register("mint.minter")}
               label="Minter Address"
             />
             <FormInput
               type="number"
-              register={register("minter.cap", { valueAsNumber: true })}
+              register={register("mint.cap")}
               label="Cap"
             />
           </Stack>
@@ -202,10 +283,20 @@ function TokenFactory() {
           position="sticky"
           bottom="0"
         >
-          <Button colorScheme="green" onClick={onSubmit}>
-            Deploy Token
-          </Button>
-          <Button colorScheme="red" onClick={handleReset}>
+          <WrapWallet>
+            <Button
+              isLoading={isLoading}
+              colorScheme="green"
+              onClick={onSubmit}
+            >
+              Deploy Token
+            </Button>
+          </WrapWallet>
+          <Button
+            isDisabled={isLoading}
+            colorScheme="red"
+            onClick={handleReset}
+          >
             Reset
           </Button>
         </Stack>
