@@ -2,7 +2,7 @@ use cosmwasm_std::{
     entry_point, Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdResult,
 };
 use error::ContractError;
-use msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
+use msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 
 pub mod contract;
 mod error;
@@ -37,4 +37,9 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
 #[entry_point]
 pub fn reply(deps: DepsMut, env: Env, msg: Reply) -> Result<Response, ContractError> {
     contract::reply(deps, env, msg)
+}
+
+#[entry_point]
+pub fn migrate(deps: DepsMut, env: Env, msg: MigrateMsg) -> Result<Response, ContractError> {
+    contract::migrate(deps, env, msg)
 }

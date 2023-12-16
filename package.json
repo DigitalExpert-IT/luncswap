@@ -10,7 +10,9 @@
   },
   "scripts": {
     "deploy:testnet": "terrain task:run deploy_testnet --network testnet",
-    "deploy:mainnet": "terrain task:run deploy_mainnet --network mainnet"
+    "deploy:mainnet": "terrain task:run deploy_mainnet --network mainnet",
+    "migrate:factory:mainnet": "terrain contract:migrate luncswap_factory --signer default --network mainnet",
+    "migrate:factory:testnet": "terrain contract:migrate luncswap_factory --signer default --network testnet"
   },
   "license": "MIT",
   "pnpm": {

@@ -1,6 +1,6 @@
 use crate::msg::{
-    ExecuteMsg, FeeResponse, QueryMsg, Token1ForToken2PriceResponse, Token2ForToken1PriceResponse,
-    TokenSelect,
+    ExecuteMsg, FeeResponse, MigrateMsg, QueryMsg, Token1ForToken2PriceResponse,
+    Token2ForToken1PriceResponse, TokenSelect,
 };
 use crate::{
     error::ContractError,
@@ -12,13 +12,16 @@ use cosmwasm_std::{
     MessageInfo, Reply, Response, StdError, StdResult, SubMsg, Uint128, Uint256, Uint512, WasmMsg,
 };
 use cw0::parse_reply_instantiate_data;
+use cw2::{get_contract_version, set_contract_version};
 use cw20::{Cw20ExecuteMsg, Denom, Expiration};
 use cw20_base::contract::query_balance;
+use semver::Version;
 
 const INSTANTIATE_LP_TOKEN_REPLY_ID: u64 = 0;
 const FEE_SCALE_FACTOR: Uint128 = Uint128::new(10_000);
-// const MAX_FEE_PERCENT: &str = "1";
 const FEE_DECIMAL_PRECISION: Uint128 = Uint128::new(10u128.pow(20));
+const CONTRACT_NAME: &str = env!("CARGO_PKG_NAME");
+const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractError> {
     if msg.id != INSTANTIATE_LP_TOKEN_REPLY_ID {
@@ -37,6 +40,24 @@ pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractE
         }
         Err(_) => Err(ContractError::InstantiateLpTokenError {}),
     }
+}
+
+pub fn migrate(deps: DepsMut, _env: Env, _msg: MigrateMsg) -> Result<Response, ContractError> {
+    let version: Version = CONTRACT_VERSION.parse()?;
+    let storage_version: Version = get_contract_version(deps.storage)?.version.parse()?;
+    let storage_name = get_contract_version(deps.storage)?.contract;
+
+    if CONTRACT_NAME != storage_name {
+        return Err(StdError::generic_err("Can only upgrade from same contract type").into());
+    }
+
+    if storage_version < version {
+        set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
+    } else {
+        return Err(StdError::generic_err("Cannot upgrade from a newer contract version").into());
+    }
+
+    Ok(Response::default())
 }
 
 pub fn instantiate(

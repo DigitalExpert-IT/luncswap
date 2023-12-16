@@ -16,6 +16,11 @@ pub enum ExecuteMsg {
         token1_denom: Denom,
         token2_denom: Denom,
     },
+    MigratePair {
+        new_code_id: u64,
+        token1_denom: Denom,
+        token2_denom: Denom,
+    },
 }
 
 #[cw_serde]
@@ -29,6 +34,9 @@ pub enum QueryMsg {
     Pair { token1: Denom, token2: Denom },
     PairList { after: Option<PairMsg> },
 }
+
+#[cw_serde]
+pub struct MigrateMsg {}
 
 #[cw_serde]
 pub struct PairResponse {

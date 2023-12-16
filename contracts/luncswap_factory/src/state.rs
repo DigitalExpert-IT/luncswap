@@ -3,6 +3,8 @@ use cosmwasm_std::{Addr, CanonicalAddr, Decimal};
 use cw20::Denom;
 use cw_storage_plus::{Item, Map};
 
+pub const INSTANTIATE_PAIR_REPLY_ID: u64 = 0;
+
 #[cw_serde]
 pub struct Config {
     pub owner: CanonicalAddr,
