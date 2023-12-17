@@ -1,10 +1,26 @@
-import { useConnectedWallet, useWallet } from "@terra-money/wallet-kit";
-import { Button, Box, Text, Code } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import {
+  useConnectedWallet,
+  useWallet,
+  useLcdClient,
+} from "@terra-money/wallet-kit";
+import { Button, Box, Text } from "@chakra-ui/react";
 
 function Home() {
+  const lcd = useLcdClient();
   const connectedWallet = useConnectedWallet();
-  const { connect, disconnect, availableWallets, network, status } =
-    useWallet();
+  const [bank, setBank] = useState<null | string>();
+  const { connect, disconnect, availableWallets } = useWallet();
+
+  useEffect(() => {
+    if (connectedWallet) {
+      lcd.bank.balance(connectedWallet.address).then(([coins]) => {
+        setBank(coins.toString());
+      });
+    } else {
+      setBank(null);
+    }
+  }, [connectedWallet, lcd]);
 
   return (
     <Box>
@@ -25,8 +41,9 @@ function Home() {
         ))
       )}
       <Text mt="2rem">Network Name: {connectedWallet?.network} </Text>
-      <Text>Network Info:</Text>
-      <Code mt="1rem">{JSON.stringify({ network, status }, null, 2)}</Code>
+      <Text>
+        Your Balances: {connectedWallet ? bank : "please connect wallet"}
+      </Text>
     </Box>
   );
 }
