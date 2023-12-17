@@ -5,7 +5,6 @@ import {
   useLcdClient,
 } from "@terra-money/wallet-kit";
 import { Button, Box, Text } from "@chakra-ui/react";
-import { AddLiquidity } from "./swap/addLiquidity";
 
 function Home() {
   const lcd = useLcdClient();
@@ -45,7 +44,6 @@ function Home() {
       <Text>
         Your Balances: {connectedWallet ? bank : "please connect wallet"}
       </Text>
-      <AddLiquidity />
     </Box>
   );
 }
