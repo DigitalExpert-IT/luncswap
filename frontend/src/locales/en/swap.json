@@ -1,5 +1,12 @@
 {
   "title": "SWAP NOW",
+  "info": {
+    "description": "In order to maintain the stability of the token price, a 0.5% reduction will be applied to each transaction.",
+    "trySwap": "Try Swap"
+  },
+  "swap": "SWAP",
+  "makeA": "MAKE A ",
+  "withUs": "WITH US",
   "description": "Trade tokens in 1 minute.",
   "buttonSwap": "SWAP",
   "slippage": "Slippage Tolerance",
