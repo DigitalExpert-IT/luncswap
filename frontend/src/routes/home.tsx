@@ -5,12 +5,15 @@ import {
   useLcdClient,
 } from "@terra-money/wallet-kit";
 import { Button, Box, Text } from "@chakra-ui/react";
+import { useQueryContract } from "@/hooks";
 
 function Home() {
   const lcd = useLcdClient();
   const connectedWallet = useConnectedWallet();
+  const { response } = useQueryContract({ pair_list: {} });
   const [bank, setBank] = useState<null | string>();
   const { connect, disconnect, availableWallets } = useWallet();
+  console.log(response);
 
   useEffect(() => {
     if (connectedWallet) {

@@ -1,16 +1,24 @@
-import { useConnectedWallet } from "@terra-money/wallet-kit";
-import config from "../refs.terrain.json";
+import { useState, useEffect } from "react";
+import { useLcdClient } from "@terra-money/wallet-kit";
 
-export const useQueryContract = () => {
-  const connectedWallet = useConnectedWallet();
+export const useQueryContract = (params: string | object) => {
+  const [response, setResponse] = useState([]);
+  const lcd = useLcdClient();
 
-  const getContractAddress = () => {
-    const NETWORK_NAME = connectedWallet ? connectedWallet.network : null;
+  // TODO:
+  // 1 . type response contract useQueryContract, handle loading and error
+  // 2 .
 
-    return config.testnet[NETWORK_NAME].luncswap_token.contractAddresses;
-  };
+  useEffect(() => {
+    const getQuery = async () => {
+      const data = await lcd.wasm.contractQuery(
+        "terra1zg4njgu40t3nu0yxnf03y8mjaghzsmljfh0lj9m2793ewswg4mxqcgt3uq",
+        params,
+      );
+      setResponse(data);
+    };
+    getQuery();
+  }, []);
 
-  return {
-    getContractAddress,
-  };
+  return { response };
 };
