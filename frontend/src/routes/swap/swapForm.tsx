@@ -19,7 +19,7 @@ import { TbGraphFilled } from "react-icons/tb";
 import { FaSackDollar } from "react-icons/fa6";
 import { RiHistoryFill } from "react-icons/ri";
 import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
-interface IOptionSelect {
+export interface IOptionSelect {
   children: React.ReactNode;
   imageUrl: string;
 }

@@ -15,5 +15,9 @@
   "poolsTable": {
     "title": "ALL POOLS",
     "addLiquidity": "Add Liquidity"
+  },
+  "addLiquidity": {
+    "title": "Add Liquidity",
+    "choose": "Choose Pair"
   }
 }
