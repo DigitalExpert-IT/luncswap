@@ -19,7 +19,10 @@ import { TbGraphFilled } from "react-icons/tb";
 import { FaSackDollar } from "react-icons/fa6";
 import { RiHistoryFill } from "react-icons/ri";
 import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
-export interface IOptionSelect {
+import { AiOutlineSwap } from "react-icons/ai";
+import { BiSolidPencil } from "react-icons/bi";
+
+interface IOptionSelect {
   children: React.ReactNode;
   imageUrl: string;
 }
@@ -209,7 +212,12 @@ const SwapForm = ({
             </Flex>
           </Box>
           <Flex mt={4} justifyContent={"center"}>
-            <Image src="/swap.png" w={4} h={4} />
+            <Icon
+              as={AiOutlineSwap}
+              fontSize={30}
+              transform={"rotate(90deg)"}
+              mt={2}
+            />
           </Flex>
           <Box>
             <Text fontWeight={"600"}>{t("swap.to")}</Text>
@@ -238,7 +246,7 @@ const SwapForm = ({
           <Flex mt={10} justifyContent={"space-between"} mb={2}>
             <Flex align={"center"} gap={3}>
               <Text> {t("swap.slippage")}</Text>
-              <Image src="/pencil.png" w={4} h={4} />
+              <Icon as={BiSolidPencil} color={"#FCDD6F"} />
             </Flex>
             <Text>0.5%</Text>
           </Flex>
