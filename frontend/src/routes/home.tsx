@@ -10,14 +10,17 @@ import { useQueryContract } from "@/hooks";
 function Home() {
   const lcd = useLcdClient();
   const connectedWallet = useConnectedWallet();
-  const { response } = useQueryContract({ pair_list: {} });
+
   const [bank, setBank] = useState<null | string>();
   const { connect, disconnect, availableWallets } = useWallet();
+
+  const { response, tokenBalance } = useQueryContract({ pair_list: {} });
   console.log(response);
+  const alongToken = Object.values(tokenBalance);
 
   useEffect(() => {
     if (connectedWallet) {
-      lcd.bank.balance(connectedWallet.address).then(([coins]) => {
+      lcd.bank.balance(connectedWallet.addresses["pisco-1"]).then(([coins]) => {
         setBank(coins.toString());
       });
     } else {
@@ -47,6 +50,7 @@ function Home() {
       <Text>
         Your Balances: {connectedWallet ? bank : "please connect wallet"}
       </Text>
+      <Text>Along Token: {alongToken} </Text>
     </Box>
   );
 }
