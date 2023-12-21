@@ -22,7 +22,7 @@ import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
 import { AiOutlineSwap } from "react-icons/ai";
 import { BiSolidPencil } from "react-icons/bi";
 
-interface IOptionSelect {
+export interface IOptionSelect {
   children: React.ReactNode;
   imageUrl: string;
 }
