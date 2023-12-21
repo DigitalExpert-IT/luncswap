@@ -5,7 +5,7 @@ export const styles: Styles = {
     body: {
       fontFamily: "body",
       color: "chakra-body-text",
-      bg: "chakra-body-bg",
+      bg: "black",
       transitionProperty: "background-color",
       transitionDuration: "normal",
       lineHeight: "base",

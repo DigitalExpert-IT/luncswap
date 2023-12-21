@@ -237,6 +237,19 @@ const colors = {
     800: "#005885",
     900: "#003F5E",
   },
-}
 
-export default colors
+  brand: {
+    50: "#fff9de",
+    100: "#feedb1",
+    200: "#fce282",
+    300: "#fbd652",
+    400: "#faca25",
+    500: "#e1b011",
+    600: "#af8908",
+    700: "#7d6203",
+    800: "#4b3b00",
+    900: "#1b1400",
+  },
+};
+
+export default colors;

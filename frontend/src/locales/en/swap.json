@@ -1,0 +1,30 @@
+{
+  "title": "SWAP NOW",
+  "info": {
+    "description": "In order to maintain the stability of the token price, a 0.5% reduction will be applied to each transaction.",
+    "trySwap": "Try Swap"
+  },
+  "swap": "SWAP",
+  "makeA": "MAKE A ",
+  "withUs": "WITH US",
+  "description": "Trade tokens in 1 minute.",
+  "buttonSwap": "SWAP",
+  "slippage": "Slippage Tolerance",
+  "from": "FROM",
+  "to": "TO",
+  "details": {
+    "rate": "Rate",
+    "minimumReceived": "Minimum Received",
+    "swapFee": "Swap Fee",
+    "route": "Route",
+    "priceImpact": "Price Impact"
+  },
+  "poolsTable": {
+    "title": "ALL POOLS",
+    "addLiquidity": "Add Liquidity"
+  },
+  "addLiquidity": {
+    "title": "Add Liquidity",
+    "choose": "Choose Pair"
+  }
+}
