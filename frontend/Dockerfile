@@ -19,4 +19,4 @@ COPY vite.config.ts .
 
 RUN npm install typescript
 EXPOSE 3000
-CMD ["npm", "run", "server"]
+CMD ["npm", "run", "preview"]
