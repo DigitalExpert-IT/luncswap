@@ -3,15 +3,15 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import theme from "@/theme";
 import ErrorPage from "@/routes/errorPage.tsx";
+import Root from "@/routes/root";
 import { WalletProvider } from "@terra-money/wallet-kit";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider as NiceModalProvider } from "@ebay/nice-modal-react";
-import Root from "@/routes/root";
 import { piscoLCD } from "./constant/Networks";
-import devtoolsRoute from "@/routes/devtools";
 import { AppProvider } from "./provider";
-import Swap from "./routes/swap";
+import devtoolsRoute from "@/routes/devtools";
+import swapRoute from "./routes/swap";
 import "./locales/index";
 
 const Home = React.lazy(() => import("@/routes/home"));
@@ -28,17 +28,7 @@ const routes = createBrowserRouter([
         element: <Home />,
       },
       devtoolsRoute,
-    ],
-  },
-  {
-    path: "/swap",
-    element: <Root />,
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        path: "/swap",
-        element: <Swap />,
-      },
+      swapRoute,
     ],
   },
 ]);
