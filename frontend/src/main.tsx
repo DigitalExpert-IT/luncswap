@@ -10,6 +10,7 @@ import { Provider as NiceModalProvider } from "@ebay/nice-modal-react";
 import Root from "@/routes/root";
 import { piscoLCD } from "./constant/Networks";
 import devtoolsRoute from "@/routes/devtools";
+import { AppProvider } from "./provider";
 import Swap from "./routes/swap";
 import "./locales/index";
 
@@ -47,7 +48,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <WalletProvider defaultNetworks={defaultNetworks}>
       <ChakraProvider theme={theme}>
         <NiceModalProvider>
-          <RouterProvider router={routes} />
+          <AppProvider>
+            <RouterProvider router={routes} />
+          </AppProvider>
         </NiceModalProvider>
       </ChakraProvider>
     </WalletProvider>
