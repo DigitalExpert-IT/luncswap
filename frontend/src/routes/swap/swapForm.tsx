@@ -59,7 +59,7 @@ const OptionSelect = ({ children, imageUrl }: IOptionSelect) => (
 const options = [
   {
     value: "bnb",
-    label: <OptionSelect imageUrl={"bnb.png"}>BNB</OptionSelect>,
+    label: <OptionSelect imageUrl={"ustc.png"}>USTC</OptionSelect>,
   },
   {
     value: "lunc",
@@ -70,19 +70,19 @@ const options = [
 const optionStyles: ChakraStylesConfig = {
   menu: provided => ({
     ...provided,
-    color: "#FCDD6F",
+    color: "brand.500",
     fontWeight: "700",
   }),
   option: provided => ({
     ...provided,
-    bg: "black",
+    bg: "#172852",
     _hover: {
       bg: "purple",
     },
   }),
   menuList: provided => ({
     ...provided,
-    background: "black",
+    background: "#172852",
   }),
   input: provided => ({
     ...provided,
@@ -91,11 +91,11 @@ const optionStyles: ChakraStylesConfig = {
   downChevron: provided => ({
     ...provided,
     color: "white",
-    bg: "black",
+    bg: "#172852",
   }),
   container: provided => ({
     ...provided,
-    bgColor: "black",
+    bgColor: "#172852",
     borderRadius: "20px",
     width: { base: "140px", md: "160px" },
   }),
@@ -103,7 +103,7 @@ const optionStyles: ChakraStylesConfig = {
     ...provided,
     position: "relative",
     left: "-1px",
-    bgColor: "black",
+    bgColor: "#172852",
     p: 1,
   }),
   control: provided => ({
@@ -159,7 +159,7 @@ const SwapForm = ({
   return (
     <Box bgColor={"#FCDD6F"} borderRadius={20}>
       <Box
-        bgColor={"#191B1F"}
+        bgColor={"#081431"}
         border={"2px solid #A4A4BE"}
         borderRadius={20}
         flex={"0 1 400px"}
@@ -272,12 +272,12 @@ const SwapForm = ({
           fontWeight={"600"}
         >
           <GridInfo title={t("swap.details.rate")}>
-            1 BNB = 0.010157 LUNC
+            1 USTC = 0.010157 LUNC
           </GridInfo>
           <GridInfo title={t("swap.details.minimumReceived")}>
             2155 LUNC
           </GridInfo>
-          <GridInfo title={t("swap.details.swapFee")}>0.0396 BNB</GridInfo>
+          <GridInfo title={t("swap.details.swapFee")}>0.0396 USTC</GridInfo>
           <GridInfo title={t("swap.details.route")}>2 Separate Routes</GridInfo>
           <GridInfo title={t("swap.details.priceImpact")}>
             <Text color={"#039F00"}>0.007%</Text>

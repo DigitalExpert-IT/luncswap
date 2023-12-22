@@ -66,7 +66,7 @@ const AllPoolsTable = () => {
               <Td borderBottomWidth={5} borderColor={"#191B1F"}>
                 <Flex align={"center"}>
                   <Flex position={"relative"}>
-                    <Image src="/bnb.png" w={4} h={4} />
+                    <Image src="/ustc.png" w={4} h={4} />
                     <Image
                       src="/lunc.png"
                       w={4}
@@ -75,7 +75,7 @@ const AllPoolsTable = () => {
                       left={"-5px"}
                     />
                   </Flex>
-                  <Text>BNB/LUNC</Text>
+                  <Text>USTC/LUNC</Text>
                 </Flex>
               </Td>
               <Td borderBottomWidth={5} borderColor={"#191B1F"}>
@@ -92,7 +92,7 @@ const AllPoolsTable = () => {
               <Td borderBottomWidth={5} borderColor={"#191B1F"}>
                 <Flex align={"center"}>
                   <Flex position={"relative"}>
-                    <Image src="/bnb.png" w={4} h={4} />
+                    <Image src="/ustc.png" w={4} h={4} />
                     <Image
                       src="/lunc.png"
                       w={4}
@@ -101,7 +101,7 @@ const AllPoolsTable = () => {
                       left={"-5px"}
                     />
                   </Flex>
-                  <Text>BNB/LUNC</Text>
+                  <Text>USTC/LUNC</Text>
                 </Flex>
               </Td>
               <Td borderBottomWidth={5} borderColor={"#191B1F"}>
@@ -118,7 +118,7 @@ const AllPoolsTable = () => {
               <Td borderBottomWidth={5} borderColor={"#191B1F"}>
                 <Flex align={"center"}>
                   <Flex position={"relative"}>
-                    <Image src="/bnb.png" w={4} h={4} />
+                    <Image src="/ustc.png" w={4} h={4} />
                     <Image
                       src="/lunc.png"
                       w={4}
@@ -127,7 +127,7 @@ const AllPoolsTable = () => {
                       left={"-5px"}
                     />
                   </Flex>
-                  <Text>BNB/LUNC</Text>
+                  <Text>USTC/LUNC</Text>
                 </Flex>
               </Td>
               <Td borderBottomWidth={5} borderColor={"#191B1F"}>

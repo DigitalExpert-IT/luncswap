@@ -7,7 +7,12 @@ const TokenFactory = React.lazy(() => import("./dtTokenFactory"));
 const routes: RouteObject = {
   path: "/devtools",
   element: <Root />,
-  children: [{ path: "/devtools", element: <TokenFactory /> }],
+  children: [
+    {
+      path: "/devtools",
+      element: <TokenFactory />,
+    },
+  ],
 };
 
 export default routes;
