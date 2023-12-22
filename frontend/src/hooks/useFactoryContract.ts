@@ -4,8 +4,9 @@ import { MsgExecuteContract } from "@terra-money/feather.js";
 import { useExecuteContract, useMount } from ".";
 import { useContext } from "react";
 import { AppContext } from "@/provider";
-import { Denom, Pair } from "@/interface";
+import { Denom, Pair, TokenInfo, TokenMarketingInfo } from "@/interface";
 import { useSnapshot } from "valtio";
+import { getPairKey } from "@/lib/pair";
 
 const CHAIN_ID = "pisco-1";
 const CONTRACT_ADDRESS = CONTRACT_LIST[CHAIN_ID].factory;
@@ -14,26 +15,83 @@ export const useFactoryContract = () => {
   const lcd = useLcdClient();
   const connectedWallet = useConnectedWallet();
   const { factory } = useContext(AppContext);
-  const [addpairExec] = useExecuteContract();
-  const { pairList, loadingPairList } = useSnapshot(factory);
+  const [addPairExec] = useExecuteContract();
+  const { pairList, tokenList, loadingPairList, loadingTokenList } =
+    useSnapshot(factory);
 
-  const addPair = async () => {
+  const storePairList = async (pairList: Pair[]) => {
+    factory.loadingTokenList = true;
+    const denomSet = new Set<string>();
+    factory.pairList = factory.pairList.concat(
+      pairList.map(item => {
+        item.assets.forEach(denom => {
+          denom = denom as { cw20: string };
+          if (denom.cw20) {
+            denomSet.add(denom.cw20);
+          }
+        });
+
+        return {
+          ...item,
+          key: getPairKey(item.assets),
+        };
+      }),
+    );
+
+    const promises = [];
+    for (const cw20Addr of denomSet) {
+      const cw20InfoPromise = lcd.wasm.contractQuery(cw20Addr, {
+        token_info: {},
+      });
+      const marketingInfoPromise = lcd.wasm.contractQuery(cw20Addr, {
+        marketing_info: {},
+      });
+      promises.push(cw20InfoPromise);
+      promises.push(marketingInfoPromise);
+    }
+    const denomListResult = await Promise.all(promises);
+    const denomIter = denomSet.values();
+    let currentDenom = denomIter.next();
+    for (let i = 0; i < denomListResult.length; i = i + 2) {
+      const tokenInfo = denomListResult[i] as TokenInfo;
+      const marketingInfo = denomListResult[i + 1] as TokenMarketingInfo;
+      factory.tokenList.push({
+        address: currentDenom.value,
+        info: tokenInfo,
+        marketing: marketingInfo,
+      });
+      currentDenom = denomIter.next();
+    }
+    factory.loadingTokenList = false;
+  };
+
+  const loadPairByDenom = async (token1: Denom, token2: Denom) => {
+    const pair = await lcd.wasm.contractQuery<Pair>(CONTRACT_ADDRESS, {
+      pair: { token1, token2 },
+    });
+    await storePairList([pair]);
+  };
+
+  const findPair = (token1: Denom, token2: Denom) => {
+    const key = getPairKey([token1, token2]);
+    return factory.pairList.find(item => item.key === key);
+  };
+
+  const addPair = async (token1: Denom, token2: Denom) => {
     if (!connectedWallet) return;
     const addPairMsg = new MsgExecuteContract(
       connectedWallet.addresses[CHAIN_ID],
       CONTRACT_ADDRESS,
       {
         add_pair: {
-          token1_denom: { native: "luna" },
-          token2_denom: {
-            cw20: "terra1w5c853etgdrhp5uhum0xade3qrz5a33pv52fhkxqzya9mkx2225sw58aq7",
-          },
+          token1_denom: token1,
+          token2_denom: token2,
         },
       },
       undefined,
     );
-    const res = await addpairExec([addPairMsg]);
-    console.log(res);
+    await addPairExec([addPairMsg]);
+    await loadPairByDenom(token1, token2);
   };
 
   const loadList = async (after?: { token1: Denom; token2: Denom }) => {
@@ -45,7 +103,7 @@ export const useFactoryContract = () => {
           after,
         },
       });
-      factory.pairList = factory.pairList.concat(pairList);
+      await storePairList(pairList);
 
       // because the limit of pagination in pair_list is 10
       // then if the returned pairlist length is 10, probably there's more
@@ -66,8 +124,21 @@ export const useFactoryContract = () => {
   };
 
   useMount(() => {
-    loadList();
+    const cursor =
+      pairList.length > 0
+        ? {
+            token1: pairList[pairList.length - 1].assets[0],
+            token2: pairList[pairList.length - 1].assets[1],
+          }
+        : undefined;
+    loadList(cursor);
   });
 
-  return { pairList, addPair, isLoading: loadingPairList };
+  return {
+    pairList,
+    addPair,
+    findPair,
+    tokenList,
+    isLoading: loadingPairList || loadingTokenList,
+  };
 };

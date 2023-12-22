@@ -37,11 +37,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <WalletProvider defaultNetworks={defaultNetworks}>
       <ChakraProvider theme={theme}>
-        <NiceModalProvider>
-          <AppProvider>
+        <AppProvider>
+          <NiceModalProvider>
             <RouterProvider router={routes} />
-          </AppProvider>
-        </NiceModalProvider>
+          </NiceModalProvider>
+        </AppProvider>
       </ChakraProvider>
     </WalletProvider>
   </React.StrictMode>,
