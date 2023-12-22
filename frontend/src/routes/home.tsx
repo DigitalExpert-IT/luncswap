@@ -25,7 +25,7 @@ function Home() {
   };
 
   return (
-    <Container maxW={"container.xl"} mb="10rem">
+    <Container maxW={"container.xl"} pb="10rem">
       <ModalComingSoon />
       {/* <ModalComingSoon /> */}
       <VStack gap={10}>
