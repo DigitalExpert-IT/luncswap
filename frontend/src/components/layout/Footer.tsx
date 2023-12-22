@@ -2,7 +2,7 @@ import { Text, Box, Stack, Container, Image } from "@chakra-ui/react";
 
 export const Footer = () => {
   return (
-    <Stack display="flex" bg="gray.800" w="100%" zIndex={2} justify="center">
+    <Stack bg="#010525" w="100%" h="75px" zIndex="999" justifyContent="center">
       <Container maxW="container.xl">
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Text size="xl">All rights reserved.</Text>

@@ -1,4 +1,12 @@
-import { Box, Text, Container, Stack, Link, Heading } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Container,
+  Stack,
+  Link,
+  Heading,
+  Image,
+} from "@chakra-ui/react";
 import { INavigation } from "@/constant/Navigation";
 
 interface INavbar {
@@ -12,7 +20,7 @@ export const Navbar: React.FC<INavbar> = ({ data }) => {
       position="sticky"
       top="0"
       left="0"
-      bg="gray.800"
+      bg="#010525"
       w="100%"
       h="75px"
       zIndex="999"
@@ -20,10 +28,13 @@ export const Navbar: React.FC<INavbar> = ({ data }) => {
     >
       <Container maxW="container.xl">
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Heading size="md">Luncswap.</Heading>
+          <Box display="flex" alignContent="center" alignItems="center">
+            <Image src="./lunc.png" mr="1rem" />
+            <Heading size="md" color="brand.500">
+              Luncswap.
+            </Heading>
           </Box>
-          <Stack direction="row" spacing="2rem">
+          <Stack direction="row" spacing="2rem" display={{ base: "none" }}>
             {data.map((item, idx) => (
               <Link
                 key={idx}
