@@ -21,6 +21,7 @@
     "@fontsource/galindo": "^5.0.18",
     "@terra-money/feather.js": "^1.2.1",
     "@terra-money/wallet-kit": "^1.0.16",
+    "@xstate/react": "^4.0.1",
     "chakra-react-select": "^4.7.6",
     "framer-motion": "^10.16.16",
     "i18next": "^23.7.11",
@@ -33,7 +34,8 @@
     "react-icons": "^4.12.0",
     "react-router-dom": "^6.21.0",
     "sort-by": "^1.2.0",
-    "valtio": "^1.12.1"
+    "valtio": "^1.12.1",
+    "xstate": "^5.4.0"
   },
   "devDependencies": {
     "@rollup/plugin-inject": "^5.0.5",

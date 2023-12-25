@@ -10,6 +10,13 @@ export type Pair = {
   lp_address: string;
 };
 
+export type PairInfo = {
+  token1_denom: Denom;
+  token1_reserve: string;
+  token2_denom: Denom;
+  token2_reserve: string;
+};
+
 export type PairWithKey = Pair & {
   key: string;
 };

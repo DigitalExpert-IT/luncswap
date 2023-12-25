@@ -4,7 +4,13 @@ import { MsgExecuteContract } from "@terra-money/feather.js";
 import { useExecuteContract, useMount } from ".";
 import { useContext } from "react";
 import { AppContext } from "@/provider";
-import { Denom, Pair, TokenInfo, TokenMarketingInfo } from "@/interface";
+import {
+  Denom,
+  Pair,
+  PairInfo,
+  TokenInfo,
+  TokenMarketingInfo,
+} from "@/interface";
 import { useSnapshot } from "valtio";
 import { getPairKey } from "@/lib/pair";
 
@@ -123,6 +129,18 @@ export const useFactoryContract = () => {
     }
   };
 
+  const loadPair = async (
+    assets: [Denom, Denom],
+  ): Promise<[Pair, PairInfo]> => {
+    const pair = findPair(assets[0], assets[1]);
+    if (!pair) throw {};
+    const pairInfo = await lcd.wasm.contractQuery<PairInfo>(
+      pair.contract_address,
+      { info: {} },
+    );
+    return [pair, pairInfo];
+  };
+
   useMount(() => {
     const cursor =
       pairList.length > 0
@@ -136,6 +154,7 @@ export const useFactoryContract = () => {
 
   return {
     pairList,
+    loadPair,
     addPair,
     findPair,
     tokenList,

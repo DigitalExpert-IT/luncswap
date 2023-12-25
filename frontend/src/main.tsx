@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React from "react";
+import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import theme from "@/theme";
 import ErrorPage from "@/routes/errorPage.tsx";
@@ -39,7 +39,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ChakraProvider theme={theme}>
         <AppProvider>
           <NiceModalProvider>
-            <RouterProvider router={routes} />
+            <Suspense fallback={<></>}>
+              <RouterProvider router={routes} />
+            </Suspense>
           </NiceModalProvider>
         </AppProvider>
       </ChakraProvider>

@@ -21,7 +21,7 @@ export const Footer = () => {
           >
             <Text size="xl">All rights reserved.</Text>
             <Box>
-              <Image src="./logo.png" alt="logo" objectFit="cover" />
+              <Image src="/logo.png" alt="logo" objectFit="cover" />
             </Box>
           </Box>
         </Container>
