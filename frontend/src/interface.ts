@@ -1,13 +1,31 @@
 export type Denom =
   | {
       native: string;
+      type: "native";
     }
-  | { cw20: string };
+  | { cw20: string; type: "cw20" };
 
 export type Pair = {
   assets: [Denom, Denom];
   contract_address: string;
   lp_address: string;
+};
+
+export enum TokenSelect {
+  Token1,
+  Token2,
+}
+
+export type SwapRequest = {
+  input_token: TokenSelect;
+  input_amount: string;
+  min_output: string;
+};
+
+export type AddLiquidityRequest = {
+  token1_amount: string;
+  min_liquidity: string;
+  max_token2: string;
 };
 
 export type PairInfo = {
@@ -36,6 +54,7 @@ export type TokenMarketingInfo = {
 };
 
 export type TokenMeta = {
+  isNative?: boolean;
   info: TokenInfo;
   marketing: TokenMarketingInfo;
   address: string;

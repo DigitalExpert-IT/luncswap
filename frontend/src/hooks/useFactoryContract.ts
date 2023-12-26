@@ -1,13 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CONTRACT_LIST } from "@/config";
 import { useConnectedWallet, useLcdClient } from "@terra-money/wallet-kit";
-import { MsgExecuteContract } from "@terra-money/feather.js";
+import { MsgExecuteContract, Coin } from "@terra-money/feather.js";
 import { useExecuteContract, useMount } from ".";
 import { useContext } from "react";
 import { AppContext } from "@/provider";
 import {
+  AddLiquidityRequest,
   Denom,
   Pair,
   PairInfo,
+  SwapRequest,
   TokenInfo,
   TokenMarketingInfo,
 } from "@/interface";
@@ -22,6 +25,9 @@ export const useFactoryContract = () => {
   const connectedWallet = useConnectedWallet();
   const { factory } = useContext(AppContext);
   const [addPairExec] = useExecuteContract();
+  const [swapExec] = useExecuteContract();
+  const [addLiquidityExec] = useExecuteContract();
+  const [increaseAllowanceExec] = useExecuteContract();
   const { pairList, tokenList, loadingPairList, loadingTokenList } =
     useSnapshot(factory);
 
@@ -126,6 +132,7 @@ export const useFactoryContract = () => {
       // log error here
     } finally {
       factory.loadingPairList = false;
+      factory.initialized = true;
     }
   };
 
@@ -141,7 +148,63 @@ export const useFactoryContract = () => {
     return [pair, pairInfo];
   };
 
+  const swap = async (contractAddr: string, input: SwapRequest) => {
+    if (!connectedWallet) return;
+    const swapMsg = new MsgExecuteContract(
+      connectedWallet.addresses[CHAIN_ID],
+      contractAddr,
+      {
+        swap: input,
+      },
+      undefined,
+    );
+    await swapExec([swapMsg]);
+  };
+
+  const addLiquidity = async (
+    contractAddr: string,
+    input: AddLiquidityRequest,
+  ) => {
+    if (!connectedWallet) return;
+    const addLiquidityMsg = new MsgExecuteContract(
+      connectedWallet.addresses[CHAIN_ID],
+      contractAddr,
+      {
+        add_liquidity: input,
+      },
+      [
+        Coin.fromAmino({
+          denom: "uluna",
+          amount: "1000000",
+        }),
+      ],
+    );
+    await addLiquidityExec([addLiquidityMsg]);
+  };
+
+  const increaseAllowance = async (
+    denom: Denom,
+    spender: string,
+    amount: string,
+  ) => {
+    if (!connectedWallet) return;
+    if ((denom as any).native) return;
+    const contractAddr = (denom as any).cw20;
+    const increaseAllowanceMsg = new MsgExecuteContract(
+      connectedWallet.addresses[CHAIN_ID],
+      contractAddr,
+      {
+        increase_allowance: {
+          spender,
+          amount,
+        },
+      },
+    );
+    await increaseAllowanceExec([increaseAllowanceMsg]);
+  };
+
   useMount(() => {
+    if (factory.initialized) return;
     const cursor =
       pairList.length > 0
         ? {
@@ -157,6 +220,9 @@ export const useFactoryContract = () => {
     loadPair,
     addPair,
     findPair,
+    swap,
+    addLiquidity,
+    increaseAllowance,
     tokenList,
     isLoading: loadingPairList || loadingTokenList,
   };

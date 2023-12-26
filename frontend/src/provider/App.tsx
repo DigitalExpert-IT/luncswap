@@ -45,6 +45,7 @@ const factoryState = proxy({
   tokenList: loadPersistedTokenList as TokenMeta[],
   loadingPairList: false as boolean,
   loadingTokenList: false as boolean,
+  initialized: false as boolean,
 });
 
 subscribe(factoryState, () => {

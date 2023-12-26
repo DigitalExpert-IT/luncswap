@@ -25,6 +25,7 @@ function DevtoolsRoot() {
 const menuEntry = [
   { title: "CW20 Factory", path: "/devtools" },
   { title: "Swap", path: "/devtools/swap" },
+  { title: "Add Liquidity", path: "/devtools/add_liquidity" },
 ];
 
 export default DevtoolsRoot;

@@ -1,88 +1,67 @@
-import { useFactoryContract } from "@/hooks";
-import { TokenMeta } from "@/interface";
-import { pairMachine } from "@/machine";
+/* eslint-disable react-hooks/exhaustive-deps */
+import TokenSelect from "@/components/TokenSelect";
+import { SwapMachineContext, TokenMachineContext } from "@/machine";
 import {
+  Box,
   Button,
   FormControl,
   FormLabel,
   Input,
   InputGroup,
-  Select,
   Stack,
-  Text,
 } from "@chakra-ui/react";
-import { useActorRef, useSelector } from "@xstate/react";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { ActorRef, fromPromise, EventFrom, SnapshotFrom } from "xstate";
-
-type EventType = EventFrom<typeof pairMachine>;
-type SnapshotType = SnapshotFrom<typeof pairMachine>;
-const MachineContext = createContext<{
-  pairActor: ActorRef<SnapshotType, EventType>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}>({ pairActor: undefined as any });
+import { useSelector } from "@xstate/react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 function DevtoolsSwap() {
-  const { pairActor } = useContext(MachineContext);
-  const { isLoading, isSwapReady, liquidityPool } = useSelector(
-    pairActor,
-    state => {
-      const token1Reserve = BigInt(
-        state.context.pairInfo?.token1_reserve ?? "0",
-      );
-      const token2Reserve = BigInt(
-        state.context.pairInfo?.token2_reserve ?? "0",
-      );
-      const liquidityPool = token1Reserve * token2Reserve;
-      return {
-        liquidityPool,
-        isLoading: state.hasTag("loading"),
-        isSwapReady: state.matches("ready"),
-      };
-    },
-  );
-
-  const { tokenList } = useFactoryContract();
+  const { swapActor } = useContext(SwapMachineContext);
+  const { tokenActor } = useContext(TokenMachineContext);
+  const { tokenList } = useSelector(tokenActor, state => {
+    return {
+      tokenList: state.context.tokenList,
+    };
+  });
+  const { isLoading, isSwapReady } = useSelector(swapActor, state => {
+    return {
+      isLoading: state.hasTag("loading"),
+      isSwapReady: state.matches("ready"),
+    };
+  });
   const [inputAddress, setInputAddress] = useState("");
   const [outputAddress, setOutputAddress] = useState("");
-  const injectedTokenList = useMemo(() => {
-    const nativeToken: TokenMeta = {
-      address: "native",
-      info: {
-        decimals: 6,
-        name: "luna",
-        symbol: "luna",
-        total_supply: String(1000000000e6),
-      },
-      marketing: {
-        description: null,
-        logo: null,
-        marketing: null,
-        project: null,
-      },
-    };
 
-    return [nativeToken].concat(tokenList);
-  }, [tokenList]);
+  useEffect(() => {
+    if (inputAddress === outputAddress) setOutputAddress("");
+  }, [inputAddress]);
 
-  const isZeroLiquidity = liquidityPool === BigInt("0");
+  useEffect(() => {
+    if (outputAddress === inputAddress) setInputAddress("");
+  }, [outputAddress]);
 
-  const handleGetInfo = () => {
-    if (!inputAddress) return;
-    if (!outputAddress) return;
+  const inputTokenMeta = useMemo(() => {
+    if (!inputAddress) return undefined;
+    return tokenList.find(item => item.address === inputAddress);
+  }, [inputAddress, tokenList]);
 
-    const inputDenom =
-      inputAddress === "native" ? { native: "luna" } : { cw20: inputAddress };
-    const outputDenom =
-      outputAddress === "native" ? { native: "luna" } : { cw20: outputAddress };
-    pairActor.send({
+  const outputTokenMeta = useMemo(() => {
+    if (!outputAddress) return undefined;
+    return tokenList.find(item => item.address === outputAddress);
+  }, [outputAddress, tokenList]);
+
+  const isAllInputFilled = !!inputTokenMeta && !!outputTokenMeta;
+
+  const switchPair = () => {
+    if (!inputTokenMeta) return;
+    if (!outputTokenMeta) return;
+    swapActor.send({
       type: "LOAD_PAIR",
-      value: [inputDenom, outputDenom],
+      value: [inputTokenMeta, outputTokenMeta],
     });
   };
 
   useEffect(() => {
-    if (inputAddress && outputAddress) handleGetInfo();
+    if (inputAddress === outputAddress) return;
+    if (inputAddress && outputAddress) switchPair();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputAddress, outputAddress]);
 
@@ -91,54 +70,26 @@ function DevtoolsSwap() {
       <FormControl>
         <FormLabel>Input</FormLabel>
         <InputGroup>
-          <Select
-            value={inputAddress}
-            onChange={e => {
-              setInputAddress(e.currentTarget.value);
-            }}
-          >
-            <option value="">Select Token</option>
-            {injectedTokenList.map(item =>
-              item.address === outputAddress ? null : (
-                <option value={item.address} key={item.address}>
-                  {item.info.name}
-                </option>
-              ),
-            )}
-          </Select>
+          <Box>
+            <TokenSelect value={inputAddress} onChange={setInputAddress} />
+          </Box>
           <Input type="number" />
         </InputGroup>
       </FormControl>
       <FormControl>
         <FormLabel>Output</FormLabel>
         <InputGroup>
-          <Select
-            value={outputAddress}
-            onChange={e => {
-              setOutputAddress(e.currentTarget.value);
-            }}
-          >
-            <option value="">Select Token</option>
-            {injectedTokenList.map(item =>
-              item.address === inputAddress ? null : (
-                <option value={item.address} key={item.address}>
-                  {item.info.name}
-                </option>
-              ),
-            )}
-          </Select>
+          <Box>
+            <TokenSelect value={outputAddress} onChange={setOutputAddress} />
+          </Box>
           <Input type="number" />
         </InputGroup>
       </FormControl>
-      {isSwapReady && isZeroLiquidity ? (
-        <Text my="2" color="red.600">
-          No Liquidity
-        </Text>
-      ) : null}
+
       <Button
+        isDisabled={!isSwapReady || !isAllInputFilled}
         isLoading={isLoading}
-        isDisabled={!isSwapReady || isZeroLiquidity}
-        onClick={handleGetInfo}
+        // onClick={}
       >
         Swap
       </Button>
@@ -146,22 +97,4 @@ function DevtoolsSwap() {
   );
 }
 
-function MachineWrapper() {
-  const { loadPair } = useFactoryContract();
-
-  const actorRef = useActorRef(
-    pairMachine.provide({
-      actors: {
-        loadPair: fromPromise(({ input }) => loadPair(input)),
-      },
-    }),
-  );
-
-  return (
-    <MachineContext.Provider value={{ pairActor: actorRef }}>
-      <DevtoolsSwap />
-    </MachineContext.Provider>
-  );
-}
-
-export default MachineWrapper;
+export default DevtoolsSwap;
