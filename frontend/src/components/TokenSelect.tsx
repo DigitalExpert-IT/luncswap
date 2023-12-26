@@ -9,7 +9,6 @@ import { useMount } from "@/hooks";
 
 type Props = {
   value: string;
-  filter?: string;
   onChange: (tokenAddr: string) => void;
 };
 function TokenSelect(props: Props) {
