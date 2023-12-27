@@ -5,7 +5,7 @@ import { useActorRef } from "@xstate/react";
 import { useConnectedWallet, useLcdClient } from "@terra-money/wallet-kit";
 import { Pair, PairInfo, TokenMeta } from "@/interface";
 import { factoryContractAddress } from "@/constant/network";
-import { Coin, MsgExecuteContract } from "@terra-money/feather.js";
+import { Coin, Msg, MsgExecuteContract } from "@terra-money/feather.js";
 import { useExecuteContract } from "@/hooks";
 
 type EventType = EventFrom<typeof swapMachine>;
@@ -41,6 +41,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
   ) => {
     if (!connectedWallet) return;
     const walletAddr = connectedWallet.addresses[CHAIN_ID];
+    const msgs: Msg[] = [];
     if (!inputTokenMeta.isNative) {
       // increase allowance
       const increaseAllowanceMsg = new MsgExecuteContract(
@@ -53,7 +54,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
           },
         },
       );
-      await executeContract([increaseAllowanceMsg]);
+      msgs.push(increaseAllowanceMsg);
     }
 
     const funds = inputTokenMeta.isNative
@@ -77,8 +78,8 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
       },
       funds,
     );
-
-    await executeContract([swapMsg]);
+    msgs.push(swapMsg);
+    await executeContract(msgs);
   };
 
   const loadTokenBalance = async (token1: TokenMeta, token2: TokenMeta) => {

@@ -1,9 +1,8 @@
 export type Denom =
   | {
       native: string;
-      type: "native";
     }
-  | { cw20: string; type: "cw20" };
+  | { cw20: string };
 
 export type Pair = {
   assets: [Denom, Denom];

@@ -15,6 +15,8 @@ import {
 import { useSelector } from "@xstate/react";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { toHumaneValue } from "@/utils";
+import WrapWallet from "@/components/WrapWallet";
 
 function DevtoolsSwap() {
   const [inputAddress, setInputAddress] = useState("");
@@ -34,6 +36,8 @@ function DevtoolsSwap() {
     isSwapReady,
     priceImpact,
     token1Meta,
+    inputTokenReserve,
+    outputTokenReserve,
     inputTokenDecimals,
     outputTokenDecimals,
     computedInputAmount,
@@ -44,6 +48,14 @@ function DevtoolsSwap() {
       isSwapReady: state.matches("ready"),
       priceImpact: state.context.priceImpact,
       token1Meta: state.context.token1Meta,
+      inputTokenReserve:
+        inputAddress === state.context.token1Meta?.address
+          ? state.context.pairInfo?.token1_reserve ?? "0"
+          : state.context.pairInfo?.token2_reserve ?? "0",
+      outputTokenReserve:
+        outputAddress === state.context.token1Meta?.address
+          ? state.context.pairInfo?.token1_reserve ?? "0"
+          : state.context.pairInfo?.token2_reserve ?? "0",
       inputTokenDecimals:
         inputAddress === state.context.token1Meta?.address
           ? state.context.token1Meta.info.decimals
@@ -88,7 +100,7 @@ function DevtoolsSwap() {
   const computeOutput = useCallback(
     _debounce((val: string) => {
       if (!inputTokenMeta) return;
-      if (val === "" || val === "0") return;
+      if (val === "") return;
       const actualValue = BigInt(
         parseInt(String(+val * Math.pow(10, inputTokenDecimals))),
       );
@@ -105,7 +117,7 @@ function DevtoolsSwap() {
   const computeInput = useCallback(
     _debounce((val: string) => {
       if (!outputTokenMeta) return;
-      if (val === "" || val === "0") return;
+      if (val === "") return;
       const actualValue = BigInt(
         parseInt(String(+val * Math.pow(10, outputTokenDecimals))),
       );
@@ -120,11 +132,13 @@ function DevtoolsSwap() {
   );
 
   useEffect(() => {
-    const inputHumaneValue = String(
-      +computedInputAmount.toString() / Math.pow(10, inputTokenDecimals),
+    const inputHumaneValue = toHumaneValue(
+      computedInputAmount,
+      inputTokenDecimals,
     );
-    const outputHumaneValue = String(
-      +computedOutputAmount.toString() / Math.pow(10, outputTokenDecimals),
+    const outputHumaneValue = toHumaneValue(
+      computedOutputAmount,
+      outputTokenDecimals,
     );
 
     setInputAmount(inputHumaneValue);
@@ -137,11 +151,11 @@ function DevtoolsSwap() {
     const temp = inputAddress;
     setInputAddress(outputAddress);
     setOutputAddress(temp);
-    if (outputAmount) {
-      computeInput(outputAmount);
-    } else if (inputAmount) {
-      computeOutput(inputAmount);
-    }
+    requestAnimationFrame(() => {
+      setInputAmount("0");
+      setOutputAmount("0");
+      computeInput("0");
+    });
   };
 
   const switchPair = () => {
@@ -177,6 +191,9 @@ function DevtoolsSwap() {
               computeOutput(e.currentTarget.value);
               setInputAmount(e.currentTarget.value);
             }}
+            onKeyDown={e => {
+              computeOutput(e.currentTarget.value);
+            }}
           />
           <Box>
             <TokenSelect value={inputAddress} onChange={setInputAddress} />
@@ -199,6 +216,9 @@ function DevtoolsSwap() {
               computeInput(e.currentTarget.value);
               setOutputAmount(e.currentTarget.value);
             }}
+            onKeyDown={e => {
+              computeInput(e.currentTarget.value);
+            }}
           />
           <Box>
             <TokenSelect value={outputAddress} onChange={setOutputAddress} />
@@ -206,17 +226,27 @@ function DevtoolsSwap() {
         </InputGroup>
       </FormControl>
       {isSwapReady && isAllInputFilled ? (
-        <Box>
+        <Stack direction="row">
           <Text>Price Impact {(priceImpact * 100).toFixed(2)}%</Text>
-        </Box>
+          <Text>
+            Input Reserve:{" "}
+            {toHumaneValue(inputTokenReserve, inputTokenDecimals)}
+          </Text>
+          <Text>
+            Output Reserve:{" "}
+            {toHumaneValue(outputTokenReserve, outputTokenDecimals)}
+          </Text>
+        </Stack>
       ) : null}
-      <Button
-        isDisabled={!isSwapReady || !isAllInputFilled}
-        isLoading={isLoading}
-        onClick={handleSwap}
-      >
-        Swap
-      </Button>
+      <WrapWallet>
+        <Button
+          isDisabled={!isSwapReady || !isAllInputFilled}
+          isLoading={isLoading}
+          onClick={handleSwap}
+        >
+          Swap
+        </Button>
+      </WrapWallet>
     </Stack>
   );
 }
