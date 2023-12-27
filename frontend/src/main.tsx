@@ -12,7 +12,6 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider as NiceModalProvider } from "@ebay/nice-modal-react";
 import { piscoLCD } from "@/constant/Networks";
-import { AppProvider } from "@/provider";
 import { SwapMachineProvider, TokenMachineProvider } from "./machine";
 
 const Home = React.lazy(() => import("@/routes/home"));
@@ -38,17 +37,15 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <WalletProvider defaultNetworks={defaultNetworks}>
       <ChakraProvider theme={theme}>
-        <AppProvider>
-          <TokenMachineProvider>
-            <SwapMachineProvider>
-              <NiceModalProvider>
-                <Suspense fallback={<></>}>
-                  <RouterProvider router={routes} />
-                </Suspense>
-              </NiceModalProvider>
-            </SwapMachineProvider>
-          </TokenMachineProvider>
-        </AppProvider>
+        <TokenMachineProvider>
+          <SwapMachineProvider>
+            <NiceModalProvider>
+              <Suspense fallback={<></>}>
+                <RouterProvider router={routes} />
+              </Suspense>
+            </NiceModalProvider>
+          </SwapMachineProvider>
+        </TokenMachineProvider>
       </ChakraProvider>
     </WalletProvider>
   </React.StrictMode>,

@@ -3,15 +3,25 @@ import { setup, PromiseActorLogic, assertEvent, assign } from "xstate";
 
 export const swapMachine = setup({
   types: {
-    events: {} as {
-      type: "LOAD_PAIR";
-      value: [TokenMeta, TokenMeta];
-    },
+    events: {} as
+      | {
+          type: "LOAD_PAIR";
+          value: [TokenMeta, TokenMeta];
+        }
+      | {
+          type: "CALCULATE_OUTPUT";
+          value: { tokenMeta: TokenMeta; amount: bigint };
+        }
+      | {
+          type: "CALCULATE_INPUT";
+          value: { tokenMeta: TokenMeta; amount: bigint };
+        },
     context: {} as {
       pair: Pair | undefined;
       pairInfo: PairInfo | undefined;
       token1Meta: TokenMeta | undefined;
       token2Meta: TokenMeta | undefined;
+      priceImpact: number;
       token1Balance: bigint;
       token2Balance: bigint;
       token1Amount: bigint;
@@ -53,6 +63,7 @@ export const swapMachine = setup({
     pairInfo: undefined,
     token1Meta: undefined,
     token2Meta: undefined,
+    priceImpact: 0,
     token1Balance: BigInt(0),
     token2Balance: BigInt(0),
     token1Amount: BigInt(0),
@@ -127,6 +138,77 @@ export const swapMachine = setup({
       },
     },
     ready: {
+      on: {
+        CALCULATE_OUTPUT: {
+          actions: assign(({ event, context }) => {
+            let token1Amount = BigInt(0);
+            let token2Amount = BigInt(0);
+            const token1Reserve = BigInt(context.pairInfo!.token1_reserve);
+            const token2Reserve = BigInt(context.pairInfo!.token2_reserve);
+            let priceImpact = 0;
+            const k = token1Reserve * token2Reserve;
+
+            if (event.value.tokenMeta.address === context.token1Meta?.address) {
+              token1Amount = event.value.amount;
+              const divisor = k / (token1Reserve + token1Amount);
+              token2Amount = token2Reserve - divisor;
+              priceImpact =
+                1 - Math.sqrt(1 - Number(token1Amount) / Number(token1Reserve));
+            } else {
+              token2Amount = event.value.amount;
+              const divisor = k / (token2Reserve + token2Amount);
+              token1Amount = token1Reserve - divisor;
+              priceImpact =
+                1 - Math.sqrt(1 - Number(token2Amount) / Number(token2Reserve));
+            }
+
+            return {
+              priceImpact: isNaN(priceImpact) ? 1 : priceImpact,
+              token1Amount,
+              token2Amount,
+            };
+          }),
+        },
+        CALCULATE_INPUT: {
+          actions: assign(({ event, context }) => {
+            let token1Amount = BigInt(0);
+            let token2Amount = BigInt(0);
+            const token1Reserve = BigInt(context.pairInfo!.token1_reserve);
+            const token2Reserve = BigInt(context.pairInfo!.token2_reserve);
+            let priceImpact = 0;
+
+            if (event.value.tokenMeta.address === context.token1Meta?.address) {
+              token1Amount = event.value.amount;
+              if (token1Amount >= token1Reserve) {
+                token2Amount = BigInt(Number.MAX_SAFE_INTEGER);
+              } else {
+                token2Amount =
+                  (token1Amount * token2Reserve) /
+                  (token1Reserve - token1Amount);
+              }
+              priceImpact =
+                1 - Math.sqrt(1 - Number(token2Amount) / Number(token2Reserve));
+            } else {
+              token2Amount = event.value.amount;
+              if (token2Amount >= token2Reserve) {
+                token1Amount = BigInt(Number.MAX_SAFE_INTEGER);
+              } else {
+                token1Amount =
+                  (token2Amount * token1Reserve) /
+                  (token2Reserve - token2Amount);
+              }
+              priceImpact =
+                1 - Math.sqrt(1 - Number(token1Amount) / Number(token1Reserve));
+            }
+
+            return {
+              priceImpact: isNaN(priceImpact) ? 1 : priceImpact,
+              token1Amount,
+              token2Amount,
+            };
+          }),
+        },
+      },
       always: [
         {
           description:
