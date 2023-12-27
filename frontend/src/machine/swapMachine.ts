@@ -1,6 +1,30 @@
 import { Pair, PairInfo, TokenMeta } from "@/interface";
 import { setup, PromiseActorLogic, assertEvent, assign } from "xstate";
 
+type ContextType = {
+  pair: Pair | undefined;
+  pairInfo: PairInfo | undefined;
+  token1Meta: TokenMeta | undefined;
+  token2Meta: TokenMeta | undefined;
+  priceImpact: number;
+  token1Balance: bigint;
+  token2Balance: bigint;
+  token1Amount: bigint;
+  token2Amount: bigint;
+};
+
+const initialContext: ContextType = {
+  pair: undefined,
+  pairInfo: undefined,
+  token1Meta: undefined,
+  token2Meta: undefined,
+  priceImpact: 0,
+  token1Balance: BigInt(0),
+  token2Balance: BigInt(0),
+  token1Amount: BigInt(0),
+  token2Amount: BigInt(0),
+};
+
 export const swapMachine = setup({
   types: {
     events: {} as
@@ -16,20 +40,11 @@ export const swapMachine = setup({
           type: "CALCULATE_INPUT";
           value: { tokenMeta: TokenMeta; amount: bigint };
         },
-    context: {} as {
-      pair: Pair | undefined;
-      pairInfo: PairInfo | undefined;
-      token1Meta: TokenMeta | undefined;
-      token2Meta: TokenMeta | undefined;
-      priceImpact: number;
-      token1Balance: bigint;
-      token2Balance: bigint;
-      token1Amount: bigint;
-      token2Amount: bigint;
-    },
+    context: {} as ContextType,
   },
-  actions: {} as {
-    errorCb: (error: unknown) => void;
+  actions: {
+    errorCb: () => {},
+    reset: assign(() => initialContext),
   },
   actors: {} as {
     loadPair: PromiseActorLogic<
@@ -58,22 +73,32 @@ export const swapMachine = setup({
   },
 }).createMachine({
   id: "swap",
-  context: {
-    pair: undefined,
-    pairInfo: undefined,
-    token1Meta: undefined,
-    token2Meta: undefined,
-    priceImpact: 0,
-    token1Balance: BigInt(0),
-    token2Balance: BigInt(0),
-    token1Amount: BigInt(0),
-    token2Amount: BigInt(0),
-  },
+  context: initialContext,
   initial: "idle",
   on: {
-    LOAD_PAIR: {
-      target: ".load_pair",
-    },
+    LOAD_PAIR: [
+      {
+        description: "skip fetching if trying to load same pair as previous",
+        guard: ({ event, context }) => {
+          if (event.value[0].address === context.token1Meta?.address) {
+            if (event.value[1].address === context.token2Meta?.address)
+              return true;
+          }
+
+          if (event.value[1].address === context.token1Meta?.address) {
+            if (event.value[0].address === context.token2Meta?.address)
+              return true;
+          }
+
+          return false;
+        },
+        target: ".ready",
+      },
+      {
+        target: ".load_pair",
+        actions: ["reset"],
+      },
+    ],
   },
   states: {
     idle: {},

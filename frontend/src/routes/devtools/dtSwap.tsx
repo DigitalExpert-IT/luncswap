@@ -6,13 +6,14 @@ import {
   Box,
   Button,
   FormControl,
-  FormLabel,
   Input,
   InputGroup,
   Stack,
   Text,
+  IconButton,
 } from "@chakra-ui/react";
 import { useSelector } from "@xstate/react";
+import { HiArrowsUpDown } from "react-icons/hi2";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 function DevtoolsSwap() {
@@ -86,7 +87,9 @@ function DevtoolsSwap() {
     _debounce((val: string) => {
       if (!inputTokenMeta) return;
       if (val === "" || val === "0") return;
-      const actualValue = BigInt(+val * Math.pow(10, inputTokenDecimals));
+      const actualValue = BigInt(
+        parseInt(String(+val * Math.pow(10, inputTokenDecimals))),
+      );
       if (actualValue === computedInputAmount) return;
 
       swapActor.send({
@@ -101,7 +104,9 @@ function DevtoolsSwap() {
     _debounce((val: string) => {
       if (!outputTokenMeta) return;
       if (val === "" || val === "0") return;
-      const actualValue = BigInt(+val * Math.pow(10, outputTokenDecimals));
+      const actualValue = BigInt(
+        parseInt(String(+val * Math.pow(10, outputTokenDecimals))),
+      );
       if (actualValue === computedOutputAmount) return;
 
       swapActor.send({
@@ -126,6 +131,17 @@ function DevtoolsSwap() {
 
   const isAllInputFilled = !!inputTokenMeta && !!outputTokenMeta;
 
+  const handleReverse = () => {
+    const temp = inputAddress;
+    setInputAddress(outputAddress);
+    setOutputAddress(temp);
+    if (outputAmount) {
+      computeInput(outputAmount);
+    } else if (inputAmount) {
+      computeOutput(inputAmount);
+    }
+  };
+
   const switchPair = () => {
     if (!inputTokenMeta) return;
     if (!outputTokenMeta) return;
@@ -142,13 +158,9 @@ function DevtoolsSwap() {
   }, [inputAddress, outputAddress]);
 
   return (
-    <Stack bg="gray.800" p="4">
+    <Stack bg="gray.800" p="4" align="center">
       <FormControl>
-        <FormLabel>Input</FormLabel>
         <InputGroup>
-          <Box>
-            <TokenSelect value={inputAddress} onChange={setInputAddress} />
-          </Box>
           <Input
             type="number"
             value={inputAmount}
@@ -157,14 +169,20 @@ function DevtoolsSwap() {
               setInputAmount(e.currentTarget.value);
             }}
           />
+          <Box>
+            <TokenSelect value={inputAddress} onChange={setInputAddress} />
+          </Box>
         </InputGroup>
       </FormControl>
+      <Box>
+        <IconButton
+          onClick={handleReverse}
+          icon={<HiArrowsUpDown />}
+          aria-label="reverse"
+        />
+      </Box>
       <FormControl>
-        <FormLabel>Output</FormLabel>
         <InputGroup>
-          <Box>
-            <TokenSelect value={outputAddress} onChange={setOutputAddress} />
-          </Box>
           <Input
             type="number"
             value={outputAmount}
@@ -173,6 +191,9 @@ function DevtoolsSwap() {
               setOutputAmount(e.currentTarget.value);
             }}
           />
+          <Box>
+            <TokenSelect value={outputAddress} onChange={setOutputAddress} />
+          </Box>
         </InputGroup>
       </FormControl>
       {isSwapReady && isAllInputFilled ? (
