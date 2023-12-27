@@ -28,6 +28,7 @@ const initialContext: ContextType = {
 export const swapMachine = setup({
   types: {
     events: {} as
+      | { type: "SWAP"; value: { inputKind: 1 | 2 } }
       | {
           type: "LOAD_PAIR";
           value: [TokenMeta, TokenMeta];
@@ -64,6 +65,8 @@ export const swapMachine = setup({
       },
       { token1: TokenMeta; token2: TokenMeta }
     >;
+    swap: PromiseActorLogic<void, ContextType & { inputKind: 1 | 2 }>;
+    refetchPairInfo: PromiseActorLogic<PairInfo, Pair>;
   },
   guards: {
     isNoLiquidity: ({ context }) =>
@@ -78,7 +81,8 @@ export const swapMachine = setup({
   on: {
     LOAD_PAIR: [
       {
-        description: "skip fetching if trying to load same pair as previous",
+        description:
+          "skip fetching pair if trying to load same pair as previous",
         guard: ({ event, context }) => {
           if (event.value[0].address === context.token1Meta?.address) {
             if (event.value[1].address === context.token2Meta?.address)
@@ -92,7 +96,7 @@ export const swapMachine = setup({
 
           return false;
         },
-        target: ".ready",
+        target: ".load_token_balance",
       },
       {
         target: ".load_pair",
@@ -133,6 +137,22 @@ export const swapMachine = setup({
         },
       },
     },
+    refetch_pair_info: {
+      tags: ["loading"],
+      invoke: {
+        src: "refetchPairInfo",
+        input: ({ context }) => context.pair!,
+        onDone: {
+          target: "load_token_balance",
+          actions: assign({
+            pairInfo: ({ event }) => event.output,
+          }),
+        },
+        onError: {
+          target: "ready",
+        },
+      },
+    },
     load_token_balance: {
       tags: ["loading"],
       description:
@@ -164,6 +184,9 @@ export const swapMachine = setup({
     },
     ready: {
       on: {
+        SWAP: {
+          target: "swap",
+        },
         CALCULATE_OUTPUT: {
           actions: assign(({ event, context }) => {
             let token1Amount = BigInt(0);
@@ -245,5 +268,30 @@ export const swapMachine = setup({
     },
     no_liquidity: {},
     no_pair: {},
+    swap: {
+      tags: ["loading"],
+      invoke: {
+        src: "swap",
+        input: ({ context, event }) => {
+          assertEvent(event, "SWAP");
+          return {
+            ...context,
+            inputKind: event.value.inputKind,
+          };
+        },
+        onDone: {
+          target: "refetch_pair_info",
+          actions: assign({
+            token1Amount: 0n,
+            token2Amount: 0n,
+            priceImpact: 0,
+          }),
+        },
+        onError: {
+          target: "ready",
+          actions: ["errorCb"],
+        },
+      },
+    },
   },
 });

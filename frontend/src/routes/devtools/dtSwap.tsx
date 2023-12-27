@@ -33,6 +33,7 @@ function DevtoolsSwap() {
     isLoading,
     isSwapReady,
     priceImpact,
+    token1Meta,
     inputTokenDecimals,
     outputTokenDecimals,
     computedInputAmount,
@@ -42,6 +43,7 @@ function DevtoolsSwap() {
       isLoading: state.hasTag("loading"),
       isSwapReady: state.matches("ready"),
       priceImpact: state.context.priceImpact,
+      token1Meta: state.context.token1Meta,
       inputTokenDecimals:
         inputAddress === state.context.token1Meta?.address
           ? state.context.token1Meta.info.decimals
@@ -151,6 +153,13 @@ function DevtoolsSwap() {
     });
   };
 
+  const handleSwap = () => {
+    swapActor.send({
+      type: "SWAP",
+      value: { inputKind: inputAddress === token1Meta?.address ? 1 : 2 },
+    });
+  };
+
   useEffect(() => {
     if (inputAddress === outputAddress) return;
     if (inputAddress && outputAddress) switchPair();
@@ -204,7 +213,7 @@ function DevtoolsSwap() {
       <Button
         isDisabled={!isSwapReady || !isAllInputFilled}
         isLoading={isLoading}
-        // onClick={}
+        onClick={handleSwap}
       >
         Swap
       </Button>

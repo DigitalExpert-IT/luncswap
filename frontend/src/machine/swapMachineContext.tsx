@@ -5,6 +5,8 @@ import { useActorRef } from "@xstate/react";
 import { useConnectedWallet, useLcdClient } from "@terra-money/wallet-kit";
 import { Pair, PairInfo, TokenMeta } from "@/interface";
 import { factoryContractAddress } from "@/constant/network";
+import { Coin, MsgExecuteContract } from "@terra-money/feather.js";
+import { useExecuteContract } from "@/hooks";
 
 type EventType = EventFrom<typeof swapMachine>;
 type SnapshotType = SnapshotFrom<typeof swapMachine>;
@@ -22,6 +24,62 @@ const FACTORY_CONTRACT_ADDR = factoryContractAddress[CHAIN_ID];
 export function SwapMachineProvider(props: { children: React.ReactNode }) {
   const lcd = useLcdClient();
   const connectedWallet = useConnectedWallet();
+  const [executeContract] = useExecuteContract();
+
+  const refetchPairInfo = async (pair: Pair) => {
+    return await lcd.wasm.contractQuery<PairInfo>(pair.contract_address, {
+      info: {},
+    });
+  };
+
+  const swap = async (
+    pair: Pair,
+    inputKind: 1 | 2,
+    inputTokenMeta: TokenMeta,
+    inputTokenAmount: bigint,
+    // outputAmount: bigint,
+  ) => {
+    if (!connectedWallet) return;
+    const walletAddr = connectedWallet.addresses[CHAIN_ID];
+    if (!inputTokenMeta.isNative) {
+      // increase allowance
+      const increaseAllowanceMsg = new MsgExecuteContract(
+        walletAddr,
+        inputTokenMeta.address,
+        {
+          increase_allowance: {
+            spender: pair.contract_address,
+            amount: inputTokenAmount.toString(),
+          },
+        },
+      );
+      await executeContract([increaseAllowanceMsg]);
+    }
+
+    const funds = inputTokenMeta.isNative
+      ? [
+          Coin.fromAmino({
+            amount: inputTokenAmount.toString(),
+            denom: inputTokenMeta.info.symbol,
+          }),
+        ]
+      : [];
+
+    const swapMsg = new MsgExecuteContract(
+      walletAddr,
+      pair.contract_address,
+      {
+        swap: {
+          input_token: inputKind === 1 ? "token1" : "token2",
+          input_amount: inputTokenAmount.toString(),
+          min_output: "0",
+        },
+      },
+      funds,
+    );
+
+    await executeContract([swapMsg]);
+  };
 
   const loadTokenBalance = async (token1: TokenMeta, token2: TokenMeta) => {
     if (!connectedWallet)
@@ -96,6 +154,16 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
         loadTokenBalance: fromPromise(({ input }) =>
           loadTokenBalance(input.token1, input.token2),
         ),
+        swap: fromPromise(({ input }) => {
+          return swap(
+            input.pair!,
+            input.inputKind,
+            input.inputKind === 1 ? input.token1Meta! : input.token2Meta!,
+            input.inputKind === 1 ? input.token1Amount : input.token2Amount,
+            // input.inputKind === 1 ? input.token2Amount : input.token1Amount,
+          );
+        }),
+        refetchPairInfo: fromPromise(({ input }) => refetchPairInfo(input)),
       },
       actions: {
         errorCb: console.error,
