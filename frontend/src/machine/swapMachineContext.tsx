@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActorRef, EventFrom, SnapshotFrom, fromPromise } from "xstate";
 import { swapMachine } from "./swapMachine";
 import React, { createContext } from "react";
@@ -148,6 +149,71 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     return { pair, pairInfo, token1Meta, token2Meta };
   };
 
+  const addLiquidity = async (
+    pair: Pair,
+    token1Amount: bigint,
+    maxToken2Amount: bigint,
+  ) => {
+    if (!connectedWallet) return;
+    const walletAddr = connectedWallet.addresses[CHAIN_ID];
+    const token1Denom = pair.assets[0] as any;
+    const token2Denom = pair.assets[1] as any;
+    const msgs: Msg[] = [];
+    const funds: Coin[] = [];
+
+    if (token1Denom.cw20) {
+      msgs.push(
+        new MsgExecuteContract(walletAddr, token1Denom.cw20, {
+          increase_allowance: {
+            spender: pair.contract_address,
+            amount: token1Amount.toString(),
+          },
+        }),
+      );
+    } else {
+      funds.push(
+        Coin.fromAmino({
+          denom: token1Denom.native,
+          amount: token1Amount.toString(),
+        }),
+      );
+    }
+
+    if (token2Denom.cw20) {
+      msgs.push(
+        new MsgExecuteContract(walletAddr, token2Denom.cw20, {
+          increase_allowance: {
+            spender: pair.contract_address,
+            amount: maxToken2Amount.toString(),
+          },
+        }),
+      );
+    } else {
+      funds.push(
+        Coin.fromAmino({
+          denom: token2Denom.native,
+          amount: maxToken2Amount.toString(),
+        }),
+      );
+    }
+
+    const addLiquidityMsg = new MsgExecuteContract(
+      walletAddr,
+      pair.contract_address,
+      {
+        add_liquidity: {
+          token1_amount: token1Amount.toString(),
+          max_token2: maxToken2Amount.toString(),
+          min_liquidity: "0",
+        },
+      },
+      funds,
+    );
+    msgs.push(addLiquidityMsg);
+
+    await executeContract(msgs);
+  };
+
   const actorRef = useActorRef(
     swapMachine.provide({
       actors: {
@@ -165,6 +231,9 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
           );
         }),
         refetchPairInfo: fromPromise(({ input }) => refetchPairInfo(input)),
+        addLiquidity: fromPromise(({ input }) =>
+          addLiquidity(input.pair, input.token1Amount, input.maxToken2Amount),
+        ),
       },
       actions: {
         errorCb: console.error,

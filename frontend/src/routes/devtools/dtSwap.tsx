@@ -114,6 +114,16 @@ function DevtoolsSwap() {
     [inputTokenMeta, inputTokenDecimals],
   );
 
+  const handleAddLiquidity = () => {
+    swapActor.send({
+      type: "ADD_LIQUIDITY",
+      value: {
+        token1Amount: BigInt(2e6),
+        maxToken2Amount: BigInt(Number.MAX_SAFE_INTEGER),
+      },
+    });
+  };
+
   const computeInput = useCallback(
     _debounce((val: string) => {
       if (!outputTokenMeta) return;
@@ -247,6 +257,9 @@ function DevtoolsSwap() {
           Swap
         </Button>
       </WrapWallet>
+      <Button isLoading={isLoading} onClick={handleAddLiquidity}>
+        Add Liquidity
+      </Button>
     </Stack>
   );
 }

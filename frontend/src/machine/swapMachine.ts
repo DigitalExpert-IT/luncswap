@@ -40,6 +40,10 @@ export const swapMachine = setup({
       | {
           type: "CALCULATE_INPUT";
           value: { tokenMeta: TokenMeta; amount: bigint };
+        }
+      | {
+          type: "ADD_LIQUIDITY";
+          value: { token1Amount: bigint; maxToken2Amount: bigint };
         },
     context: {} as ContextType,
   },
@@ -67,6 +71,10 @@ export const swapMachine = setup({
     >;
     swap: PromiseActorLogic<void, ContextType & { inputKind: 1 | 2 }>;
     refetchPairInfo: PromiseActorLogic<PairInfo, Pair>;
+    addLiquidity: PromiseActorLogic<
+      void,
+      { pair: Pair; token1Amount: bigint; maxToken2Amount: bigint }
+    >;
   },
   guards: {
     isNoLiquidity: ({ context }) =>
@@ -75,6 +83,7 @@ export const swapMachine = setup({
       BigInt(0),
   },
 }).createMachine({
+  /** @xstate-layout N4IgpgJg5mDOIC5SwO4EMAOBiAMgeQEEARAfQAUCBJAJQG0AGAXUVAwHtYBLAF07YDsWIAB6IALACYANCACe4gGwBOAHRiAzGMkAOAIzKJAVnrbDAXzMzUmXIVIUatXcyQh2XXgKGiEkmfIRdAHYglSUgpSUJBSD1JTiJJQsrdAwVABs2NAgSDDROACcsCAEwFU5+ADc2AGsy6zTM7Nz8goQK6oBjNE9+BkZ+oXcePkFXHxDdFXVDdQlTCTiFdSCxf0RtCRUIoIVtJUNV+gUNc0sQBoysnLzC4tLyqtr61Kvm27aOtm7e-qcXVgcEZecaISbTWbzQyLJTLVbrBBzLZRehzdR6JS6FbJC6vJo3VpYMAFApsAoqDDpHoAMzJAFsVJd8S1Cu0nj9Rn8mEMgb1vGCglMZnMFksVms5IhgqoxCE5oY9FjDAoTDjLgUwNSwNxOgALFkFEgVWn3fhlL51RmvDVanX6j5G-i0tldHqcpiDVzDPmghDg4VQmFwiUBZQKML0RbLbRBGPaehJc7qzXavUGx0m4mk8mUmn0q2YFQ21P21oZtgu75ugRcgFuXmjfl+wUQkXQsXwyV+7TaFTzFViLHRbQq7RqvHXEjcZ78EgAIzQVP4nTApvNT0tTMn07qs4XS5XlY5NY93K9DZBoB8ullvaHQQk9HoQUjsIRWl7YgOSn2kXCL8TFJC2ZHcwD3Rc0GXVcszJCkqW4WkCgZLdmlA8CDzAI9qz6U8629RtfRvWMVHvR9n1fBQETmegVAUZR9DEWZZlhcdCw1bJZCwABlAB1AgyE9QEPAIq8pQVMRtkMXRlVWaF4kMBFmJUGNYRiLRY2MMck2tMAOKwABhAgcH0gBVHACAAFQAURIPATIssh7ME+thMvEQpRfQxaMMDQlATegpJVIIqO0dRtnmXR9GiH9oQUM4gLSdiIE4wzjLMyybMoAA5RyLOc-C3OvQUwp-RZ1F0fZlk0BSu3mVRNFhMRjhCbQxBOVjEt05KsGIUgcEoABFEzKCISgLIATXyi8xlEwIoi2fZQriDEFGkLsxFMcLNKkkINAkCQOqLLrOKm1yZvcub9uUn91GW3RYTWgJZgk8JDCk8JpXCdRDuyHJ0k4ABHABXTgIB4TiSjNR5qk3V5fpIf7gdB8GsN+XCeTOpsJEi1RsciR8mpk5UET88NMXRVbI1MPYDu0wt4cRkGwe4TiYJzeDEOQuGID+wGmZRr5jxwgYzyE4Fzp8bHH1o1qIkSZVB07AI4gkzQb2fB95MWMRDoaNdoeeAs0gaVH3RFvDpqbQcwux6FoRHY5wjohFdl7fbHzK+hGPmWmEqNokSVg3MEPzS4TcF7Dawx8WraxPtpKMftHd2Siu0xGj43oG9QqxHGznOfg2AgOAhAaaOfVmgBaVOAmrlQnwbxvG-mQ7QfSMBy5Ei7gji6YU5MOEolChFH1CGJbsOW9pLjQ7mQ+TvCsQQ5QlldRjnUE5bukhFglCBNdFRA5hy9zZDuLO102NNgF4lpev2UjfqP2+9gq7XYvNCw4VizyJdkA3FgLbhnPOCCUEb5NgPlJa6Mwfz3RfLEKiMw+xPkxKFZQBxVg6zpp1Di4DCLvz7nRAeKwh7qHfKFEixxDCoIUBVBU-9LgMz5sjFmeDZr7XjNMAKT4RSbATO+G8aglCDlCsIvyqlDqFwRsw5mAQxYVwuhwmia9jConmHwpQil74H2WnoE4KJ4oALSFI+e55MaEQClMfYMCMTwLIV2PQJE9DUyzrQ2Ub1dapDYYoxi10gizBMDop2NUAi7DChPPY91GK+W+hYMwQA */
   id: "swap",
   context: initialContext,
   initial: "idle",
@@ -198,8 +207,8 @@ export const swapMachine = setup({
 
             if (event.value.tokenMeta.address === context.token1Meta?.address) {
               token1Amount = event.value.amount;
-              const divisor = k / (token1Reserve + token1Amount);
-              token2Amount = token2Reserve - divisor;
+              const subvisor = k / (token1Reserve + token1Amount);
+              token2Amount = token2Reserve - subvisor;
               priceImpact =
                 1 - Math.sqrt(1 - Number(token1Amount) / Number(token1Reserve));
             } else {
@@ -256,6 +265,9 @@ export const swapMachine = setup({
             };
           }),
         },
+        ADD_LIQUIDITY: {
+          target: "add_liquidity",
+        },
       },
       always: [
         {
@@ -265,6 +277,27 @@ export const swapMachine = setup({
           target: "no_liquidity",
         },
       ],
+    },
+    add_liquidity: {
+      tags: ["loading"],
+      invoke: {
+        src: "addLiquidity",
+        input: ({ context, event }) => {
+          assertEvent(event, "ADD_LIQUIDITY");
+          return {
+            pair: context.pair!,
+            token1Amount: event.value.token1Amount,
+            maxToken2Amount: event.value.maxToken2Amount,
+          };
+        },
+        onDone: {
+          target: "refetch_pair_info",
+        },
+        onError: {
+          target: "ready",
+          actions: ["errorCb"],
+        },
+      },
     },
     no_liquidity: {},
     no_pair: {},
