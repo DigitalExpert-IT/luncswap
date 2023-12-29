@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import WrapWallet from "@/components/WrapWallet";
+import _debounce from "lodash/debounce";
 import {
   useColorModeValue,
   Box,
@@ -15,6 +16,7 @@ import TokenSelect from "@/components/TokenSelect";
 import { SwapMachineContext, TokenMachineContext } from "@/machine";
 import { useSelector } from "@xstate/react";
 import { Dec } from "@terra-money/feather.js";
+import { toHumaneValue } from "@/utils";
 
 const AddLiquidity = () => {
   const [inputAddress, setInputAddress] = useState("");
@@ -25,20 +27,26 @@ const AddLiquidity = () => {
   const { swapActor } = useContext(SwapMachineContext);
   const bg = useColorModeValue("gray.50", "gray.900");
   const tokenList = useSelector(tokenActor, state => state.context.tokenList);
-  const { isLoading, isReady, isNoLiquidity, isNoPair } = useSelector(
-    swapActor,
-    state => {
-      return {
-        isReady:
-          state.matches("ready") ||
-          state.matches("no_liquidity") ||
-          state.matches("no_pair"),
-        isLoading: state.hasTag("loading"),
-        isNoLiquidity: state.matches("no_liquidity"),
-        isNoPair: state.matches("no_pair"),
-      };
-    },
-  );
+  const {
+    isLoading,
+    isReady,
+    isNoLiquidity,
+    isNoPair,
+    inputTokenReserve,
+    outputTokenReserve,
+  } = useSelector(swapActor, state => {
+    return {
+      isReady:
+        state.matches("ready") ||
+        state.matches("no_liquidity") ||
+        state.matches("no_pair"),
+      isLoading: state.hasTag("loading"),
+      isNoLiquidity: state.matches("no_liquidity"),
+      isNoPair: state.matches("no_pair"),
+      inputTokenReserve: state.context.pairInfo?.token1_reserve ?? "0",
+      outputTokenReserve: state.context.pairInfo?.token2_reserve ?? "0",
+    };
+  });
 
   useEffect(() => {
     if (inputAddress === outputAddress) {
@@ -60,11 +68,34 @@ const AddLiquidity = () => {
     return tokenList.find(item => item.address === outputAddress);
   }, [outputAddress, tokenList]);
 
+  const computeOutput = useCallback(
+    _debounce((inputTokenAmount: string) => {
+      if (!inputTokenMeta || !outputTokenMeta) return;
+      if (!isReady) return;
+      const inputAmount = new Dec(inputTokenAmount).mul(
+        Math.pow(10, inputTokenMeta.info.decimals),
+      );
+      const output = inputAmount
+        .mul(new Dec(outputTokenReserve))
+        .div(new Dec(inputTokenReserve))
+        .add(1);
+
+      setOutputAmount(toHumaneValue(output, outputTokenMeta.info.decimals));
+    }, 500),
+    [
+      inputTokenMeta,
+      outputTokenMeta,
+      inputTokenReserve,
+      outputTokenReserve,
+      isReady,
+    ],
+  );
+
   useEffect(() => {
     if (!inputTokenMeta || !outputTokenMeta) return;
 
     // prevent using native token as token2
-    if (outputTokenMeta.isNative) {
+    if (outputTokenMeta.isNative && !inputTokenMeta.isNative) {
       const temp = inputAddress;
       setInputAddress(outputAddress);
       setOutputAddress(temp);
@@ -92,9 +123,19 @@ const AddLiquidity = () => {
           token2Meta: outputTokenMeta!,
         },
       });
+    } else {
+      swapActor.send({
+        type: "ADD_LIQUIDITY",
+        value: {
+          token1Amount: new Dec(inputAmount).mul(
+            Math.pow(10, inputTokenMeta?.info.decimals ?? 0),
+          ),
+          maxToken2Amount: new Dec(outputAmount).mul(
+            Math.pow(10, outputTokenMeta?.info.decimals ?? 0),
+          ),
+        },
+      });
     }
-    setInputAmount("0");
-    setOutputAmount("0");
   };
 
   return (
@@ -111,6 +152,7 @@ const AddLiquidity = () => {
                   value={inputAmount}
                   onChange={e => {
                     setInputAmount(e.currentTarget.value);
+                    computeOutput(e.currentTarget.value);
                   }}
                 />
               </Box>
@@ -122,7 +164,7 @@ const AddLiquidity = () => {
               <Box flex="1">
                 <Input
                   type="number"
-                  required
+                  readOnly={isReady}
                   value={outputAmount}
                   onChange={e => {
                     setOutputAmount(e.currentTarget.value);
