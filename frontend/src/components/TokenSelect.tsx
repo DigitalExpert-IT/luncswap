@@ -57,7 +57,11 @@ function TokenSelect(props: Props) {
         </Box>
       ) : (
         <Flex flex="1" flexDirection="row" align="center" gap={2}>
-          <Avatar name={selectedToken.info.name} size="sm" />
+          <Avatar
+            src={selectedToken.marketing.logo?.url ?? ""}
+            name={selectedToken.info.name}
+            size="sm"
+          />
           <Text>{selectedToken.info.name}</Text>
         </Flex>
       )}

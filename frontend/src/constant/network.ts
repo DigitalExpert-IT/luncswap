@@ -6,8 +6,7 @@ export const factoryContractAddress = {
 
 export const trustedTokens = {
   "pisco-1": [
-    "terra1w5c853etgdrhp5uhum0xade3qrz5a33pv52fhkxqzya9mkx2225sw58aq7",
-    "terra1lfqnp85lcuy6mrvq5jd9kvkv0csh9va7y5wtmf0ecwdsk92jjx5qrz3nsj",
+    "terra10m5zy8krcnqtrzkpegphlmetm6huvedxx6rwzu6rymq7wzkqg5rs9qm9af",
   ],
 };
 
@@ -23,7 +22,9 @@ export const nativeCoin: Record<string, TokenMeta> = {
     },
     marketing: {
       description: null,
-      logo: null,
+      logo: {
+        url: "/lunc.svg",
+      },
       marketing: null,
       project: null,
     },

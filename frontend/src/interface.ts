@@ -1,8 +1,7 @@
-export type Denom =
-  | {
-      native: string;
-    }
-  | { cw20: string };
+export type Denom = {
+  native?: string;
+  cw20?: string;
+};
 
 export type Pair = {
   assets: [Denom, Denom];
@@ -53,7 +52,7 @@ export type TokenInfo = {
 
 export type TokenMarketingInfo = {
   description: string | null;
-  logo: string | null;
+  logo: { url: string } | null;
   marketing: string | null;
   project: string | null;
 };

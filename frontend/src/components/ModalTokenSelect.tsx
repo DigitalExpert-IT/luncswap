@@ -94,7 +94,7 @@ function TokenItem(props: TokenItemProps) {
       onClick={() => onClick(data.address)}
     >
       <Box>
-        <Avatar name={data.info.name} />
+        <Avatar src={data.marketing.logo?.url ?? ""} name={data.info.name} />
       </Box>
       <Box>
         <Text>{data.info.name}</Text>

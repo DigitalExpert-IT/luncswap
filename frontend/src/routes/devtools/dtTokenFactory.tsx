@@ -117,7 +117,11 @@ function TokenFactory() {
             project: val.marketing.project || undefined,
             description: val.marketing.description || undefined,
             marketing: val.marketing.marketing || undefined,
-            logo: val.marketing.logo || undefined,
+            logo: val.marketing.logo
+              ? {
+                  url: val.marketing.logo,
+                }
+              : undefined,
           },
         },
         undefined,
