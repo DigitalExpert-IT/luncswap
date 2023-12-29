@@ -10,6 +10,12 @@ export type Pair = {
   lp_address: string;
 };
 
+export type PairFee = {
+  owner: string | null;
+  protocol_fee_percent: number;
+  protocol_fee_recipient: string;
+};
+
 export enum TokenSelect {
   Token1,
   Token2,

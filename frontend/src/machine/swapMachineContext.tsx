@@ -4,10 +4,11 @@ import { swapMachine } from "./swapMachine";
 import React, { createContext } from "react";
 import { useActorRef } from "@xstate/react";
 import { useConnectedWallet, useLcdClient } from "@terra-money/wallet-kit";
-import { Pair, PairInfo, TokenMeta } from "@/interface";
+import { Pair, PairFee, PairInfo, TokenMeta } from "@/interface";
 import { factoryContractAddress } from "@/constant/network";
 import { Coin, Msg, MsgExecuteContract } from "@terra-money/feather.js";
 import { useExecuteContract } from "@/hooks";
+import { useToast } from "@chakra-ui/react";
 
 type EventType = EventFrom<typeof swapMachine>;
 type SnapshotType = SnapshotFrom<typeof swapMachine>;
@@ -26,6 +27,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
   const lcd = useLcdClient();
   const connectedWallet = useConnectedWallet();
   const [executeContract] = useExecuteContract();
+  const toast = useToast();
 
   const refetchPairInfo = async (pair: Pair) => {
     return await lcd.wasm.contractQuery<PairInfo>(pair.contract_address, {
@@ -38,7 +40,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     inputKind: 1 | 2,
     inputTokenMeta: TokenMeta,
     inputTokenAmount: bigint,
-    // outputAmount: bigint,
+    outputAmount: bigint,
   ) => {
     if (!connectedWallet) return;
     const walletAddr = connectedWallet.addresses[CHAIN_ID];
@@ -74,7 +76,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
         swap: {
           input_token: inputKind === 1 ? "token1" : "token2",
           input_amount: inputTokenAmount.toString(),
-          min_output: "0",
+          min_output: outputAmount.toString(),
         },
       },
       funds,
@@ -135,6 +137,12 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
 
     if (!pair) return undefined;
 
+    const pairFee = await lcd.wasm.contractQuery<PairFee>(
+      pair.contract_address,
+      {
+        fee: {},
+      },
+    );
     const pairInfo = await lcd.wasm.contractQuery<PairInfo>(
       pair.contract_address,
       {
@@ -146,7 +154,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
       : assets[1];
     const token2Meta =
       token1Meta.address === assets[1].address ? assets[0] : assets[1];
-    return { pair, pairInfo, token1Meta, token2Meta };
+    return { pair, pairFee, pairInfo, token1Meta, token2Meta };
   };
 
   const addLiquidity = async (
@@ -227,7 +235,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
             input.inputKind,
             input.inputKind === 1 ? input.token1Meta! : input.token2Meta!,
             input.inputKind === 1 ? input.token1Amount : input.token2Amount,
-            // input.inputKind === 1 ? input.token2Amount : input.token1Amount,
+            input.inputKind === 1 ? input.token2Amount : input.token1Amount,
           );
         }),
         refetchPairInfo: fromPromise(({ input }) => refetchPairInfo(input)),
@@ -236,7 +244,13 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
         ),
       },
       actions: {
-        errorCb: console.error,
+        errorCb: ({ event }: any) => {
+          const errorMsg = event?.error?.raw_log ?? "Unknown Error";
+          toast({
+            status: "error",
+            description: errorMsg,
+          });
+        },
       },
     }),
   );

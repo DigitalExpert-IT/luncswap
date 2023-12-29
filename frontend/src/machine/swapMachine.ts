@@ -1,9 +1,10 @@
-import { Pair, PairInfo, TokenMeta } from "@/interface";
+import { Pair, PairFee, PairInfo, TokenMeta } from "@/interface";
 import { setup, PromiseActorLogic, assertEvent, assign } from "xstate";
 
 type ContextType = {
   pair: Pair | undefined;
   pairInfo: PairInfo | undefined;
+  pairFee: PairFee | undefined;
   token1Meta: TokenMeta | undefined;
   token2Meta: TokenMeta | undefined;
   priceImpact: number;
@@ -16,6 +17,7 @@ type ContextType = {
 const initialContext: ContextType = {
   pair: undefined,
   pairInfo: undefined,
+  pairFee: undefined,
   token1Meta: undefined,
   token2Meta: undefined,
   priceImpact: 0,
@@ -56,6 +58,7 @@ export const swapMachine = setup({
       | undefined
       | {
           pair: Pair;
+          pairFee: PairFee;
           pairInfo: PairInfo;
           token1Meta: TokenMeta;
           token2Meta: TokenMeta;
@@ -133,6 +136,7 @@ export const swapMachine = setup({
             actions: [
               assign({
                 pair: ({ event }) => event.output!.pair,
+                pairFee: ({ event }) => event.output!.pairFee,
                 pairInfo: ({ event }) => event.output!.pairInfo,
                 token1Meta: ({ event }) => event.output!.token1Meta,
                 token2Meta: ({ event }) => event.output!.token2Meta,
@@ -202,19 +206,28 @@ export const swapMachine = setup({
             let token2Amount = BigInt(0);
             const token1Reserve = BigInt(context.pairInfo!.token1_reserve);
             const token2Reserve = BigInt(context.pairInfo!.token2_reserve);
+            const feePercent = +context.pairFee!.protocol_fee_percent;
             let priceImpact = 0;
             const k = token1Reserve * token2Reserve;
 
             if (event.value.tokenMeta.address === context.token1Meta?.address) {
               token1Amount = event.value.amount;
-              const subvisor = k / (token1Reserve + token1Amount);
+              const token1FeeAmount = BigInt(
+                (Number(token1Amount) * feePercent) / 100,
+              );
+              const token1AmountAfterFee = token1Amount - token1FeeAmount;
+              const subvisor = k / (token1Reserve + token1AmountAfterFee) + 10n;
               token2Amount = token2Reserve - subvisor;
               priceImpact =
                 1 - Math.sqrt(1 - Number(token1Amount) / Number(token1Reserve));
             } else {
               token2Amount = event.value.amount;
-              const divisor = k / (token2Reserve + token2Amount);
-              token1Amount = token1Reserve - divisor;
+              const token2FeeAmount = BigInt(
+                (Number(token2Amount) * feePercent) / 100,
+              );
+              const token2AmountAfterFee = token2Amount - token2FeeAmount;
+              const subvisor = k / (token2Reserve + token2AmountAfterFee) + 10n;
+              token1Amount = token1Reserve - subvisor;
               priceImpact =
                 1 - Math.sqrt(1 - Number(token2Amount) / Number(token2Reserve));
             }

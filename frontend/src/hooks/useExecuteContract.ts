@@ -47,10 +47,14 @@ export const useExecuteContract = () => {
           msgs,
         });
         const txInfo = await waitForTx(tx, lcd);
+        if (txInfo?.code !== 0) {
+          throw txInfo;
+        }
         setResult(txInfo);
         return txInfo;
       } catch (err) {
         setError(err);
+        throw err;
       } finally {
         setLoading(false);
       }
