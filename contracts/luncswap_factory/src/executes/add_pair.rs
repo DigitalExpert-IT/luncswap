@@ -20,6 +20,21 @@ pub fn execute_add_pair(
         .into());
     }
 
+    // if token 2 are native but token 1 is non native
+    // then swap position
+    let mut msg = msg.clone();
+    match msg.token2_denom {
+        cw20::Denom::Cw20(_) => {}
+        cw20::Denom::Native(_) => match msg.token1_denom {
+            cw20::Denom::Cw20(_) => {
+                let temp = msg.token1_denom;
+                msg.token1_denom = msg.token2_denom;
+                msg.token2_denom = temp;
+            }
+            cw20::Denom::Native(_) => {}
+        },
+    }
+
     let instantiate_pair_msg = WasmMsg::Instantiate {
         admin: Some(env.contract.address.to_string()),
         code_id: config.pair_code_id,
