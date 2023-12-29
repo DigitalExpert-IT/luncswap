@@ -1,5 +1,6 @@
 import { Pair, PairFee, PairInfo, TokenMeta } from "@/interface";
 import { setup, PromiseActorLogic, assertEvent, assign } from "xstate";
+import { Dec } from "@terra-money/feather.js";
 
 type ContextType = {
   pair: Pair | undefined;
@@ -8,10 +9,10 @@ type ContextType = {
   token1Meta: TokenMeta | undefined;
   token2Meta: TokenMeta | undefined;
   priceImpact: number;
-  token1Balance: bigint;
-  token2Balance: bigint;
-  token1Amount: bigint;
-  token2Amount: bigint;
+  token1Balance: Dec;
+  token2Balance: Dec;
+  token1Amount: Dec;
+  token2Amount: Dec;
 };
 
 const initialContext: ContextType = {
@@ -21,10 +22,10 @@ const initialContext: ContextType = {
   token1Meta: undefined,
   token2Meta: undefined,
   priceImpact: 0,
-  token1Balance: BigInt(0),
-  token2Balance: BigInt(0),
-  token1Amount: BigInt(0),
-  token2Amount: BigInt(0),
+  token1Balance: new Dec(0),
+  token2Balance: new Dec(0),
+  token1Amount: new Dec(0),
+  token2Amount: new Dec(0),
 };
 
 export const swapMachine = setup({
@@ -37,15 +38,15 @@ export const swapMachine = setup({
         }
       | {
           type: "CALCULATE_OUTPUT";
-          value: { tokenMeta: TokenMeta; amount: bigint };
+          value: { tokenMeta: TokenMeta; amount: Dec };
         }
       | {
           type: "CALCULATE_INPUT";
-          value: { tokenMeta: TokenMeta; amount: bigint };
+          value: { tokenMeta: TokenMeta; amount: Dec };
         }
       | {
           type: "ADD_LIQUIDITY";
-          value: { token1Amount: bigint; maxToken2Amount: bigint };
+          value: { token1Amount: Dec; maxToken2Amount: Dec };
         },
     context: {} as ContextType,
   },
@@ -67,8 +68,8 @@ export const swapMachine = setup({
     >;
     loadTokenBalance: PromiseActorLogic<
       {
-        token1Balance: bigint;
-        token2Balance: bigint;
+        token1Balance: Dec;
+        token2Balance: Dec;
       },
       { token1: TokenMeta; token2: TokenMeta }
     >;
@@ -76,7 +77,7 @@ export const swapMachine = setup({
     refetchPairInfo: PromiseActorLogic<PairInfo, Pair>;
     addLiquidity: PromiseActorLogic<
       void,
-      { pair: Pair; token1Amount: bigint; maxToken2Amount: bigint }
+      { pair: Pair; token1Amount: Dec; maxToken2Amount: Dec }
     >;
   },
   guards: {
@@ -202,32 +203,35 @@ export const swapMachine = setup({
         },
         CALCULATE_OUTPUT: {
           actions: assign(({ event, context }) => {
-            let token1Amount = BigInt(0);
-            let token2Amount = BigInt(0);
-            const token1Reserve = BigInt(context.pairInfo!.token1_reserve);
-            const token2Reserve = BigInt(context.pairInfo!.token2_reserve);
+            if (event.value.amount.eq(new Dec(0))) {
+              return {
+                priceImpact: 0,
+                token1Amount: new Dec(0),
+                token2Amount: new Dec(0),
+              };
+            }
+            let token1Amount = new Dec(0);
+            let token2Amount = new Dec(0);
+            const token1Reserve = new Dec(context.pairInfo!.token1_reserve);
+            const token2Reserve = new Dec(context.pairInfo!.token2_reserve);
             const feePercent = +context.pairFee!.protocol_fee_percent;
             let priceImpact = 0;
-            const k = token1Reserve * token2Reserve;
+            const k = token1Reserve.mul(token2Reserve);
 
             if (event.value.tokenMeta.address === context.token1Meta?.address) {
               token1Amount = event.value.amount;
-              const token1FeeAmount = BigInt(
-                (Number(token1Amount) * feePercent) / 100,
-              );
-              const token1AmountAfterFee = token1Amount - token1FeeAmount;
-              const subvisor = k / (token1Reserve + token1AmountAfterFee) + 10n;
-              token2Amount = token2Reserve - subvisor;
+              const token1FeeAmount = token1Amount.mul(feePercent).div(100);
+              const token1AmountAfterFee = token1Amount.sub(token1FeeAmount);
+              const subvisor = k.div(token1Reserve.add(token1AmountAfterFee));
+              token2Amount = token2Reserve.sub(subvisor);
               priceImpact =
                 1 - Math.sqrt(1 - Number(token1Amount) / Number(token1Reserve));
             } else {
               token2Amount = event.value.amount;
-              const token2FeeAmount = BigInt(
-                (Number(token2Amount) * feePercent) / 100,
-              );
-              const token2AmountAfterFee = token2Amount - token2FeeAmount;
-              const subvisor = k / (token2Reserve + token2AmountAfterFee) + 10n;
-              token1Amount = token1Reserve - subvisor;
+              const token2FeeAmount = token2Amount.mul(feePercent).div(100);
+              const token2AmountAfterFee = token2Amount.sub(token2FeeAmount);
+              const subvisor = k.div(token2Reserve.add(token2AmountAfterFee));
+              token1Amount = token1Reserve.sub(subvisor);
               priceImpact =
                 1 - Math.sqrt(1 - Number(token2Amount) / Number(token2Reserve));
             }
@@ -241,31 +245,45 @@ export const swapMachine = setup({
         },
         CALCULATE_INPUT: {
           actions: assign(({ event, context }) => {
-            let token1Amount = BigInt(0);
-            let token2Amount = BigInt(0);
-            const token1Reserve = BigInt(context.pairInfo!.token1_reserve);
-            const token2Reserve = BigInt(context.pairInfo!.token2_reserve);
+            if (event.value.amount.eq(new Dec(0))) {
+              return {
+                priceImpact: 0,
+                token1Amount: new Dec(0),
+                token2Amount: new Dec(0),
+              };
+            }
+            let token1Amount = new Dec(0);
+            let token2Amount = new Dec(0);
+            const token1Reserve = new Dec(context.pairInfo!.token1_reserve);
+            const token2Reserve = new Dec(context.pairInfo!.token2_reserve);
+            const feePercent = new Dec(context.pairFee!.protocol_fee_percent);
             let priceImpact = 0;
 
             if (event.value.tokenMeta.address === context.token1Meta?.address) {
               token1Amount = event.value.amount;
               if (token1Amount >= token1Reserve) {
-                token2Amount = BigInt(Number.MAX_SAFE_INTEGER);
+                token2Amount = new Dec(Number.MAX_SAFE_INTEGER);
               } else {
-                token2Amount =
-                  (token1Amount * token2Reserve) /
-                  (token1Reserve - token1Amount);
+                token2Amount = token1Amount
+                  .mul(
+                    token2Reserve.add(token2Reserve.mul(feePercent).div(100)),
+                  )
+                  .div(token1Reserve.sub(token1Amount))
+                  .add(1);
               }
               priceImpact =
                 1 - Math.sqrt(1 - Number(token2Amount) / Number(token2Reserve));
             } else {
               token2Amount = event.value.amount;
               if (token2Amount >= token2Reserve) {
-                token1Amount = BigInt(Number.MAX_SAFE_INTEGER);
+                token1Amount = new Dec(Number.MAX_SAFE_INTEGER);
               } else {
-                token1Amount =
-                  (token2Amount * token1Reserve) /
-                  (token2Reserve - token2Amount);
+                token1Amount = token2Amount
+                  .mul(
+                    token1Reserve.add(token1Reserve.mul(feePercent).div(100)),
+                  )
+                  .div(token2Reserve.sub(token2Amount))
+                  .add(1);
               }
               priceImpact =
                 1 - Math.sqrt(1 - Number(token1Amount) / Number(token1Reserve));
@@ -328,8 +346,8 @@ export const swapMachine = setup({
         onDone: {
           target: "refetch_pair_info",
           actions: assign({
-            token1Amount: 0n,
-            token2Amount: 0n,
+            token1Amount: new Dec(0),
+            token2Amount: new Dec(0),
             priceImpact: 0,
           }),
         },

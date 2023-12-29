@@ -6,7 +6,7 @@ import { useActorRef } from "@xstate/react";
 import { useConnectedWallet, useLcdClient } from "@terra-money/wallet-kit";
 import { Pair, PairFee, PairInfo, TokenMeta } from "@/interface";
 import { factoryContractAddress } from "@/constant/network";
-import { Coin, Msg, MsgExecuteContract } from "@terra-money/feather.js";
+import { Coin, Dec, Msg, MsgExecuteContract } from "@terra-money/feather.js";
 import { useExecuteContract } from "@/hooks";
 import { useToast } from "@chakra-ui/react";
 
@@ -39,8 +39,8 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     pair: Pair,
     inputKind: 1 | 2,
     inputTokenMeta: TokenMeta,
-    inputTokenAmount: bigint,
-    outputAmount: bigint,
+    inputTokenAmount: Dec,
+    outputAmount: Dec,
   ) => {
     if (!connectedWallet) return;
     const walletAddr = connectedWallet.addresses[CHAIN_ID];
@@ -53,7 +53,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
         {
           increase_allowance: {
             spender: pair.contract_address,
-            amount: inputTokenAmount.toString(),
+            amount: inputTokenAmount.toFixed(0),
           },
         },
       );
@@ -63,7 +63,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     const funds = inputTokenMeta.isNative
       ? [
           Coin.fromAmino({
-            amount: inputTokenAmount.toString(),
+            amount: inputTokenAmount.toFixed(0),
             denom: inputTokenMeta.info.symbol,
           }),
         ]
@@ -75,8 +75,11 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
       {
         swap: {
           input_token: inputKind === 1 ? "token1" : "token2",
-          input_amount: inputTokenAmount.toString(),
-          min_output: outputAmount.toString(),
+          input_amount: inputTokenAmount.toFixed(0),
+          // 0.5 slippage
+          min_output: outputAmount
+            .sub(outputAmount.mul(0.5).div(100))
+            .toFixed(0),
         },
       },
       funds,
@@ -87,18 +90,18 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
 
   const loadTokenBalance = async (token1: TokenMeta, token2: TokenMeta) => {
     if (!connectedWallet)
-      return { token1Balance: BigInt(0), token2Balance: BigInt(0) };
+      return { token1Balance: new Dec(0), token2Balance: new Dec(0) };
     const nativeBalances = (
       await lcd.bank.balance(connectedWallet.addresses[CHAIN_ID])
     )[0].toArray();
 
     const token1Balance = token1.isNative
-      ? BigInt(
+      ? new Dec(
           nativeBalances
             .find(item => item.denom === token1.info.symbol)
             ?.amount.toNumber() ?? 0,
         )
-      : BigInt(
+      : new Dec(
           (
             await lcd.wasm.contractQuery<{ balance: string }>(token1.address, {
               balance: { address: connectedWallet.addresses[CHAIN_ID] },
@@ -107,12 +110,12 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
         );
 
     const token2Balance = token2.isNative
-      ? BigInt(
+      ? new Dec(
           nativeBalances
             .find(item => item.denom === token2.info.symbol)
             ?.amount.toNumber() ?? 0,
         )
-      : BigInt(
+      : new Dec(
           (
             await lcd.wasm.contractQuery<{ balance: string }>(token2.address, {
               balance: { address: connectedWallet.addresses[CHAIN_ID] },
@@ -159,8 +162,8 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
 
   const addLiquidity = async (
     pair: Pair,
-    token1Amount: bigint,
-    maxToken2Amount: bigint,
+    token1Amount: Dec,
+    maxToken2Amount: Dec,
   ) => {
     if (!connectedWallet) return;
     const walletAddr = connectedWallet.addresses[CHAIN_ID];
@@ -174,7 +177,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
         new MsgExecuteContract(walletAddr, token1Denom.cw20, {
           increase_allowance: {
             spender: pair.contract_address,
-            amount: token1Amount.toString(),
+            amount: token1Amount.toFixed(0),
           },
         }),
       );
@@ -182,7 +185,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
       funds.push(
         Coin.fromAmino({
           denom: token1Denom.native,
-          amount: token1Amount.toString(),
+          amount: token1Amount.toFixed(0),
         }),
       );
     }
@@ -192,7 +195,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
         new MsgExecuteContract(walletAddr, token2Denom.cw20, {
           increase_allowance: {
             spender: pair.contract_address,
-            amount: maxToken2Amount.toString(),
+            amount: maxToken2Amount.toFixed(0),
           },
         }),
       );
@@ -200,7 +203,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
       funds.push(
         Coin.fromAmino({
           denom: token2Denom.native,
-          amount: maxToken2Amount.toString(),
+          amount: maxToken2Amount.toFixed(0),
         }),
       );
     }
@@ -210,8 +213,8 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
       pair.contract_address,
       {
         add_liquidity: {
-          token1_amount: token1Amount.toString(),
-          max_token2: maxToken2Amount.toString(),
+          token1_amount: token1Amount.toFixed(0),
+          max_token2: maxToken2Amount.toFixed(0),
           min_liquidity: "0",
         },
       },

@@ -17,6 +17,7 @@ import { HiArrowsUpDown } from "react-icons/hi2";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { toHumaneValue } from "@/utils";
 import WrapWallet from "@/components/WrapWallet";
+import { Dec } from "@terra-money/feather.js";
 
 function DevtoolsSwap() {
   const [inputAddress, setInputAddress] = useState("");
@@ -66,13 +67,13 @@ function DevtoolsSwap() {
           : state.context.token2Meta?.info.decimals ?? 1,
       computedInputAmount:
         inputAddress === ""
-          ? BigInt(0)
+          ? new Dec(0)
           : inputAddress === state.context.token1Meta?.address
             ? state.context.token1Amount
             : state.context.token2Amount,
       computedOutputAmount:
         outputAddress === ""
-          ? BigInt(0)
+          ? new Dec(0)
           : outputAddress === state.context.token1Meta?.address
             ? state.context.token1Amount
             : state.context.token2Amount,
@@ -101,9 +102,7 @@ function DevtoolsSwap() {
     _debounce((val: string) => {
       if (!inputTokenMeta) return;
       if (val === "") return;
-      const actualValue = BigInt(
-        parseInt(String(+val * Math.pow(10, inputTokenDecimals))),
-      );
+      const actualValue = new Dec(val).mul(Math.pow(10, inputTokenDecimals));
       if (actualValue === computedInputAmount) return;
 
       swapActor.send({
@@ -118,8 +117,8 @@ function DevtoolsSwap() {
     swapActor.send({
       type: "ADD_LIQUIDITY",
       value: {
-        token1Amount: BigInt(2e6),
-        maxToken2Amount: BigInt(Number.MAX_SAFE_INTEGER),
+        token1Amount: new Dec(2e6),
+        maxToken2Amount: new Dec(Number.MAX_SAFE_INTEGER),
       },
     });
   };
@@ -128,9 +127,7 @@ function DevtoolsSwap() {
     _debounce((val: string) => {
       if (!outputTokenMeta) return;
       if (val === "") return;
-      const actualValue = BigInt(
-        parseInt(String(+val * Math.pow(10, outputTokenDecimals))),
-      );
+      const actualValue = new Dec(val).mul(Math.pow(10, outputTokenDecimals));
       if (actualValue === computedOutputAmount) return;
 
       swapActor.send({
@@ -153,7 +150,7 @@ function DevtoolsSwap() {
 
     setInputAmount(inputHumaneValue);
     setOutputAmount(outputHumaneValue);
-  }, [computedInputAmount, computedOutputAmount]);
+  }, [computedInputAmount.toString(), computedOutputAmount.toString()]);
 
   const isAllInputFilled = !!inputTokenMeta && !!outputTokenMeta;
 
@@ -198,10 +195,9 @@ function DevtoolsSwap() {
             type="number"
             value={inputAmount}
             onChange={e => {
-              computeOutput(e.currentTarget.value);
               setInputAmount(e.currentTarget.value);
             }}
-            onKeyDown={e => {
+            onKeyUp={e => {
               computeOutput(e.currentTarget.value);
             }}
           />
@@ -223,10 +219,9 @@ function DevtoolsSwap() {
             type="number"
             value={outputAmount}
             onChange={e => {
-              computeInput(e.currentTarget.value);
               setOutputAmount(e.currentTarget.value);
             }}
-            onKeyDown={e => {
+            onKeyUp={e => {
               computeInput(e.currentTarget.value);
             }}
           />
