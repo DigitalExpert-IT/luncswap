@@ -1,4 +1,4 @@
-import { Box, Flex, Icon, Spinner, Text } from "@chakra-ui/react";
+import { Box, Flex, Icon, Spinner, Text, Avatar } from "@chakra-ui/react";
 import { useModal } from "@ebay/nice-modal-react";
 import { useContext, useMemo } from "react";
 import { HiChevronDown } from "react-icons/hi2";
@@ -11,6 +11,7 @@ type Props = {
   value: string;
   onChange: (tokenAddr: string) => void;
 };
+
 function TokenSelect(props: Props) {
   const { tokenActor } = useContext(TokenMachineContext);
   const { tokenList, isLoading } = useSelector(tokenActor, state => {
@@ -40,11 +41,11 @@ function TokenSelect(props: Props) {
       onClick={handleClick}
       width="max-content"
       py="2"
-      bg="gray.800"
-      _hover={{ bg: "gray.700" }}
-      _active={{ bg: "gray.800" }}
+      bg="navy.800"
+      _hover={{ bg: "navy.700" }}
+      _active={{ bg: "navy.800" }}
       px="4"
-      borderRadius="lg"
+      borderRadius="xl"
       cursor="pointer"
       flexDirection="row"
       gap="3"
@@ -55,7 +56,8 @@ function TokenSelect(props: Props) {
           <Text>Select Token</Text>
         </Box>
       ) : (
-        <Flex flex="1" flexDirection="row">
+        <Flex flex="1" flexDirection="row" align="center" gap={2}>
+          <Avatar name={selectedToken.info.name} size="sm" />
           <Text>{selectedToken.info.name}</Text>
         </Flex>
       )}

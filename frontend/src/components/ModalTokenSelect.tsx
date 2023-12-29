@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { TokenMeta } from "@/interface";
 import { shortenAddress } from "@/utils";
+import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
+import { create, useModal } from "@ebay/nice-modal-react";
 import {
   Avatar,
   Box,
@@ -12,29 +15,59 @@ import {
   ModalOverlay,
   Stack,
   Text,
+  InputGroup,
+  Input,
+  InputLeftElement,
 } from "@chakra-ui/react";
-import { create, useModal } from "@ebay/nice-modal-react";
 
 type Props = {
   tokenList: TokenMeta[];
 };
+
 const ModalTokenSelect = create<Props>(({ tokenList }) => {
   const modal = useModal();
+
+  const [filteredTokens, setFilteredTokens] = useState<TokenMeta[]>([
+    ...tokenList,
+  ]);
 
   const onSelect = (tokenAddr: string) => {
     modal.resolve(tokenAddr);
     modal.hide();
   };
 
+  const fetchData = (value: string) => {
+    const result = tokenList.filter(i => {
+      return (
+        i.address.includes(value) || i.info.name.toLowerCase().includes(value)
+      );
+    });
+    setFilteredTokens(result);
+  };
+
+  const handleChange = (value: string) => {
+    fetchData(value);
+  };
+
   return (
-    <Modal isOpen={modal.visible} onClose={modal.hide}>
+    <Modal isOpen={modal.visible} onClose={modal.hide} size="xl" isCentered>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent bgColor="navy.900">
         <ModalCloseButton />
-        <ModalHeader>Select Token</ModalHeader>
+        <ModalHeader>Choose Token</ModalHeader>
         <ModalBody pb="8">
-          <Stack>
-            {tokenList.map(token => (
+          <InputGroup>
+            <InputLeftElement pointerEvents="none">
+              <HiOutlineMagnifyingGlass color="gray.900" />
+            </InputLeftElement>
+            <Input
+              type="text"
+              placeholder="Search name or paste address"
+              onChange={e => handleChange(e.target.value)}
+            />
+          </InputGroup>
+          <Stack mt="2rem">
+            {filteredTokens.map(token => (
               <TokenItem key={token.address} data={token} onClick={onSelect} />
             ))}
           </Stack>
