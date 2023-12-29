@@ -11,6 +11,8 @@ import {
   Stack,
   Text,
   IconButton,
+  Heading,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useSelector } from "@xstate/react";
 import { HiArrowsUpDown } from "react-icons/hi2";
@@ -24,6 +26,7 @@ function DevtoolsSwap() {
   const [outputAddress, setOutputAddress] = useState("");
   const [inputAmount, setInputAmount] = useState("");
   const [outputAmount, setOutputAmount] = useState("");
+  const bg = useColorModeValue("gray.50", "gray.900");
 
   const { swapActor } = useContext(SwapMachineContext);
   const { tokenActor } = useContext(TokenMachineContext);
@@ -113,16 +116,6 @@ function DevtoolsSwap() {
     [inputTokenMeta, inputTokenDecimals],
   );
 
-  const handleAddLiquidity = () => {
-    swapActor.send({
-      type: "ADD_LIQUIDITY",
-      value: {
-        token1Amount: new Dec(2e6),
-        maxToken2Amount: new Dec(Number.MAX_SAFE_INTEGER),
-      },
-    });
-  };
-
   const computeInput = useCallback(
     _debounce((val: string) => {
       if (!outputTokenMeta) return;
@@ -188,74 +181,83 @@ function DevtoolsSwap() {
   }, [inputAddress, outputAddress]);
 
   return (
-    <Stack bg="gray.800" p="4" align="center">
-      <FormControl>
-        <InputGroup>
-          <Input
-            type="number"
-            value={inputAmount}
-            onChange={e => {
-              setInputAmount(e.currentTarget.value);
-            }}
-            onKeyUp={e => {
-              computeOutput(e.currentTarget.value);
-            }}
+    <Box>
+      <Heading my="4">Swap</Heading>
+      <Stack borderRadius="6" bg={bg} p="4" align="center">
+        <FormControl>
+          <InputGroup>
+            <Input
+              type="number"
+              value={inputAmount}
+              onChange={e => {
+                setInputAmount(e.currentTarget.value);
+              }}
+              onKeyUp={e => {
+                computeOutput(e.currentTarget.value);
+              }}
+            />
+            <Box>
+              <TokenSelect value={inputAddress} onChange={setInputAddress} />
+            </Box>
+          </InputGroup>
+        </FormControl>
+        <Box>
+          <IconButton
+            onClick={handleReverse}
+            icon={<HiArrowsUpDown />}
+            aria-label="reverse"
           />
-          <Box>
-            <TokenSelect value={inputAddress} onChange={setInputAddress} />
-          </Box>
-        </InputGroup>
-      </FormControl>
-      <Box>
-        <IconButton
-          onClick={handleReverse}
-          icon={<HiArrowsUpDown />}
-          aria-label="reverse"
-        />
-      </Box>
-      <FormControl>
-        <InputGroup>
-          <Input
-            type="number"
-            value={outputAmount}
-            onChange={e => {
-              setOutputAmount(e.currentTarget.value);
-            }}
-            onKeyUp={e => {
-              computeInput(e.currentTarget.value);
-            }}
-          />
-          <Box>
-            <TokenSelect value={outputAddress} onChange={setOutputAddress} />
-          </Box>
-        </InputGroup>
-      </FormControl>
-      {isSwapReady && isAllInputFilled ? (
-        <Stack direction="row">
-          <Text>Price Impact {(priceImpact * 100).toFixed(2)}%</Text>
-          <Text>
-            Input Reserve:{" "}
-            {toHumaneValue(inputTokenReserve, inputTokenDecimals)}
-          </Text>
-          <Text>
-            Output Reserve:{" "}
-            {toHumaneValue(outputTokenReserve, outputTokenDecimals)}
-          </Text>
-        </Stack>
-      ) : null}
-      <WrapWallet>
-        <Button
-          isDisabled={!isSwapReady || !isAllInputFilled}
-          isLoading={isLoading}
-          onClick={handleSwap}
-        >
-          Swap
-        </Button>
-      </WrapWallet>
-      <Button isLoading={isLoading} onClick={handleAddLiquidity}>
-        Add Liquidity
-      </Button>
-    </Stack>
+        </Box>
+        <FormControl>
+          <InputGroup>
+            <Input
+              type="number"
+              value={outputAmount}
+              onChange={e => {
+                setOutputAmount(e.currentTarget.value);
+              }}
+              onKeyUp={e => {
+                computeInput(e.currentTarget.value);
+              }}
+            />
+            <Box>
+              <TokenSelect value={outputAddress} onChange={setOutputAddress} />
+            </Box>
+          </InputGroup>
+        </FormControl>
+        <Box w="full" mt="1">
+          {isSwapReady && isAllInputFilled ? (
+            <Stack direction="row" mb="2">
+              <Text>Price Impact {Math.ceil(priceImpact * 100)}%</Text>
+              <Text>
+                Input Reserve:{" "}
+                {toHumaneValue(inputTokenReserve, inputTokenDecimals)}
+              </Text>
+              <Text>
+                Output Reserve:{" "}
+                {toHumaneValue(outputTokenReserve, outputTokenDecimals)}
+              </Text>
+            </Stack>
+          ) : null}
+          {priceImpact > 0.2 ? (
+            <Text my="2" color="red.500">
+              Price impact too hight!
+            </Text>
+          ) : null}
+          <WrapWallet>
+            <Button
+              isDisabled={
+                !isSwapReady || !isAllInputFilled || priceImpact > 0.2
+              }
+              isLoading={isLoading}
+              onClick={handleSwap}
+            >
+              Swap
+            </Button>
+          </WrapWallet>
+        </Box>
+      </Stack>
+    </Box>
   );
 }
 
