@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useMemo } from "react";
 import { TokenMeta } from "@/interface";
 import { shortenAddress } from "@/utils";
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
@@ -19,38 +19,49 @@ import {
   Input,
   InputLeftElement,
 } from "@chakra-ui/react";
+import { TokenMachineContext } from "@/machine";
+import { useSelector } from "@xstate/react";
+import { useDebouncedInput } from "@/hooks";
 
-type Props = {
-  tokenList: TokenMeta[];
-};
-
-const ModalTokenSelect = create<Props>(({ tokenList }) => {
+const ModalTokenSelect = create(() => {
   const modal = useModal();
+  const [keyword, debouncedKeyword, setKeyword] = useDebouncedInput(200);
+  const { tokenActor } = useContext(TokenMachineContext);
+  const { tokenList } = useSelector(tokenActor, state => {
+    return {
+      tokenList: state.context.tokenList,
+    };
+  });
 
-  const [filteredTokens, setFilteredTokens] = useState<TokenMeta[]>([
-    ...tokenList,
-  ]);
+  const filteredTokenList = useMemo(() => {
+    return tokenList
+      .filter(item => {
+        if (item.address === debouncedKeyword) return true;
+        if (
+          item.info.name.toLowerCase().includes(debouncedKeyword.toLowerCase())
+        ) {
+          return true;
+        }
+        if (
+          item.info.symbol
+            .toLowerCase()
+            .includes(debouncedKeyword.toLowerCase())
+        ) {
+          return true;
+        }
+
+        return false;
+      })
+      .slice(0, 15);
+  }, [debouncedKeyword, tokenList]);
 
   const onSelect = (tokenAddr: string) => {
     modal.resolve(tokenAddr);
     modal.hide();
   };
 
-  const fetchData = (value: string) => {
-    const result = tokenList.filter(i => {
-      return (
-        i.address.includes(value) || i.info.name.toLowerCase().includes(value)
-      );
-    });
-    setFilteredTokens(result);
-  };
-
-  const handleChange = (value: string) => {
-    fetchData(value);
-  };
-
   return (
-    <Modal isOpen={modal.visible} onClose={modal.hide} size="xl" isCentered>
+    <Modal isOpen={modal.visible} onClose={modal.hide} size="xl">
       <ModalOverlay />
       <ModalContent bgColor="navy.900">
         <ModalCloseButton />
@@ -61,13 +72,15 @@ const ModalTokenSelect = create<Props>(({ tokenList }) => {
               <HiOutlineMagnifyingGlass color="gray.900" />
             </InputLeftElement>
             <Input
+              autoFocus
               type="text"
+              value={keyword}
               placeholder="Search name or paste address"
-              onChange={e => handleChange(e.target.value)}
+              onChange={e => setKeyword(e.currentTarget.value)}
             />
           </InputGroup>
           <Stack mt="2rem">
-            {filteredTokens.map(token => (
+            {filteredTokenList.map(token => (
               <TokenItem key={token.address} data={token} onClick={onSelect} />
             ))}
           </Stack>

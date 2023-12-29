@@ -28,7 +28,7 @@ function TokenSelect(props: Props) {
 
   const handleClick = async () => {
     if (isLoading) return;
-    const selectedAddr = await modal.show({ tokenList: tokenList });
+    const selectedAddr = await modal.show();
     props.onChange(selectedAddr as string);
   };
 
