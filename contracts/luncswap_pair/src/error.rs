@@ -9,6 +9,9 @@ pub enum ContractError {
     #[error("Semver parsing error: {0}")]
     SemVer(String),
 
+    #[error("Price impact too high")]
+    PriceImpactTooHigh {},
+
     #[error("Insufficient liquidity error: requested: {requested}, available: {available}")]
     InsufficientLiquidityError {
         requested: Uint128,
