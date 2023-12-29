@@ -4,14 +4,21 @@ import {
   Flex,
   Grid,
   GridItem,
-  Image,
   Input,
   Text,
   Icon,
 } from "@chakra-ui/react";
 import { IoMdInformationCircleOutline } from "react-icons/io";
-import { ChakraStylesConfig, Select } from "chakra-react-select";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useState,
+  useEffect,
+  useMemo,
+  useContext,
+  useCallback,
+} from "react";
+import { TokenMachineContext, SwapMachineContext } from "@/machine";
 import { useTranslation } from "react-i18next";
 import { HiFire } from "react-icons/hi";
 import { IoMdSettings } from "react-icons/io";
@@ -19,8 +26,12 @@ import { TbGraphFilled } from "react-icons/tb";
 import { FaSackDollar } from "react-icons/fa6";
 import { RiHistoryFill } from "react-icons/ri";
 import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
-import { AiOutlineSwap } from "react-icons/ai";
+import { HiArrowsUpDown } from "react-icons/hi2";
 import { BiSolidPencil } from "react-icons/bi";
+import TokenSelect from "@/components/TokenSelect";
+import _debounce from "lodash/debounce";
+import { useSelector } from "@xstate/react";
+import { Dec } from "@terra-money/feather.js";
 
 export interface IOptionSelect {
   children: React.ReactNode;
@@ -45,71 +56,6 @@ const GridInfo = ({
       <GridItem textAlign={"right"}>{children}</GridItem>
     </>
   );
-};
-
-const OptionSelect = ({ children, imageUrl }: IOptionSelect) => (
-  <Flex align={"center"} gap={3}>
-    <Image src={imageUrl} w={5} h={5} />
-    <Box fontWeight={"700"} color={"#FCDD6F"} fontSize={12}>
-      {children}
-    </Box>
-  </Flex>
-);
-
-const options = [
-  {
-    value: "bnb",
-    label: <OptionSelect imageUrl={"ustc.png"}>USTC</OptionSelect>,
-  },
-  {
-    value: "lunc",
-    label: <OptionSelect imageUrl={"lunc.png"}>LUNC</OptionSelect>,
-  },
-];
-
-const optionStyles: ChakraStylesConfig = {
-  menu: provided => ({
-    ...provided,
-    color: "brand.500",
-    fontWeight: "700",
-  }),
-  option: provided => ({
-    ...provided,
-    bg: "#172852",
-    _hover: {
-      bg: "purple",
-    },
-  }),
-  menuList: provided => ({
-    ...provided,
-    background: "#172852",
-  }),
-  input: provided => ({
-    ...provided,
-    h: "40px",
-  }),
-  downChevron: provided => ({
-    ...provided,
-    color: "white",
-    bg: "#172852",
-  }),
-  container: provided => ({
-    ...provided,
-    bgColor: "#172852",
-    borderRadius: "20px",
-    width: { base: "140px", md: "160px" },
-  }),
-  dropdownIndicator: provided => ({
-    ...provided,
-    position: "relative",
-    left: "-1px",
-    bgColor: "#172852",
-    p: 1,
-  }),
-  control: provided => ({
-    ...provided,
-    borderRadius: "15px",
-  }),
 };
 
 const menuContents = [
@@ -143,6 +89,97 @@ const SwapForm = ({
   sideContent: string;
 }) => {
   const { t } = useTranslation();
+  const [inputAddress, setInputAddress] = useState("");
+  const [outputAddress, setOutputAddress] = useState("");
+  const [outputAmount, setOutputAmount] = useState("");
+  const [inputAmount, setInputAmount] = useState("");
+  const { swapActor } = useContext(SwapMachineContext);
+  const { tokenActor } = useContext(TokenMachineContext);
+  const { tokenList } = useSelector(tokenActor, state => {
+    return {
+      tokenList: state.context.tokenList,
+    };
+  });
+  const { outputTokenDecimals, computedOutputAmount } = useSelector(
+    swapActor,
+    state => {
+      return {
+        isLoading: state.hasTag("loading"),
+        isSwapReady: state.matches("ready"),
+        priceImpact: state.context.priceImpact,
+        token1Meta: state.context.token1Meta,
+        inputTokenReserve:
+          inputAddress === state.context.token1Meta?.address
+            ? state.context.pairInfo?.token1_reserve ?? "0"
+            : state.context.pairInfo?.token2_reserve ?? "0",
+        outputTokenReserve:
+          outputAddress === state.context.token1Meta?.address
+            ? state.context.pairInfo?.token1_reserve ?? "0"
+            : state.context.pairInfo?.token2_reserve ?? "0",
+        inputTokenDecimals:
+          inputAddress === state.context.token1Meta?.address
+            ? state.context.token1Meta.info.decimals
+            : state.context.token2Meta?.info.decimals ?? 1,
+        outputTokenDecimals:
+          outputAddress === state.context.token1Meta?.address
+            ? state.context.token1Meta.info.decimals
+            : state.context.token2Meta?.info.decimals ?? 1,
+        computedInputAmount:
+          inputAddress === ""
+            ? new Dec(0)
+            : inputAddress === state.context.token1Meta?.address
+              ? state.context.token1Amount
+              : state.context.token2Amount,
+        computedOutputAmount:
+          outputAddress === ""
+            ? new Dec(0)
+            : outputAddress === state.context.token1Meta?.address
+              ? state.context.token1Amount
+              : state.context.token2Amount,
+      };
+    },
+  );
+
+  const outputTokenMeta = useMemo(() => {
+    if (!outputAddress) return undefined;
+    return tokenList.find(item => item.address === outputAddress);
+  }, [outputAddress, tokenList]);
+
+  const computeInput = useCallback(
+    _debounce((val: string) => {
+      if (!outputTokenMeta) return;
+      if (val === "") return;
+      const actualValue = new Dec(val).mul(Math.pow(10, outputTokenDecimals));
+      if (actualValue === computedOutputAmount) return;
+
+      swapActor.send({
+        type: "CALCULATE_INPUT",
+        value: { tokenMeta: outputTokenMeta, amount: actualValue },
+      });
+    }, 500),
+    [outputTokenDecimals, outputTokenMeta],
+  );
+
+  const handleReverse = () => {
+    const temp = inputAddress;
+    setOutputAddress(temp);
+    requestAnimationFrame(() => {
+      setInputAmount("0");
+      setOutputAmount("0");
+      computeInput("0");
+    });
+  };
+
+  console.log("input amount", inputAmount);
+  console.log("output amount", outputAmount);
+
+  useEffect(() => {
+    if (inputAddress === outputAddress) setOutputAddress("");
+  }, [inputAddress]);
+
+  useEffect(() => {
+    if (outputAddress === inputAddress) setInputAddress("");
+  }, [outputAddress]);
 
   const onClickMenu = (contentName: string) => () => {
     setSideContent(contentName === sideContent ? "" : contentName);
@@ -191,12 +228,7 @@ const SwapForm = ({
             <Text fontWeight={"600"}>{t("swap.from")}</Text>
             <Flex bgColor={"white"} p={"2px"} borderRadius={15} mt={1}>
               <Box width={"100%"} flex={"1"}>
-                <Select
-                  onChange={() => {}}
-                  defaultValue={options[0]}
-                  options={options}
-                  chakraStyles={optionStyles}
-                />
+                <TokenSelect value={inputAddress} onChange={setInputAddress} />
               </Box>
               <Input
                 type="number"
@@ -213,21 +245,20 @@ const SwapForm = ({
           </Box>
           <Flex mt={4} justifyContent={"center"}>
             <Icon
-              as={AiOutlineSwap}
+              as={HiArrowsUpDown}
               fontSize={30}
-              transform={"rotate(90deg)"}
               mt={2}
+              onClick={handleReverse}
+              pointer="cursor"
             />
           </Flex>
           <Box>
             <Text fontWeight={"600"}>{t("swap.to")}</Text>
             <Flex bgColor={"white"} p={"3px"} borderRadius={15} mt={1}>
               <Box width={"100%"} flex={"0 1 170px"}>
-                <Select
-                  defaultValue={options[1]}
-                  onChange={() => {}}
-                  options={options}
-                  chakraStyles={optionStyles}
+                <TokenSelect
+                  value={outputAddress}
+                  onChange={setOutputAddress}
                 />
               </Box>
               <Input
