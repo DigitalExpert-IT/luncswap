@@ -5,6 +5,7 @@ import React from "react";
 const TokenFactory = React.lazy(() => import("./dtTokenFactory"));
 const Swap = React.lazy(() => import("./dtSwap"));
 const AddLiquidity = React.lazy(() => import("./dtAddLiquidity"));
+const Pool = React.lazy(() => import("./dtPool"));
 
 const routes: RouteObject = {
   path: "/devtools",
@@ -21,6 +22,10 @@ const routes: RouteObject = {
     {
       path: "/devtools/add_liquidity",
       element: <AddLiquidity />,
+    },
+    {
+      path: "/devtools/pool",
+      element: <Pool />,
     },
   ],
 };
