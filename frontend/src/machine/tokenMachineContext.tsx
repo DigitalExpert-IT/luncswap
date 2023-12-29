@@ -2,7 +2,7 @@ import { ActorRef, EventFrom, SnapshotFrom, fromPromise } from "xstate";
 import { tokenMachine } from "./tokenMachine";
 import React, { createContext } from "react";
 import { useLcdClient } from "@terra-money/wallet-kit";
-import { TokenInfo, TokenMarketingInfo } from "@/interface";
+import { TokenInfo, TokenMarketingInfo, TokenMeta } from "@/interface";
 import { nativeCoin, trustedTokens } from "@/constant/network";
 import { useActorRef } from "@xstate/react";
 
@@ -20,6 +20,32 @@ const CHAIN_ID = "pisco-1";
 
 export function TokenMachineProvider(props: { children: React.ReactNode }) {
   const lcd = useLcdClient();
+
+  const searchToken = async (value: {
+    address: string;
+    tokenList: TokenMeta[];
+  }) => {
+    try {
+      const found = value.tokenList.find(
+        item => item.address === value.address,
+      );
+      if (found) return undefined;
+      const [info, marketingInfo] = await Promise.all([
+        lcd.wasm.contractQuery<TokenInfo>(value.address, { token_info: {} }),
+        lcd.wasm.contractQuery<TokenMarketingInfo>(value.address, {
+          marketing_info: {},
+        }),
+      ] as const);
+      return {
+        isNative: false,
+        info: info,
+        marketing: marketingInfo,
+        address: value.address,
+      } as TokenMeta;
+    } catch (error) {
+      return undefined;
+    }
+  };
 
   const fetchTokenList = async () => {
     const trustedTokenList = trustedTokens[CHAIN_ID] ?? [];
@@ -48,6 +74,7 @@ export function TokenMachineProvider(props: { children: React.ReactNode }) {
     tokenMachine.provide({
       actors: {
         loadList: fromPromise(() => fetchTokenList()),
+        searchToken: fromPromise(({ input }) => searchToken(input)),
       },
     }),
   );

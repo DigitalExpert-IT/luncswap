@@ -1,12 +1,8 @@
 import { useContext, useEffect, useMemo } from "react";
-import { TokenMeta } from "@/interface";
-import { shortenAddress } from "@/utils";
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 import { create, useModal } from "@ebay/nice-modal-react";
 import {
-  Avatar,
   Box,
-  Flex,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -14,7 +10,6 @@ import {
   ModalHeader,
   ModalOverlay,
   Stack,
-  Text,
   InputGroup,
   Input,
   InputLeftElement,
@@ -25,8 +20,9 @@ import {
 import { TokenMachineContext } from "@/machine";
 import { useSelector } from "@xstate/react";
 import { useDebouncedInput } from "@/hooks";
+import { TokenItem } from "./ModalTokenSelect";
 
-const ModalTokenSelect = create(() => {
+export const ModalTokenSelect = create(() => {
   const modal = useModal();
   const [keyword, debouncedKeyword, setKeyword] = useDebouncedInput(200);
   const { tokenActor } = useContext(TokenMachineContext);
@@ -41,7 +37,7 @@ const ModalTokenSelect = create(() => {
     if (!modal.visible) {
       setKeyword("");
     }
-  }, [modal.visible, setKeyword]);
+  }, [modal.visible]);
 
   const filteredTokenList = useMemo(() => {
     return tokenList
@@ -122,36 +118,3 @@ const ModalTokenSelect = create(() => {
     </Modal>
   );
 });
-
-type TokenItemProps = {
-  data: TokenMeta;
-  onClick: (tokenAddr: string) => void;
-};
-function TokenItem(props: TokenItemProps) {
-  const { data, onClick } = props;
-
-  return (
-    <Flex
-      _hover={{ opacity: 0.8 }}
-      _active={{ opacity: 1 }}
-      cursor="pointer"
-      flexDirection="row"
-      gap="2"
-      onClick={() => onClick(data.address)}
-    >
-      <Box>
-        <Avatar src={data.marketing.logo?.url ?? ""} name={data.info.name} />
-      </Box>
-      <Box>
-        <Text>{data.info.name}</Text>
-        <Text fontSize="small">
-          {data.address === "native"
-            ? "Native Coin"
-            : shortenAddress(data.address)}
-        </Text>
-      </Box>
-    </Flex>
-  );
-}
-
-export default ModalTokenSelect;
