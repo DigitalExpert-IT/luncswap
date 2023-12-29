@@ -6,24 +6,6 @@ task(async ({ wallets, client, deploy }) => {
       "luncswap_token",
       wallets.default
     );
-    const tokenAddress = await deploy.instantiate(
-      "luncswap_token",
-      wallets.default,
-      {
-        admin: wallets.default.key.accAddress("terra"),
-        init: {
-          name: "along token",
-          symbol: "along",
-          decimals: 6,
-          initial_balances: [
-            {
-              address: wallets.default.key.accAddress("terra"),
-              amount: "1000000000000000",
-            },
-          ],
-        },
-      }
-    );
     const pairCodeId = await deploy.storeCode(
       "luncswap_pair",
       wallets.default,
@@ -50,7 +32,6 @@ task(async ({ wallets, client, deploy }) => {
       {
         factoryAddress,
         factoryCodeId,
-        tokenAddress,
       },
     ]);
   } catch (err) {

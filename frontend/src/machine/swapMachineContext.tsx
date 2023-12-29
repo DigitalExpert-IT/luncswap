@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActorRef, EventFrom, SnapshotFrom, fromPromise } from "xstate";
-import { swapMachine } from "./swapMachine";
+import { CreatePairInputType, swapMachine } from "./swapMachine";
 import React, { createContext } from "react";
 import { useActorRef } from "@xstate/react";
 import { useConnectedWallet, useLcdClient } from "@terra-money/wallet-kit";
@@ -225,6 +225,38 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     await executeContract(msgs);
   };
 
+  const createPair = async (input: CreatePairInputType) => {
+    const walletAddr = connectedWallet!.addresses[CHAIN_ID];
+    const token1Denom = input.token1Meta.isNative
+      ? { native: input.token1Meta.info.symbol }
+      : {
+          cw20: input.token1Meta.address,
+        };
+    const token2Denom = input.token2Meta.isNative
+      ? { native: input.token2Meta.info.symbol }
+      : {
+          cw20: input.token2Meta.address,
+        };
+    const createPairMsg = new MsgExecuteContract(
+      walletAddr,
+      FACTORY_CONTRACT_ADDR,
+      {
+        add_pair: {
+          token1_denom: token1Denom,
+          token2_denom: token2Denom,
+        },
+      },
+    );
+    await executeContract([createPairMsg]);
+
+    const pair = await lcd.wasm.contractQuery<Pair>(FACTORY_CONTRACT_ADDR, {
+      pair: { token1: token1Denom, token2: token2Denom },
+    });
+
+    await addLiquidity(pair, input.token1Amount, input.token2Amount);
+    return [input.token1Meta, input.token2Meta] as [TokenMeta, TokenMeta];
+  };
+
   const actorRef = useActorRef(
     swapMachine.provide({
       actors: {
@@ -245,9 +277,11 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
         addLiquidity: fromPromise(({ input }) =>
           addLiquidity(input.pair, input.token1Amount, input.maxToken2Amount),
         ),
+        createPair: fromPromise(({ input }) => createPair(input)),
       },
       actions: {
         errorCb: ({ event }: any) => {
+          console.log(event);
           const errorMsg = event?.error?.raw_log ?? "Unknown Error";
           toast({
             status: "error",

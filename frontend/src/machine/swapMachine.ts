@@ -2,6 +2,13 @@ import { Pair, PairFee, PairInfo, TokenMeta } from "@/interface";
 import { setup, PromiseActorLogic, assertEvent, assign } from "xstate";
 import { Dec } from "@terra-money/feather.js";
 
+export type CreatePairInputType = {
+  token1Meta: TokenMeta;
+  token1Amount: Dec;
+  token2Meta: TokenMeta;
+  token2Amount: Dec;
+};
+
 type ContextType = {
   pair: Pair | undefined;
   pairInfo: PairInfo | undefined;
@@ -47,6 +54,10 @@ export const swapMachine = setup({
       | {
           type: "ADD_LIQUIDITY";
           value: { token1Amount: Dec; maxToken2Amount: Dec };
+        }
+      | {
+          type: "CREATE_PAIR";
+          value: CreatePairInputType;
         },
     context: {} as ContextType,
   },
@@ -79,6 +90,7 @@ export const swapMachine = setup({
       void,
       { pair: Pair; token1Amount: Dec; maxToken2Amount: Dec }
     >;
+    createPair: PromiseActorLogic<[TokenMeta, TokenMeta], CreatePairInputType>;
   },
   guards: {
     isNoLiquidity: ({ context }) =>
@@ -215,7 +227,7 @@ export const swapMachine = setup({
             const token1Reserve = new Dec(context.pairInfo!.token1_reserve);
             const token2Reserve = new Dec(context.pairInfo!.token2_reserve);
             const feePercent = +context.pairFee!.protocol_fee_percent;
-            let priceImpact = 0;
+            let priceImpact = new Dec(0);
             const k = token1Reserve.mul(token2Reserve);
 
             if (event.value.tokenMeta.address === context.token1Meta?.address) {
@@ -224,20 +236,24 @@ export const swapMachine = setup({
               const token1AmountAfterFee = token1Amount.sub(token1FeeAmount);
               const subvisor = k.div(token1Reserve.add(token1AmountAfterFee));
               token2Amount = token2Reserve.sub(subvisor);
-              priceImpact =
-                1 - Math.sqrt(1 - Number(token1Amount) / Number(token1Reserve));
+              priceImpact = new Dec(1).sub(
+                Dec.sqrt(new Dec(1).sub(token1Amount.div(token1Reserve))),
+              );
             } else {
               token2Amount = event.value.amount;
               const token2FeeAmount = token2Amount.mul(feePercent).div(100);
               const token2AmountAfterFee = token2Amount.sub(token2FeeAmount);
               const subvisor = k.div(token2Reserve.add(token2AmountAfterFee));
               token1Amount = token1Reserve.sub(subvisor);
-              priceImpact =
-                1 - Math.sqrt(1 - Number(token2Amount) / Number(token2Reserve));
+              priceImpact = new Dec(1).sub(
+                Dec.sqrt(new Dec(1).sub(token2Amount.div(token2Reserve))),
+              );
             }
 
             return {
-              priceImpact: isNaN(priceImpact) ? 1 : priceImpact,
+              priceImpact: isNaN(priceImpact.toNumber())
+                ? 1
+                : +priceImpact.toNumber().toFixed(3),
               token1Amount,
               token2Amount,
             };
@@ -257,7 +273,7 @@ export const swapMachine = setup({
             const token1Reserve = new Dec(context.pairInfo!.token1_reserve);
             const token2Reserve = new Dec(context.pairInfo!.token2_reserve);
             const feePercent = new Dec(context.pairFee!.protocol_fee_percent);
-            let priceImpact = 0;
+            let priceImpact = new Dec(0);
 
             if (event.value.tokenMeta.address === context.token1Meta?.address) {
               token1Amount = event.value.amount;
@@ -271,8 +287,9 @@ export const swapMachine = setup({
                   .div(token1Reserve.sub(token1Amount))
                   .add(1);
               }
-              priceImpact =
-                1 - Math.sqrt(1 - Number(token2Amount) / Number(token2Reserve));
+              priceImpact = new Dec(1).sub(
+                Dec.sqrt(new Dec(1).sub(token2Amount.div(token2Reserve))),
+              );
             } else {
               token2Amount = event.value.amount;
               if (token2Amount >= token2Reserve) {
@@ -285,12 +302,15 @@ export const swapMachine = setup({
                   .div(token2Reserve.sub(token2Amount))
                   .add(1);
               }
-              priceImpact =
-                1 - Math.sqrt(1 - Number(token1Amount) / Number(token1Reserve));
+              priceImpact = new Dec(1).sub(
+                Dec.sqrt(new Dec(1).sub(token1Amount.div(token1Reserve))),
+              );
             }
 
             return {
-              priceImpact: isNaN(priceImpact) ? 1 : priceImpact,
+              priceImpact: isNaN(priceImpact.toNumber())
+                ? 1
+                : +priceImpact.toNumber().toFixed(3),
               token1Amount,
               token2Amount,
             };
@@ -331,7 +351,31 @@ export const swapMachine = setup({
       },
     },
     no_liquidity: {},
-    no_pair: {},
+    no_pair: {
+      on: {
+        CREATE_PAIR: {
+          target: "create_pair",
+        },
+      },
+    },
+    create_pair: {
+      tags: ["loading"],
+      invoke: {
+        src: "createPair",
+        input: ({ event }) => {
+          assertEvent(event, "CREATE_PAIR");
+          return event.value;
+        },
+        onDone: {
+          actions: ({ self, event }) => {
+            self.send({ type: "LOAD_PAIR", value: event.output });
+          },
+        },
+        onError: {
+          actions: ["errorCb"],
+        },
+      },
+    },
     swap: {
       tags: ["loading"],
       invoke: {

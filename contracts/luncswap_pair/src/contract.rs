@@ -470,16 +470,7 @@ pub fn execute_swap(
     };
     let output_token = output_token_item.load(deps.storage)?;
 
-    // validate price impact, max impact are 20%
-    let price_impact = 1_f64
-        - f64::sqrt(
-            1_f64
-                - input_amount.to_string().parse::<f64>().unwrap()
-                    / input_token.reserve.to_string().parse::<f64>().unwrap(),
-        );
-    if price_impact > 0.2_f64 {
-        return Err(ContractError::PriceImpactTooHigh{});
-    }
+    // TODO: calculate price impact!
 
     // validate input_amount if native input token
     validate_input_amount(&info.funds, input_amount, &input_token.denom)?;

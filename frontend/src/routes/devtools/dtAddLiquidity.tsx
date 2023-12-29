@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import WrapWallet from "@/components/WrapWallet";
 import {
   useColorModeValue,
@@ -9,18 +10,92 @@ import {
   Button,
   FormControl,
   Input,
-  FormLabel,
 } from "@chakra-ui/react";
 import TokenSelect from "@/components/TokenSelect";
+import { SwapMachineContext, TokenMachineContext } from "@/machine";
+import { useSelector } from "@xstate/react";
+import { Dec } from "@terra-money/feather.js";
 
 const AddLiquidity = () => {
-  const [token1, setToken1] = useState("");
-  const [token2, setToken2] = useState("");
-  const [token1InputAmount, setToken1InputAmount] = useState("");
-  const [token2InputAmount, setToken2InputAmount] = useState("");
+  const [inputAddress, setInputAddress] = useState("");
+  const [outputAddress, setOutputAddress] = useState("");
+  const [inputAmount, setInputAmount] = useState("");
+  const [outputAmount, setOutputAmount] = useState("");
+  const { tokenActor } = useContext(TokenMachineContext);
+  const { swapActor } = useContext(SwapMachineContext);
   const bg = useColorModeValue("gray.50", "gray.900");
+  const tokenList = useSelector(tokenActor, state => state.context.tokenList);
+  const { isLoading, isReady, isNoLiquidity, isNoPair } = useSelector(
+    swapActor,
+    state => {
+      return {
+        isReady:
+          state.matches("ready") ||
+          state.matches("no_liquidity") ||
+          state.matches("no_pair"),
+        isLoading: state.hasTag("loading"),
+        isNoLiquidity: state.matches("no_liquidity"),
+        isNoPair: state.matches("no_pair"),
+      };
+    },
+  );
 
-  const onSubmit = async () => {};
+  useEffect(() => {
+    if (inputAddress === outputAddress) {
+      setOutputAddress("");
+    }
+  }, [inputAddress]);
+
+  useEffect(() => {
+    if (outputAddress === inputAddress) {
+      setInputAddress("");
+    }
+  }, [outputAddress]);
+
+  const inputTokenMeta = useMemo(() => {
+    return tokenList.find(item => item.address === inputAddress);
+  }, [inputAddress, tokenList]);
+
+  const outputTokenMeta = useMemo(() => {
+    return tokenList.find(item => item.address === outputAddress);
+  }, [outputAddress, tokenList]);
+
+  useEffect(() => {
+    if (!inputTokenMeta || !outputTokenMeta) return;
+
+    // prevent using native token as token2
+    if (outputTokenMeta.isNative) {
+      const temp = inputAddress;
+      setInputAddress(outputAddress);
+      setOutputAddress(temp);
+      return;
+    }
+    swapActor.send({
+      type: "LOAD_PAIR",
+      value: [inputTokenMeta, outputTokenMeta],
+    });
+  }, [inputTokenMeta, outputTokenMeta]);
+
+  const isAllValueFilled = !!inputAmount && !!outputAmount;
+  const onSubmit = async () => {
+    if (isNoPair) {
+      swapActor.send({
+        type: "CREATE_PAIR",
+        value: {
+          token1Amount: new Dec(inputAmount).mul(
+            Math.pow(10, inputTokenMeta!.info.decimals),
+          ),
+          token2Amount: new Dec(outputAmount).mul(
+            Math.pow(10, outputTokenMeta!.info.decimals),
+          ),
+          token1Meta: inputTokenMeta!,
+          token2Meta: outputTokenMeta!,
+        },
+      });
+    }
+    setInputAmount("0");
+    setOutputAmount("0");
+  };
 
   return (
     <Box my="2rem">
@@ -28,45 +103,50 @@ const AddLiquidity = () => {
       <Box shadow="lg" bg={bg} my={6} borderRadius="md" p={4}>
         <Stack mb="4">
           <FormControl>
-            <FormLabel>Token 1</FormLabel>
             <Stack direction="row">
-              <TokenSelect value={token1} onChange={setToken1} />
               <Box flex="1">
                 <Input
                   type="number"
                   required
-                  value={token1InputAmount}
+                  value={inputAmount}
                   onChange={e => {
-                    setToken1InputAmount(e.currentTarget.value);
+                    setInputAmount(e.currentTarget.value);
                   }}
                 />
               </Box>
+              <TokenSelect value={inputAddress} onChange={setInputAddress} />
             </Stack>
           </FormControl>
           <FormControl>
-            <FormLabel>Token 2</FormLabel>
             <Stack direction="row">
-              <TokenSelect value={token2} onChange={setToken2} />
               <Box flex="1">
                 <Input
                   type="number"
                   required
-                  value={token2InputAmount}
+                  value={outputAmount}
                   onChange={e => {
-                    setToken2InputAmount(e.currentTarget.value);
+                    setOutputAmount(e.currentTarget.value);
                   }}
                 />
               </Box>
+              <TokenSelect value={outputAddress} onChange={setOutputAddress} />
             </Stack>
           </FormControl>
         </Stack>
         <WrapWallet>
           <Button
-            isDisabled={!token1 || !token2}
+            isDisabled={
+              !isReady || !inputAddress || !outputAddress || !isAllValueFilled
+            }
+            isLoading={isLoading}
             colorScheme="orange"
             onClick={onSubmit}
           >
-            Add Liquidity
+            {isNoPair
+              ? "Create Pair"
+              : isNoLiquidity
+                ? "Provide Liquidity"
+                : "Add Liquidity"}
           </Button>
         </WrapWallet>
       </Box>

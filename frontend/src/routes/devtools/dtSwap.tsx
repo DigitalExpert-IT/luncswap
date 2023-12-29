@@ -228,7 +228,7 @@ function DevtoolsSwap() {
         <Box w="full" mt="1">
           {isSwapReady && isAllInputFilled ? (
             <Stack direction="row" mb="2">
-              <Text>Price Impact {Math.ceil(priceImpact * 100)}%</Text>
+              <Text>Price Impact {priceImpact * 100}%</Text>
               <Text>
                 Input Reserve:{" "}
                 {toHumaneValue(inputTokenReserve, inputTokenDecimals)}
@@ -241,7 +241,7 @@ function DevtoolsSwap() {
           ) : null}
           {priceImpact > 0.2 ? (
             <Text my="2" color="red.500">
-              Price impact too hight!
+              Price impact too high!
             </Text>
           ) : null}
           <WrapWallet>
