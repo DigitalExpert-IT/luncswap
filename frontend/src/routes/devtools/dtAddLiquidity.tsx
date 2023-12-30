@@ -71,7 +71,8 @@ const AddLiquidity = () => {
   const computeOutput = useCallback(
     _debounce((inputTokenAmount: string) => {
       if (!inputTokenMeta || !outputTokenMeta) return;
-      if (!isReady) return;
+      if (isNoLiquidity || isNoPair) return;
+      if (!inputTokenAmount) return;
       const inputAmount = new Dec(inputTokenAmount).mul(
         Math.pow(10, inputTokenMeta.info.decimals),
       );
@@ -87,7 +88,8 @@ const AddLiquidity = () => {
       outputTokenMeta,
       inputTokenReserve,
       outputTokenReserve,
-      isReady,
+      isNoLiquidity,
+      isNoPair,
     ],
   );
 
@@ -164,7 +166,7 @@ const AddLiquidity = () => {
               <Box flex="1">
                 <Input
                   type="number"
-                  readOnly={isReady}
+                  isReadOnly={!isNoLiquidity && !isNoPair}
                   value={outputAmount}
                   onChange={e => {
                     setOutputAmount(e.currentTarget.value);

@@ -1,12 +1,12 @@
 import { TokenMeta } from "@/interface";
 
 export const factoryContractAddress = {
-  "pisco-1": "terra1zae93l3h3nhtg6v28wlv7jev9m5fwcr2t94eqznyqdhhr0x6y40sn2sc7l",
+  "pisco-1": "terra1tepxa0vatksmqnywmpsnzmp2nqpr9ed9scm62gex3maygeaegk0sdq6x9l",
 };
 
 export const trustedTokens = {
   "pisco-1": [
-    "terra10m5zy8krcnqtrzkpegphlmetm6huvedxx6rwzu6rymq7wzkqg5rs9qm9af",
+    "terra1y52vpctg3whkh9c4nak8udd8jmkvsmprajg5cslw33ekwtcj70hslu8nga",
   ],
 };
 

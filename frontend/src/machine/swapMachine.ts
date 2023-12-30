@@ -350,7 +350,13 @@ export const swapMachine = setup({
         },
       },
     },
-    no_liquidity: {},
+    no_liquidity: {
+      on: {
+        ADD_LIQUIDITY: {
+          target: "add_liquidity",
+        },
+      },
+    },
     no_pair: {
       on: {
         CREATE_PAIR: {

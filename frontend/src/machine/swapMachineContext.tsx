@@ -13,6 +13,13 @@ import { useToast } from "@chakra-ui/react";
 type EventType = EventFrom<typeof swapMachine>;
 type SnapshotType = SnapshotFrom<typeof swapMachine>;
 
+const sleep = (ms: number) =>
+  new Promise(resolve => {
+    setTimeout(() => {
+      resolve(null);
+    }, ms);
+  });
+
 export const SwapMachineContext = createContext<{
   swapActor: ActorRef<SnapshotType, EventType>;
 }>({
@@ -248,7 +255,8 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
       },
     );
     await executeContract([createPairMsg]);
-
+    // wait 10 sec
+    await sleep(1000 * 10);
     const pair = await lcd.wasm.contractQuery<Pair>(FACTORY_CONTRACT_ADDR, {
       pair: { token1: token1Denom, token2: token2Denom },
     });

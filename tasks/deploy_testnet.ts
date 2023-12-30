@@ -1,6 +1,6 @@
 import { task } from "@terra-money/terrain";
 
-task(async ({ wallets, client, deploy }) => {
+task(async ({ wallets, deploy }) => {
   try {
     const tokenCodeId = await deploy.storeCode(
       "luncswap_token",
