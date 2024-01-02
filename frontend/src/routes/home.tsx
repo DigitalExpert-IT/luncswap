@@ -27,7 +27,6 @@ function Home() {
   return (
     <Container maxW={"container.xl"} pb="10rem">
       <ModalComingSoon />
-      {/* <ModalComingSoon /> */}
       <VStack gap={10}>
         <BannerInfo />
         <Heading

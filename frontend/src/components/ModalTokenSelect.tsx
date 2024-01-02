@@ -78,7 +78,7 @@ const ModalTokenSelect = create(() => {
   };
 
   return (
-    <Modal isOpen={modal.visible} onClose={modal.hide} size="xl">
+    <Modal isOpen={modal.visible} onClose={modal.hide} size="xl" isCentered>
       <ModalOverlay />
       <ModalContent bgColor="navy.900">
         <ModalCloseButton />
@@ -132,7 +132,7 @@ function TokenItem(props: TokenItemProps) {
 
   return (
     <Flex
-      _hover={{ opacity: 0.8 }}
+      _hover={{ opacity: 0.8, bgColor: "gray.700" }}
       _active={{ opacity: 1 }}
       cursor="pointer"
       flexDirection="row"
