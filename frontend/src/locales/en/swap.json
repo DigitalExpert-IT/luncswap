@@ -4,6 +4,7 @@
     "description": "In order to maintain the stability of the token price, a 0.5% reduction will be applied to each transaction.",
     "trySwap": "Try Swap"
   },
+  "priceImpactHight": "Price impact to high!",
   "swap": "SWAP",
   "makeA": "MAKE A ",
   "withUs": "WITH US",

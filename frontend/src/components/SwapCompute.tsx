@@ -1,6 +1,61 @@
+import React, { useContext, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useSelector } from "@xstate/react";
+import { TokenMachineContext } from "@/machine";
 import { Grid, GridItem, Text, Flex } from "@chakra-ui/react";
 import { IoMdInformationCircleOutline } from "react-icons/io";
-import { useTranslation } from "react-i18next";
+
+type SwapType = {
+  inputAddress: string;
+  outputAddress: string;
+  priceImpact: number;
+};
+
+export const SwapCompute: React.FC<SwapType> = props => {
+  const { t } = useTranslation();
+  const { inputAddress, outputAddress, priceImpact } = props;
+  const { tokenActor } = useContext(TokenMachineContext);
+  const { tokenList } = useSelector(tokenActor, state => {
+    return {
+      isLoading: state.hasTag("loading"),
+      tokenList: state.context.tokenList,
+    };
+  });
+
+  const getInputToken = useMemo(() => {
+    return tokenList.find(item => item.address === inputAddress);
+  }, [inputAddress, tokenList]);
+
+  const getOutputToken = useMemo(() => {
+    return tokenList.find(item => item.address === outputAddress);
+  }, [outputAddress, tokenList]);
+
+  return (
+    <Grid
+      color={"black"}
+      px={10}
+      py={4}
+      templateColumns={"repeat(2, 1fr)"}
+      fontWeight={"600"}
+    >
+      <GridInfo
+        title={t("swap.details.rate")}
+      >{`1 ${getInputToken?.info.name} = 0.010157 ${getOutputToken?.info.name}`}</GridInfo>
+      <GridInfo title={t("swap.details.minimumReceived")}>
+        2155 {getOutputToken?.info.name}
+      </GridInfo>
+      <GridInfo title={t("swap.details.swapFee")}>
+        0.0396 {getInputToken?.info.name}
+      </GridInfo>
+      <GridInfo title={t("swap.details.route")}>2 Separate Routes</GridInfo>
+      <GridInfo title={t("swap.details.priceImpact")}>
+        <Text color={priceImpact > 0.2 ? "red" : "#039F00"}>
+          {priceImpact * 100}%
+        </Text>
+      </GridInfo>
+    </Grid>
+  );
+};
 
 const GridInfo = ({
   title,
@@ -19,26 +74,5 @@ const GridInfo = ({
       </GridItem>
       <GridItem textAlign={"right"}>{children}</GridItem>
     </>
-  );
-};
-
-export const SwapCompute = () => {
-  const { t } = useTranslation();
-  return (
-    <Grid
-      color={"black"}
-      px={10}
-      py={4}
-      templateColumns={"repeat(2, 1fr)"}
-      fontWeight={"600"}
-    >
-      <GridInfo title={t("swap.details.rate")}>1 USTC = 0.010157 LUNC</GridInfo>
-      <GridInfo title={t("swap.details.minimumReceived")}>2155 LUNC</GridInfo>
-      <GridInfo title={t("swap.details.swapFee")}>0.0396 USTC</GridInfo>
-      <GridInfo title={t("swap.details.route")}>2 Separate Routes</GridInfo>
-      <GridInfo title={t("swap.details.priceImpact")}>
-        <Text color={"#039F00"}>100%</Text>
-      </GridInfo>
-    </Grid>
   );
 };

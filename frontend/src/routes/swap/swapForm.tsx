@@ -3,8 +3,6 @@ import {
   Box,
   Button,
   Flex,
-  Grid,
-  GridItem,
   Input,
   Text,
   Icon,
@@ -21,7 +19,6 @@ import React, {
   useContext,
   useCallback,
 } from "react";
-import { IoMdInformationCircleOutline } from "react-icons/io";
 import { TokenMachineContext, SwapMachineContext } from "@/machine";
 import { useTranslation } from "react-i18next";
 import { HiFire } from "react-icons/hi";
@@ -38,31 +35,12 @@ import { useSelector } from "@xstate/react";
 import { Dec } from "@terra-money/feather.js";
 import { toHumaneValue } from "@/utils";
 import WrapWallet from "@/components/WrapWallet";
+import { SwapCompute } from "@/components/SwapCompute";
 
 export interface IOptionSelect {
   children: React.ReactNode;
   imageUrl: string;
 }
-
-const GridInfo = ({
-  title,
-  children,
-}: {
-  children: React.ReactNode;
-  title: string;
-}) => {
-  return (
-    <>
-      <GridItem>
-        <Flex align={"center"} gap={2}>
-          <Text>{title}</Text>
-          <IoMdInformationCircleOutline />
-        </Flex>
-      </GridItem>
-      <GridItem textAlign={"right"}>{children}</GridItem>
-    </>
-  );
-};
 
 const menuContents = [
   {
@@ -257,6 +235,8 @@ const SwapForm = ({
     });
   };
 
+  console.log(tokenList);
+
   return (
     <Box bgColor={"#FCDD6F"} borderRadius={20}>
       <Box
@@ -383,25 +363,11 @@ const SwapForm = ({
         </Box>
       </Box>
       {isSwapReady && isAllInputFilled ? (
-        <Grid
-          color={"black"}
-          px={10}
-          py={4}
-          templateColumns={"repeat(2, 1fr)"}
-          fontWeight={"600"}
-        >
-          <GridInfo title={t("swap.details.rate")}>
-            1 USTC = 0.010157 LUNC
-          </GridInfo>
-          <GridInfo title={t("swap.details.minimumReceived")}>
-            2155 LUNC
-          </GridInfo>
-          <GridInfo title={t("swap.details.swapFee")}>0.0396 USTC</GridInfo>
-          <GridInfo title={t("swap.details.route")}>2 Separate Routes</GridInfo>
-          <GridInfo title={t("swap.details.priceImpact")}>
-            <Text color={"#039F00"}>{priceImpact * 100}%</Text>
-          </GridInfo>
-        </Grid>
+        <SwapCompute
+          inputAddress={inputAddress}
+          outputAddress={outputAddress}
+          priceImpact={priceImpact}
+        />
       ) : null}
     </Box>
   );
