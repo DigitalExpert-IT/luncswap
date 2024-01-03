@@ -26,6 +26,8 @@
   },
   "addLiquidity": {
     "title": "Add Liquidity",
-    "choose": "Choose Pair"
+    "choose": "Choose Pair",
+    "tip": "Tip: When you add liquidity, you will receive pool tokens representing your position. These tokens automatically earn fees proportional to your share of the pool, and can be redeemed at any time.",
+    "DepositAmount": "Deposit amount"
   }
 }

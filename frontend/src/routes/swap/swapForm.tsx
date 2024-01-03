@@ -235,8 +235,6 @@ const SwapForm = ({
     });
   };
 
-  console.log(tokenList);
-
   return (
     <Box bgColor={"#FCDD6F"} borderRadius={20}>
       <Box

@@ -1,27 +1,28 @@
 import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react";
-import SwapForm from "./swapForm";
-import AllPoolsTable from "./allPoolsTable";
-import { useState } from "react";
-import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
-import Graph from "./graph";
+// import SwapForm from "./swapForm";
+// import AllPoolsTable from "./allPoolsTable";
+// import { useState } from "react";
+// import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
+// import Graph from "./graph";
 import "@fontsource/galindo";
 import { useTranslation } from "react-i18next";
 import BannerInfo from "@/components/BannerInfo";
+import { AddLiquidity } from "./addLiquidity";
 
 const Swap = () => {
   const { t } = useTranslation();
-  const [sideContent, setSideContent] = useState("");
+  // const [sideContent, setSideContent] = useState("");
 
-  const SideMenuContent = () => {
-    switch (sideContent) {
-      case SIDE_SWAP_CONTENTS.ALL_POOLS:
-        return <AllPoolsTable />;
-      case SIDE_SWAP_CONTENTS.GRAPH:
-        return <Graph />;
-      default:
-        return null;
-    }
-  };
+  // const SideMenuContent = () => {
+  //   switch (sideContent) {
+  //     case SIDE_SWAP_CONTENTS.ALL_POOLS:
+  //       return <AllPoolsTable />;
+  //     case SIDE_SWAP_CONTENTS.GRAPH:
+  //       return <Graph />;
+  //     default:
+  //       return null;
+  //   }
+  // };
 
   return (
     <Container maxW={"container.xl"}>
@@ -46,8 +47,9 @@ const Swap = () => {
           flexDir={{ base: "column", lg: "row" }}
           justifyContent={"center"}
         >
-          <SwapForm setSideContent={setSideContent} sideContent={sideContent} />
-          <SideMenuContent />
+          {/* <SwapForm setSideContent={setSideContent} sideContent={sideContent} /> */}
+          <AddLiquidity />
+          {/* <SideMenuContent /> */}
         </Flex>
       </VStack>
     </Container>

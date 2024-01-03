@@ -8,6 +8,7 @@ export const trustedTokens = {
   "pisco-1": [
     "terra1y52vpctg3whkh9c4nak8udd8jmkvsmprajg5cslw33ekwtcj70hslu8nga",
     "terra1v0uzzq49fa0jp9qkmnce2fzywuqlwm2xw3zd3vdek99jvhpdd28qncnklf",
+    "terra1dc6d6v4wrkv20hmpjuhee56xmg6zl6y3np0sntu4cr9z9hz0h0vqaz7w4k",
   ],
 };
 
