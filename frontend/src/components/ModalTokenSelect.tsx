@@ -79,22 +79,29 @@ const ModalTokenSelect = create(() => {
 
   return (
     <Modal isOpen={modal.visible} onClose={modal.hide} size="xl" isCentered>
-      <ModalOverlay />
-      <ModalContent bgColor="navy.900">
-        <ModalCloseButton />
-        <ModalHeader>Choose Token</ModalHeader>
-        <ModalBody pb="8">
+      <ModalOverlay backdropFilter="blur(7px) " />
+      <ModalContent bgColor="navy.700" overflow={"hidden"} borderRadius={20}>
+        <ModalCloseButton pt={4} color={"navy.700"} />
+        <ModalHeader bgColor={"brand.400"} color={"navy.700"} fontWeight={700}>
+          Select Token
+        </ModalHeader>
+        <ModalBody pb="8" pt={5}>
           <InputGroup>
             <InputLeftElement pointerEvents="none">
-              <HiOutlineMagnifyingGlass color="gray.900" />
+              <HiOutlineMagnifyingGlass color="black" />
             </InputLeftElement>
             <Input
+              bgColor={"white"}
               autoFocus
               type="text"
               value={keyword}
               onPaste={e => {
                 handlePaste(e.clipboardData.getData("text"));
               }}
+              _placeholder={{
+                color: "gray",
+              }}
+              color={"black"}
               placeholder="Search name or paste address"
               onChange={e => setKeyword(e.currentTarget.value)}
             />

@@ -6,10 +6,21 @@ import { Dec } from "@terra-money/feather.js";
 import { useTranslation } from "react-i18next";
 import TokenSelect from "@/components/TokenSelect";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { Box, Text, Icon, Stack, Input, Button } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Icon,
+  Stack,
+  Input,
+  Button,
+  Flex,
+  Spinner,
+} from "@chakra-ui/react";
 import { SwapMachineContext, TokenMachineContext } from "@/machine";
 import { useContext, useState, useEffect, useMemo, useCallback } from "react";
 import WrapWallet from "@/components/WrapWallet";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { useNavigate } from "react-router-dom";
 
 export const AddLiquidity = () => {
   const { t } = useTranslation();
@@ -41,6 +52,12 @@ export const AddLiquidity = () => {
       outputTokenReserve: state.context.pairInfo?.token2_reserve ?? "0",
     };
   });
+
+  const { tokenBalance: inputTokenBalance, isLoading: inputIsLoading } =
+    useTokenBalance(inputAddress);
+
+  const { tokenBalance: outputTokenBalance, isLoading: outputIsLoading } =
+    useTokenBalance(outputAddress);
 
   useEffect(() => {
     if (inputAddress === outputAddress) {
@@ -133,12 +150,22 @@ export const AddLiquidity = () => {
     }
   };
 
+  const onMaxInputClicked = () => {
+    setInputAmount(inputTokenBalance);
+  };
+  const onMaxOutputClicked = () => {
+    setOutputAmount(outputTokenBalance);
+  };
+
+  const navigate = useNavigate();
+
   return (
     <Box
-      bgColor="navy.800"
+      bgColor="navy.700"
       border={"2px solid #A4A4BE"}
       borderRadius="20"
       w="50%"
+      position={"relative"}
     >
       <Box display="flex" alignItems="center" p="1rem">
         <Box display="flex" alignContent="center" alignItems="center">
@@ -150,6 +177,10 @@ export const AddLiquidity = () => {
             mr={5}
             w={6}
             h={6}
+            _hover={{
+              cursor: "pointer",
+            }}
+            onClick={() => navigate("/")}
           />
           <Text fontWeight="700" fontSize="xl">
             {t("swap.addLiquidity.title")}
@@ -157,7 +188,7 @@ export const AddLiquidity = () => {
         </Box>
       </Box>
       <Box p="1rem">
-        <Box bgColor="navy.600" p="1rem" rounded="xl" mb="10">
+        <Box bgColor="navy.500" p="1rem" rounded="xl" mb="10">
           <Text color="brand.400">{t("swap.addLiquidity.tip")}</Text>
         </Box>
         <Text textTransform="uppercase" fontWeight="bold">
@@ -171,16 +202,21 @@ export const AddLiquidity = () => {
             rounded="xl"
             width="full"
             align="center"
+            h={16}
           >
             <TokenSelect value={inputAddress} onChange={setInputAddress} />
             <Box flex="1">
               <Input
-                color="black"
+                color="navy.700"
+                fontWeight={"700"}
                 type="number"
                 _focusVisible={{
                   border: "unset",
                 }}
                 border="unset"
+                px={0}
+                fontSize={18}
+                h={"20px"}
                 required
                 value={inputAmount}
                 onChange={e => {
@@ -188,7 +224,34 @@ export const AddLiquidity = () => {
                   computeOutput(e.currentTarget.value);
                 }}
               />
+              <Flex gap={1} align={"center"}>
+                <Text color={"gray"} fontSize={10}>
+                  Balance :
+                </Text>
+                {inputIsLoading ? (
+                  <Spinner color="gray" w={2} h={2} />
+                ) : (
+                  <Text color={"gray"} fontSize={10}>
+                    {inputTokenBalance}
+                  </Text>
+                )}
+              </Flex>
             </Box>
+            <Button
+              bg={"brand.400"}
+              color={"navy.700"}
+              _hover={{
+                bg: "brand.500",
+              }}
+              p={1}
+              mr={3}
+              h={7}
+              fontSize={12}
+              fontWeight={700}
+              onClick={onMaxInputClicked}
+            >
+              Max
+            </Button>
           </Stack>
 
           <Stack
@@ -198,47 +261,81 @@ export const AddLiquidity = () => {
             rounded="xl"
             width="full"
             align="center"
+            h={16}
           >
             <TokenSelect value={outputAddress} onChange={setOutputAddress} />
             <Box flex="1">
               <Input
-                color="black"
+                color="navy.700"
+                fontWeight={"700"}
                 type="number"
                 _focusVisible={{
                   border: "unset",
                 }}
                 border="unset"
+                px={0}
+                fontSize={18}
+                h={"20px"}
                 required
                 value={outputAmount}
                 onChange={e => {
                   setOutputAmount(e.currentTarget.value);
                 }}
               />
+              <Flex gap={1} align={"center"}>
+                <Text color={"gray"} fontSize={10}>
+                  Balance :
+                </Text>
+                {outputIsLoading ? (
+                  <Spinner color="gray" w={2} h={2} />
+                ) : (
+                  <Text color={"gray"} fontSize={10}>
+                    {outputTokenBalance}
+                  </Text>
+                )}
+              </Flex>
             </Box>
+            <Button
+              bg={"brand.400"}
+              color={"navy.700"}
+              _hover={{
+                bg: "brand.500",
+              }}
+              p={1}
+              mr={3}
+              h={7}
+              fontSize={12}
+              onClick={onMaxOutputClicked}
+              fontWeight={700}
+            >
+              Max
+            </Button>
           </Stack>
         </Stack>
       </Box>
-      <WrapWallet>
-        <Button
-          bgColor={"#FCDD6F"}
-          w={"100%"}
-          mb={10}
-          borderRadius={12}
-          color={"black"}
-          fontWeight={"700"}
-          isDisabled={
-            !isReady || !inputAddress || !outputAddress || !isAllValueFilled
-          }
-          isLoading={isLoading}
-          onClick={() => onSubmit()}
-        >
-          {isNoPair
-            ? "Create Pair"
-            : isNoLiquidity
-              ? "Provide Liquidity"
-              : "Add Liquidity"}
-        </Button>
-      </WrapWallet>
+      <Box px={5}>
+        <WrapWallet>
+          <Button
+            bgColor={"brand.400"}
+            w={"100%"}
+            mb={10}
+            borderRadius={12}
+            color={"black"}
+            fontWeight={"700"}
+            isDisabled={
+              !isReady || !inputAddress || !outputAddress || !isAllValueFilled
+            }
+            isLoading={isLoading}
+            onClick={() => onSubmit()}
+          >
+            {isNoPair
+              ? "CREATE PAIR"
+              : isNoLiquidity
+                ? "PROVIDE LIQUIDITY"
+                : "ADD LIQUIDITY"}
+          </Button>
+        </WrapWallet>
+      </Box>
     </Box>
   );
 };

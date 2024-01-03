@@ -41,7 +41,7 @@ function TokenSelect(props: Props) {
       onClick={handleClick}
       width="max-content"
       py="2"
-      bg="navy.800"
+      bg="navy.500"
       _hover={{ bg: "navy.700" }}
       _active={{ bg: "navy.800" }}
       px="4"
@@ -50,19 +50,22 @@ function TokenSelect(props: Props) {
       flexDirection="row"
       gap="3"
       align="center"
+      h={"100%"}
     >
       {!selectedToken ? (
-        <Box flex="1">
+        <Box flex="1" w={"6rem"}>
           <Text>Select Token</Text>
         </Box>
       ) : (
-        <Flex flex="1" flexDirection="row" align="center" gap={2}>
+        <Flex flex="1" flexDirection="row" align="center" gap={2} w={"6rem"}>
           <Avatar
             src={selectedToken.marketing.logo?.url ?? ""}
             name={selectedToken.info.name}
             size="sm"
           />
-          <Text>{selectedToken.info.name}</Text>
+          <Text fontWeight={700} color={"brand.400"}>
+            {selectedToken.info.name}
+          </Text>
         </Flex>
       )}
       {isLoading ? <Spinner /> : <Icon as={HiChevronDown} />}

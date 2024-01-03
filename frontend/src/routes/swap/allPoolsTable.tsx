@@ -12,9 +12,11 @@ import {
 } from "@chakra-ui/react";
 import { FiPlus } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 const AllPoolsTable = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -30,10 +32,11 @@ const AllPoolsTable = () => {
           {t("swap.poolsTable.title")}
         </Text>
         <Button
-          bgColor={"#FCDD6F"}
+          bgColor={"brand.400"}
           borderRadius={10}
           color={"black"}
           fontWeight={"700"}
+          onClick={() => navigate("/addLiquidity")}
         >
           <Flex align={"center"} gap={3}>
             <Text fontSize={20}>
@@ -46,17 +49,21 @@ const AllPoolsTable = () => {
       <TableContainer px={10} borderRadius={20}>
         <Table colorScheme="teal" bgColor={"#27262C"} borderRadius={15}>
           <Thead>
-            <Tr color={"#FCDD6F"} borderBottomWidth={5} borderColor={"#191B1F"}>
-              <Th color={"#FCDD6F"} borderColor={"#191B1F"}>
+            <Tr
+              color={"brand.400"}
+              borderBottomWidth={5}
+              borderColor={"#191B1F"}
+            >
+              <Th color={"brand.400"} borderColor={"#191B1F"}>
                 POOL
               </Th>
-              <Th color={"#FCDD6F"} borderColor={"#191B1F"}>
+              <Th color={"brand.400"} borderColor={"#191B1F"}>
                 TVL
               </Th>
-              <Th color={"#FCDD6F"} borderColor={"#191B1F"}>
+              <Th color={"brand.400"} borderColor={"#191B1F"}>
                 VOLUME 24H
               </Th>
-              <Th color={"#FCDD6F"} borderColor={"#191B1F"}>
+              <Th color={"brand.400"} borderColor={"#191B1F"}>
                 VOLUME 7D
               </Th>
             </Tr>
