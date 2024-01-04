@@ -8,7 +8,7 @@ const Swap = () => {
   const { t } = useTranslation();
 
   return (
-    <Container maxW={"container.xl"}>
+    <Container maxW={"container.xl"} pb="10rem">
       <VStack gap={10}>
         <BannerInfo />
         <Heading
