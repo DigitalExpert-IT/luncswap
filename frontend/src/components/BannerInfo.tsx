@@ -26,7 +26,7 @@ const BannerInfo = () => {
             <Text
               fontWeight={"700"}
               fontSize={"20px"}
-              color={"#FCDD6F"}
+              color={"brand.400"}
               stroke={"black"}
               position={"relative"}
               textShadow={
