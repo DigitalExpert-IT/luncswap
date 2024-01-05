@@ -78,7 +78,7 @@ const ModalTokenSelect = create(() => {
   };
 
   return (
-    <Modal isOpen={modal.visible} onClose={modal.hide} size="xl" isCentered>
+    <Modal isOpen={modal.visible} onClose={modal.hide} size="xl">
       <ModalOverlay backdropFilter="blur(7px) " />
       <ModalContent bgColor="navy.700" overflow={"hidden"} borderRadius={20}>
         <ModalCloseButton pt={4} color={"navy.700"} />
