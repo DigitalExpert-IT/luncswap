@@ -9,11 +9,12 @@ type SwapType = {
   inputAddress: string;
   outputAddress: string;
   priceImpact: number;
+  inputTokenReserve: string;
 };
 
 export const SwapCompute: React.FC<SwapType> = props => {
   const { t } = useTranslation();
-  const { inputAddress, outputAddress, priceImpact } = props;
+  const { inputAddress, outputAddress, priceImpact, inputTokenReserve } = props;
   const { tokenActor } = useContext(TokenMachineContext);
   const { tokenList } = useSelector(tokenActor, state => {
     return {
@@ -42,12 +43,11 @@ export const SwapCompute: React.FC<SwapType> = props => {
         title={t("swap.details.rate")}
       >{`1 ${getInputToken?.info.name} = 0.010157 ${getOutputToken?.info.name}`}</GridInfo>
       <GridInfo title={t("swap.details.minimumReceived")}>
-        2155 {getOutputToken?.info.name}
+        {`${inputTokenReserve}  ${getOutputToken?.info.name}`}
       </GridInfo>
       <GridInfo title={t("swap.details.swapFee")}>
         0.0396 {getInputToken?.info.name}
       </GridInfo>
-      <GridInfo title={t("swap.details.route")}>2 Separate Routes</GridInfo>
       <GridInfo title={t("swap.details.priceImpact")}>
         <Text color={priceImpact > 0.2 ? "red" : "#039F00"}>
           {priceImpact * 100}%

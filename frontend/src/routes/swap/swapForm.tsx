@@ -91,7 +91,7 @@ const SwapForm = ({
     isSwapReady,
     priceImpact,
     token1Meta,
-    // inputTokenReserve,
+    inputTokenReserve,
     // outputTokenReserve,
     inputTokenDecimals,
     outputTokenDecimals,
@@ -189,6 +189,7 @@ const SwapForm = ({
   }, [computedInputAmount.toString(), computedOutputAmount.toString()]);
 
   const isAllInputFilled = !!inputTokenMeta && !!outputTokenMeta;
+  const inputReserve = toHumaneValue(inputTokenReserve, inputTokenDecimals);
 
   const handleReverse = () => {
     const temp = inputAddress;
@@ -268,7 +269,13 @@ const SwapForm = ({
         <Box px={10} mt={5}>
           <Box>
             <Text fontWeight={"600"}>{t("swap.from")}</Text>
-            <Flex bgColor={"white"} p={"2px"} borderRadius={15} mt={1}>
+            <Flex
+              bgColor={"white"}
+              p={"2px"}
+              borderRadius={15}
+              mt={1}
+              align="center"
+            >
               <Box width={"100%"} flex={"1"}>
                 <TokenSelect value={inputAddress} onChange={setInputAddress} />
               </Box>
@@ -276,6 +283,8 @@ const SwapForm = ({
                 type="number"
                 color={"black"}
                 flex={2}
+                fontWeight={"700"}
+                fontSize={18}
                 height={"inherit"}
                 borderRadius={"20px"}
                 border={"unset"}
@@ -316,6 +325,8 @@ const SwapForm = ({
                     type="number"
                     color={"black"}
                     flex={2}
+                    fontWeight={"700"}
+                    fontSize={18}
                     height={"inherit"}
                     borderRadius={"20px"}
                     border={"unset"}
@@ -365,6 +376,7 @@ const SwapForm = ({
           inputAddress={inputAddress}
           outputAddress={outputAddress}
           priceImpact={priceImpact}
+          inputTokenReserve={inputReserve}
         />
       ) : null}
     </Box>

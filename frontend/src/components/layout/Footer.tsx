@@ -1,4 +1,4 @@
-import { Text, Box, Stack, Container, Image } from "@chakra-ui/react";
+import { Text, Box, Stack, Container, Image, Heading } from "@chakra-ui/react";
 
 export const Footer = () => {
   return (
@@ -21,7 +21,9 @@ export const Footer = () => {
           >
             <Text size="xl">All rights reserved.</Text>
             <Box>
-              <Image src="/logo.png" alt="logo" objectFit="cover" />
+              <Heading size="md" color="white">
+                Luncswap
+              </Heading>
             </Box>
           </Box>
         </Container>

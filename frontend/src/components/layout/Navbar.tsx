@@ -31,7 +31,7 @@ export const Navbar: React.FC<INavbar> = ({ data }) => {
           <Box display="flex" alignContent="center" alignItems="center">
             <Image src="/lunc.png" mr="1rem" />
             <Heading size="md" color="brand.500">
-              Luncswap.
+              Luncswap
             </Heading>
           </Box>
           <Stack direction="row" spacing="2rem" display={{ base: "none" }}>
