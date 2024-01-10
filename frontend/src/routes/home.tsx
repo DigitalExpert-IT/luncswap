@@ -6,8 +6,8 @@ import { useTranslation } from "react-i18next";
 import BannerInfo from "@/components/BannerInfo";
 import AllPoolsTable from "@/routes/swap/allPoolsTable";
 import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
-import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 import { ModalComingSoon } from "@/components/ModalComingSoon";
+import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 
 function Home() {
   const { t } = useTranslation();
@@ -27,7 +27,6 @@ function Home() {
   return (
     <Container maxW={"container.xl"} pb="10rem">
       <ModalComingSoon />
-      {/* <ModalComingSoon /> */}
       <VStack gap={10}>
         <BannerInfo />
         <Heading

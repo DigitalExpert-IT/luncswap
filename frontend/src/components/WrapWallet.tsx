@@ -13,7 +13,17 @@ function WrapWallet(props: Props) {
 
   if (!connectedWallet)
     return (
-      <Button onClick={() => modalConnectWallet.show()}>Connect Wallet</Button>
+      <Button
+        bgColor={"navy.400"}
+        w={"100%"}
+        mb={10}
+        borderRadius={12}
+        color={"black"}
+        fontWeight={"700"}
+        onClick={() => modalConnectWallet.show()}
+      >
+        Connect Wallet
+      </Button>
     );
 
   return props.children;

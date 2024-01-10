@@ -1,11 +1,11 @@
 import { RouteObject } from "react-router-dom";
 import React from "react";
 
-const SwapRoot = React.lazy(() => import("./swapRoot"));
+const AddLiquidity = React.lazy(() => import("./AddLiquidityRoot"));
 
 const routes: RouteObject = {
-  path: "/swap",
-  element: <SwapRoot />,
+  path: "/addLiquidity",
+  element: <AddLiquidity />,
 };
 
 export default routes;
