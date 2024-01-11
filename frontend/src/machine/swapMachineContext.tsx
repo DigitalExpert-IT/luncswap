@@ -93,6 +93,10 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     );
     msgs.push(swapMsg);
     await executeContract(msgs);
+    toast({
+      status: "success",
+      description: "Swap Success",
+    });
   };
 
   const loadTokenBalance = async (token1: TokenMeta, token2: TokenMeta) => {
@@ -230,6 +234,10 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     msgs.push(addLiquidityMsg);
 
     await executeContract(msgs);
+    toast({
+      status: "success",
+      description: "Add Liquidity Success",
+    });
   };
 
   const createPair = async (input: CreatePairInputType) => {
