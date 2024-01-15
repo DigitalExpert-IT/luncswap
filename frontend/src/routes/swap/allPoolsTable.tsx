@@ -13,10 +13,20 @@ import {
 import { FiPlus } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { LiquidityMachineContext } from "@/machine/liquidtyMachineContext";
+import { useContext } from "react";
+import { useSelector } from "@xstate/react";
 
 const AllPoolsTable = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { liquidityActor } = useContext(LiquidityMachineContext);
+  const { pairLiquidity, tokensInfo } = useSelector(liquidityActor, state => {
+    return {
+      tokensInfo: state.context.tokensInfo,
+      pairLiquidity: state.context.pairLiquidity,
+    };
+  });
 
   return (
     <Box
@@ -68,85 +78,49 @@ const AllPoolsTable = () => {
               </Th>
             </Tr>
           </Thead>
-          <Tbody>
-            <Tr>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                <Flex align={"center"}>
-                  <Flex position={"relative"}>
-                    <Image src="/ustc.png" w={4} h={4} />
-                    <Image
-                      src="/lunc.png"
-                      w={4}
-                      h={4}
-                      position={"relative"}
-                      left={"-5px"}
-                    />
+          <Tbody overflow={"scroll"}>
+            {pairLiquidity.map(pair => (
+              <Tr>
+                <Td borderBottomWidth={5} borderColor={"#191B1F"}>
+                  <Flex align={"center"}>
+                    <Flex position={"relative"}>
+                      <Image
+                        src={
+                          tokensInfo[pair.assets[0]?.cw20]?.logo?.url ??
+                          "/lunc.png"
+                        }
+                        w={4}
+                        h={4}
+                      />
+
+                      <Image
+                        src={
+                          tokensInfo[pair.assets[1]?.cw20]?.logo?.url ??
+                          "/lunc.png"
+                        }
+                        w={4}
+                        h={4}
+                        position={"relative"}
+                        left={"-5px"}
+                      />
+                    </Flex>
+                    <Text>
+                      {tokensInfo[pair?.assets[0]?.cw20 ?? ""]?.project}/
+                      {tokensInfo[pair?.assets[1]?.cw20 ?? ""]?.project}
+                    </Text>
                   </Flex>
-                  <Text>USTC/LUNC</Text>
-                </Flex>
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-            </Tr>
-            <Tr>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                <Flex align={"center"}>
-                  <Flex position={"relative"}>
-                    <Image src="/ustc.png" w={4} h={4} />
-                    <Image
-                      src="/lunc.png"
-                      w={4}
-                      h={4}
-                      position={"relative"}
-                      left={"-5px"}
-                    />
-                  </Flex>
-                  <Text>USTC/LUNC</Text>
-                </Flex>
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-            </Tr>
-            <Tr>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                <Flex align={"center"}>
-                  <Flex position={"relative"}>
-                    <Image src="/ustc.png" w={4} h={4} />
-                    <Image
-                      src="/lunc.png"
-                      w={4}
-                      h={4}
-                      position={"relative"}
-                      left={"-5px"}
-                    />
-                  </Flex>
-                  <Text>USTC/LUNC</Text>
-                </Flex>
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-            </Tr>
+                </Td>
+                <Td borderBottomWidth={5} borderColor={"#191B1F"}>
+                  $0
+                </Td>
+                <Td borderBottomWidth={5} borderColor={"#191B1F"}>
+                  $0
+                </Td>
+                <Td borderBottomWidth={5} borderColor={"#191B1F"}>
+                  $0
+                </Td>
+              </Tr>
+            ))}
           </Tbody>
           <Tfoot>
             <Tr>
@@ -155,6 +129,15 @@ const AllPoolsTable = () => {
                   <FaArrowLeftLong />
                   <Text>Page 2 of 3</Text>
                   <FaArrowRightLong />
+                  <Button
+                    onClick={() => {
+                      liquidityActor.send({
+                        type: "LOAD_PAIR_LIST",
+                      });
+                    }}
+                  >
+                    DSASDA
+                  </Button>
                 </Flex>
               </Th>
             </Tr>
