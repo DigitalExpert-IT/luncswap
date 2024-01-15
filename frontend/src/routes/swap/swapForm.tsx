@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable react-hooks/exhaustive-deps */
 import {
   Box,
@@ -18,6 +19,7 @@ import React, {
   useMemo,
   useContext,
   useCallback,
+  useRef,
 } from "react";
 import { TokenMachineContext, SwapMachineContext } from "@/machine";
 import { useTranslation } from "react-i18next";
@@ -77,6 +79,7 @@ const SwapForm = ({
   const [outputAddress, setOutputAddress] = useState("");
   const [inputAmount, setInputAmount] = useState("");
   const [outputAmount, setOutputAmount] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { swapActor } = useContext(SwapMachineContext);
   const { tokenActor } = useContext(TokenMachineContext);
@@ -192,13 +195,19 @@ const SwapForm = ({
   const inputReserve = toHumaneValue(inputTokenReserve, inputTokenDecimals);
 
   const handleReverse = () => {
+    if (!inputRef.current) return;
     const temp = inputAddress;
     setInputAddress(outputAddress);
     setOutputAddress(temp);
-    requestAnimationFrame(() => {
-      setInputAmount("0");
-      setOutputAmount("0");
-      computeInput("0");
+
+    const actualValue = new Dec(outputAmount).mul(
+      Math.pow(10, outputTokenDecimals),
+    );
+
+    swapActor.send({
+      type: "CALCULATE_OUTPUT",
+      // @ts-expect-error
+      value: { tokenMeta: outputTokenMeta, amount: actualValue },
     });
   };
 
@@ -288,6 +297,7 @@ const SwapForm = ({
                 height={"inherit"}
                 borderRadius={"20px"}
                 border={"unset"}
+                ref={inputRef}
                 _focusVisible={{
                   border: "unset",
                 }}
@@ -298,6 +308,7 @@ const SwapForm = ({
                 onKeyUp={e => {
                   computeOutput(e.currentTarget.value);
                 }}
+                disabled={!isSwapReady}
               />
             </Flex>
           </Box>
@@ -340,6 +351,7 @@ const SwapForm = ({
                     onKeyUp={e => {
                       computeInput(e.currentTarget.value);
                     }}
+                    disabled={!isSwapReady}
                   />
                 </InputGroup>
               </FormControl>
