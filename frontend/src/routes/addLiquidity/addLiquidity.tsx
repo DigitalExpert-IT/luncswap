@@ -336,15 +336,6 @@ export const AddLiquidity = () => {
           </Button>
         </WrapWallet>
       </Box>
-      <Button
-        onClick={() => {
-          swapActor.send({
-            type: "LOAD_PAIR_LIST",
-          });
-        }}
-      >
-        dLULULUD
-      </Button>
     </Box>
   );
 };

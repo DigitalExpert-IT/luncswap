@@ -9,6 +9,7 @@ export const liquidityMachine = setup({
     context: {} as {
       pairLiquidity: Pair[];
       tokensInfo: TokenInfoList;
+      isAllPairsFetched: boolean;
     },
   },
   actions: {} as {
@@ -22,6 +23,7 @@ export const liquidityMachine = setup({
   context: {
     pairLiquidity: [],
     tokensInfo: {},
+    isAllPairsFetched: false,
   },
   initial: "idle",
   states: {
@@ -36,10 +38,12 @@ export const liquidityMachine = setup({
       tags: ["loading"],
       invoke: {
         src: "loadPairList",
+        input: ({ context }) => context.pairLiquidity,
         onDone: [
           {
             actions: assign({
-              pairLiquidity: ({ event }) => event.output,
+              pairLiquidity: ({ event }) => event.output.pairList,
+              isAllPairsFetched: ({ event }) => event.output.isAllPairsFetched,
             }),
             target: "load_token_info",
           },
@@ -59,7 +63,7 @@ export const liquidityMachine = setup({
             actions: assign({
               tokensInfo: ({ event }) => event.output,
             }),
-            target: "fetched",
+            target: "idle",
           },
         ],
         onError: {

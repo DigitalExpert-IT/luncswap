@@ -58,7 +58,7 @@ export type TokenMarketingInfo = {
 };
 
 export type TokenInfoList = {
-  [key: string]: TokenMarketingInfo;
+  [key: string]: TokenMarketingInfo & TokenInfo;
 };
 
 export type TokenMeta = {

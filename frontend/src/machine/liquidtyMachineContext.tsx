@@ -3,7 +3,12 @@ import React, { createContext } from "react";
 import { ActorRef, EventFrom, SnapshotFrom, fromPromise } from "xstate";
 import { liquidityMachine } from ".";
 import { useActorRef } from "@xstate/react";
-import { Pair, TokenInfoList, TokenMarketingInfo } from "@/interface";
+import {
+  Pair,
+  TokenInfo,
+  TokenInfoList,
+  TokenMarketingInfo,
+} from "@/interface";
 import { factoryContractAddress } from "@/constant/network";
 
 type EventType = EventFrom<typeof liquidityMachine>;
@@ -22,23 +27,25 @@ export const LiquidityMachineContext = createContext<{
 export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
   const lcd = useLcdClient();
 
-  const loadPairList = async () => {
+  const loadPairList = async (currentPairList: Pair[]) => {
     const pairList = await lcd.wasm.contractQuery<Pair[]>(
       FACTORY_CONTRACT_ADDR,
       {
-        pair_list: {},
+        pair_list: currentPairList.length
+          ? {
+              after: {
+                token1: currentPairList[currentPairList.length - 1].assets[0],
+                token2: currentPairList[currentPairList.length - 1].assets[1],
+              },
+            }
+          : {},
       },
     );
 
-    const tmpTokens = new Set<string>();
-
-    pairList.map(pair => {
-      pair.assets.map(v => {
-        if (v["cw20"]) tmpTokens.add(v["cw20"]);
-      });
-    });
-
-    return pairList;
+    return {
+      isAllPairsFetched: pairList.length === 0,
+      pairList: [...currentPairList, ...pairList],
+    };
   };
 
   const loadTokenInfo = async (pairList: Pair[]) => {
@@ -52,7 +59,7 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
 
     const contractTokens = [...tmpTokens];
 
-    const dataTokenInfo = await Promise.all(
+    const dataTokenMarketInfo = await Promise.all(
       contractTokens.map(tokenAddr =>
         lcd.wasm.contractQuery<TokenMarketingInfo>(tokenAddr, {
           marketing_info: {},
@@ -60,10 +67,19 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
       ),
     );
 
+    const dataTokenInfo = await Promise.all(
+      contractTokens.map(tokenAddr =>
+        lcd.wasm.contractQuery<TokenInfo>(tokenAddr, { token_info: {} }),
+      ),
+    );
+
     let tokensInfo: TokenInfoList = {};
 
-    dataTokenInfo.map((info, i) => {
-      tokensInfo = { ...tokensInfo, [contractTokens[i]]: info };
+    dataTokenMarketInfo.map((info, i) => {
+      tokensInfo = {
+        ...tokensInfo,
+        [contractTokens[i]]: { ...info, ...dataTokenInfo[i] },
+      };
     });
 
     return tokensInfo;
@@ -72,7 +88,7 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
   const actorRef = useActorRef(
     liquidityMachine.provide({
       actors: {
-        loadPairList: fromPromise(() => loadPairList()),
+        loadPairList: fromPromise(({ input }) => loadPairList(input)),
         loadTokenInfo: fromPromise(({ input }) => loadTokenInfo(input)),
       },
     }),

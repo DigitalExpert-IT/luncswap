@@ -1,5 +1,4 @@
-import { Box, Button, Flex, Image, Text } from "@chakra-ui/react";
-import { FaArrowLeftLong, FaArrowRightLong } from "react-icons/fa6";
+import { Box, Button, Flex, Image, Spinner, Text } from "@chakra-ui/react";
 import {
   Table,
   Thead,
@@ -14,19 +13,32 @@ import { FiPlus } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { LiquidityMachineContext } from "@/machine/liquidtyMachineContext";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useSelector } from "@xstate/react";
+import { useInView } from "react-intersection-observer";
 
 const AllPoolsTable = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { liquidityActor } = useContext(LiquidityMachineContext);
-  const { pairLiquidity, tokensInfo } = useSelector(liquidityActor, state => {
-    return {
-      tokensInfo: state.context.tokensInfo,
-      pairLiquidity: state.context.pairLiquidity,
-    };
-  });
+  const { ref, inView } = useInView();
+  const { pairLiquidity, tokensInfo, isAllPairsFetched, isLoading } =
+    useSelector(liquidityActor, state => {
+      return {
+        tokensInfo: state.context.tokensInfo,
+        pairLiquidity: state.context.pairLiquidity,
+        isAllPairsFetched: state.context.isAllPairsFetched,
+        isLoading: state.hasTag("loading"),
+      };
+    });
+
+  useEffect(() => {
+    if (!isLoading && inView && !isAllPairsFetched) {
+      liquidityActor.send({
+        type: "LOAD_PAIR_LIST",
+      });
+    }
+  }, [inView, isLoading, liquidityActor, isAllPairsFetched]);
 
   return (
     <Box
@@ -56,7 +68,12 @@ const AllPoolsTable = () => {
           </Flex>
         </Button>
       </Flex>
-      <TableContainer px={10} borderRadius={20}>
+      <TableContainer
+        px={10}
+        borderRadius={20}
+        overflowY={"scroll"}
+        h={"380px"}
+      >
         <Table colorScheme="teal" bgColor={"#27262C"} borderRadius={15}>
           <Thead>
             <Tr
@@ -86,7 +103,7 @@ const AllPoolsTable = () => {
                     <Flex position={"relative"}>
                       <Image
                         src={
-                          tokensInfo[pair.assets[0]?.cw20]?.logo?.url ??
+                          tokensInfo[pair.assets[0]?.cw20 as ""]?.logo?.url ??
                           "/lunc.png"
                         }
                         w={4}
@@ -95,7 +112,7 @@ const AllPoolsTable = () => {
 
                       <Image
                         src={
-                          tokensInfo[pair.assets[1]?.cw20]?.logo?.url ??
+                          tokensInfo[pair.assets[1]?.cw20 as ""]?.logo?.url ??
                           "/lunc.png"
                         }
                         w={4}
@@ -104,10 +121,17 @@ const AllPoolsTable = () => {
                         left={"-5px"}
                       />
                     </Flex>
-                    <Text>
-                      {tokensInfo[pair?.assets[0]?.cw20 ?? ""]?.project}/
-                      {tokensInfo[pair?.assets[1]?.cw20 ?? ""]?.project}
-                    </Text>
+                    <Flex gap={1}>
+                      <Text>
+                        {tokensInfo[pair?.assets[0]?.cw20 as ""]?.name ??
+                          "LUNC"}
+                      </Text>
+                      <Text>/</Text>
+                      <Text>
+                        {tokensInfo[pair?.assets[1]?.cw20 as ""]?.name ??
+                          "LUNC"}
+                      </Text>
+                    </Flex>
                   </Flex>
                 </Td>
                 <Td borderBottomWidth={5} borderColor={"#191B1F"}>
@@ -122,23 +146,15 @@ const AllPoolsTable = () => {
               </Tr>
             ))}
           </Tbody>
+          <Box ref={ref} />
           <Tfoot>
             <Tr>
               <Th colSpan={4}>
-                <Flex justifyContent={"center"} gap={3} align={"center"}>
-                  <FaArrowLeftLong />
-                  <Text>Page 2 of 3</Text>
-                  <FaArrowRightLong />
-                  <Button
-                    onClick={() => {
-                      liquidityActor.send({
-                        type: "LOAD_PAIR_LIST",
-                      });
-                    }}
-                  >
-                    DSASDA
-                  </Button>
-                </Flex>
+                {isLoading && (
+                  <Flex justifyContent={"center"} w={"full"}>
+                    <Spinner />
+                  </Flex>
+                )}
               </Th>
             </Tr>
           </Tfoot>
