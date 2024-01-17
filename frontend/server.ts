@@ -1,61 +1,41 @@
-// import type { Request, Response, NextFunction } from "express";
-import fs from "node:fs/promises";
-import path, { dirname } from "path";
+import path from "path";
+import express from "express";
+// import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { createServer as createViteServer } from "vite";
 import compression from "compression";
 import serveStatic from "serve-static";
-import express from "express";
 
-const isDev = process.env.NODE_ENV === "test" || !!process.env.VITE_TEST_BUILD;
+const isDev =
+  process.env.NODE_ENV === "development" ||
+  process.env.VITE_DEV_SERVER === "true";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const resolve = (p: string) => path.resolve(__dirname, p);
 
-const getStyleSheets = async () => {
-  try {
-    const assetpath = resolve("public");
-    const file = await fs.readdir(assetpath);
-    const cssAssets = file.filter(l => l.endsWith(".css"));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const allContent: any = [];
-    for (const asset of cssAssets) {
-      const content = await fs.readFile(path.join(assetpath, asset), "utf-8");
-      allContent.push(`<style type="text/css">${content}</style>`);
-    }
-    return allContent.join("\n");
-  } catch (e) {
-    console.log(e);
-  }
-};
-
-const createServer = async (isProd = process.env.NODE_ENV === "production") => {
+const createServer = async () => {
   const app = express();
   const vite = await createViteServer({
     server: { middlewareMode: true },
-    appType: "custom",
     logLevel: isDev ? "error" : "info",
-    root: isProd ? "dist" : "",
-    optimizeDeps: { include: [] },
+    root: resolve("."),
   });
-  app.use(vite.middlewares);
-  const assetsDir = resolve("public");
-  const requestHandler = express.static(assetsDir);
-  app.use(requestHandler);
-  app.use("/public", requestHandler);
 
-  if (isProd) {
+  app.use(vite.middlewares);
+
+  if (isDev) {
+    app.use(express.static(resolve("public")));
+  } else {
     app.use(compression());
-    app.use(
-      serveStatic(resolve("client"), {
-        index: false,
-      }),
-    );
+    app.use(serveStatic(resolve("dist"), { index: false }));
   }
-  const stylesheets = getStyleSheets();
-  console.log(stylesheets);
+
+  const port = process.env.PORT || 3000;
+  app.listen(Number(port), "0.0.0.0", () => {
+    console.log(`Listening on http://localhost:${port}`);
+  });
 };
 
 createServer();
