@@ -16,6 +16,7 @@ import { LiquidityMachineContext } from "@/machine/liquidtyMachineContext";
 import { useContext, useEffect } from "react";
 import { useSelector } from "@xstate/react";
 import { useInView } from "react-intersection-observer";
+import { Denom } from "@/interface";
 
 const AllPoolsTable = () => {
   const { t } = useTranslation();
@@ -39,6 +40,18 @@ const AllPoolsTable = () => {
       });
     }
   }, [inView, isLoading, liquidityActor, isAllPairsFetched]);
+
+  const pairIcon = (pair: Denom) => {
+    if (tokensInfo[pair?.cw20 as ""])
+      return tokensInfo[pair?.cw20 as ""]?.logo?.url;
+    return "/lunc.png";
+  };
+
+  const pairName = (pair: Denom) => {
+    if (pair.native) return "LUNC";
+    if (!tokensInfo[pair.cw20 as ""]) return <Spinner size="sm" />;
+    return tokensInfo[pair.cw20 as ""].name;
+  };
 
   return (
     <Box
@@ -101,20 +114,10 @@ const AllPoolsTable = () => {
                 <Td borderBottomWidth={5} borderColor={"#191B1F"}>
                   <Flex align={"center"}>
                     <Flex position={"relative"}>
-                      <Image
-                        src={
-                          tokensInfo[pair.assets[0]?.cw20 as ""]?.logo?.url ??
-                          "/lunc.png"
-                        }
-                        w={4}
-                        h={4}
-                      />
+                      <Image src={pairIcon(pair.assets[0])} w={4} h={4} />
 
                       <Image
-                        src={
-                          tokensInfo[pair.assets[1]?.cw20 as ""]?.logo?.url ??
-                          "/lunc.png"
-                        }
+                        src={pairIcon(pair.assets[1])}
                         w={4}
                         h={4}
                         position={"relative"}
@@ -122,15 +125,9 @@ const AllPoolsTable = () => {
                       />
                     </Flex>
                     <Flex gap={1}>
-                      <Text>
-                        {tokensInfo[pair?.assets[0]?.cw20 as ""]?.name ??
-                          "LUNC"}
-                      </Text>
+                      <Text>{pairName(pair?.assets[0])}</Text>
                       <Text>/</Text>
-                      <Text>
-                        {tokensInfo[pair?.assets[1]?.cw20 as ""]?.name ??
-                          "LUNC"}
-                      </Text>
+                      <Text>{pairName(pair?.assets[1])}</Text>
                     </Flex>
                   </Flex>
                 </Td>
