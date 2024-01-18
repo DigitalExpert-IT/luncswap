@@ -245,6 +245,8 @@ const SwapForm = ({
     });
   };
 
+  const priceOne = Number(outputAmount) / Number(inputAmount);
+
   return (
     <Box bgColor={"#FCDD6F"} borderRadius={20}>
       <Box
@@ -385,6 +387,7 @@ const SwapForm = ({
       </Box>
       {isSwapReady && isAllInputFilled ? (
         <SwapCompute
+          pricePerPiece={priceOne}
           inputAddress={inputAddress}
           outputAddress={outputAddress}
           priceImpact={priceImpact}

@@ -10,6 +10,7 @@ export const trustedTokens = {
     "terra1v0uzzq49fa0jp9qkmnce2fzywuqlwm2xw3zd3vdek99jvhpdd28qncnklf",
     "terra1dc6d6v4wrkv20hmpjuhee56xmg6zl6y3np0sntu4cr9z9hz0h0vqaz7w4k",
     "terra1dc62muhtvzurajky2wwll69afa3re5jv393jnmteg6vn0dlwl75s9yla50",
+    "terra15tc0ucch3s0ja5cgvr4np0qu8e74hwrq2l4wz9j6vzl09qnfhedqhe9av4",
   ],
 };
 
