@@ -1,11 +1,11 @@
-import { Button } from "@chakra-ui/react";
+import { Button, ButtonProps } from "@chakra-ui/react";
 import { useModal } from "@ebay/nice-modal-react";
 import { useConnectedWallet } from "@terra-money/wallet-kit";
 import ModalConnectWallet from "./ModalConnectWallet";
 
-type Props = {
+interface Props extends ButtonProps {
   children: React.ReactNode;
-};
+}
 
 function WrapWallet(props: Props) {
   const connectedWallet = useConnectedWallet();
@@ -21,6 +21,7 @@ function WrapWallet(props: Props) {
         color={"black"}
         fontWeight={"700"}
         onClick={() => modalConnectWallet.show()}
+        {...props}
       >
         Connect Wallet
       </Button>
