@@ -13,7 +13,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider as NiceModalProvider } from "@ebay/nice-modal-react";
 import { piscoLCD } from "@/constant/Networks";
 import { SwapMachineProvider, TokenMachineProvider } from "./machine";
-import { LiquidityMachineProvider } from "./machine/liquidtyMachineContext";
+import { LiquidityMachineProvider } from "./machine/liquidityMachineContext";
 
 const Home = React.lazy(() => import("@/routes/home"));
 

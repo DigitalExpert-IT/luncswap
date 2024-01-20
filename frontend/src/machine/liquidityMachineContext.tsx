@@ -27,7 +27,7 @@ export const LiquidityMachineContext = createContext<{
 export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
   const lcd = useLcdClient();
 
-  const loadPairList = async (currentPairList: Pair[]) => {
+  const refetchPairList = async (currentPairList: Pair[]) => {
     const pairList = await lcd.wasm.contractQuery<Pair[]>(
       FACTORY_CONTRACT_ADDR,
       {
@@ -85,10 +85,25 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
     return tokensInfo;
   };
 
+  const loadPairList = async () => {
+    const pairList = await lcd.wasm.contractQuery<Pair[]>(
+      FACTORY_CONTRACT_ADDR,
+      {
+        pair_list: {},
+      },
+    );
+
+    return {
+      isAllPairsFetched: pairList.length === 0,
+      pairList,
+    };
+  };
+
   const actorRef = useActorRef(
     liquidityMachine.provide({
       actors: {
-        loadPairList: fromPromise(({ input }) => loadPairList(input)),
+        loadPairList: fromPromise(() => loadPairList()),
+        refetchPairList: fromPromise(({ input }) => refetchPairList(input)),
         loadTokenInfo: fromPromise(({ input }) => loadTokenInfo(input)),
       },
     }),

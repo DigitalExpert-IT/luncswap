@@ -12,8 +12,8 @@ import {
 import { FiPlus } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { LiquidityMachineContext } from "@/machine/liquidtyMachineContext";
-import { useContext, useEffect } from "react";
+import { LiquidityMachineContext } from "@/machine/liquidityMachineContext";
+import { useContext, useEffect, useRef } from "react";
 import { useSelector } from "@xstate/react";
 import { useInView } from "react-intersection-observer";
 import { Denom } from "@/interface";
@@ -33,10 +33,17 @@ const AllPoolsTable = () => {
       };
     });
 
+  const isMounted = useRef(false);
+
   useEffect(() => {
-    if (!isLoading && inView && !isAllPairsFetched) {
+    if (!isMounted.current) {
       liquidityActor.send({
         type: "LOAD_PAIR_LIST",
+      });
+      isMounted.current = true;
+    } else if (!isLoading && inView && !isAllPairsFetched) {
+      liquidityActor.send({
+        type: "REFETCH_PAIR_LIST",
       });
     }
   }, [inView, isLoading, liquidityActor, isAllPairsFetched]);
