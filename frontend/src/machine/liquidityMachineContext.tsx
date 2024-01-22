@@ -1,4 +1,4 @@
-import { useLcdClient } from "@terra-money/wallet-kit";
+import { useConnectedWallet, useLcdClient } from "@terra-money/wallet-kit";
 import React, { createContext } from "react";
 import { ActorRef, EventFrom, SnapshotFrom, fromPromise } from "xstate";
 import { liquidityMachine } from ".";
@@ -26,6 +26,7 @@ export const LiquidityMachineContext = createContext<{
 
 export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
   const lcd = useLcdClient();
+  const connectedWallet = useConnectedWallet();
 
   const refetchPairList = async (currentPairList: Pair[]) => {
     const pairList = await lcd.wasm.contractQuery<Pair[]>(
@@ -99,12 +100,27 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
     };
   };
 
+  const loadBalancePair = async (pairList: Pair[]) => {
+    if (connectedWallet) {
+      const balances: { balance: string }[] = pairList.map(pair =>
+        lcd.wasm.contractQuery(pair.lp_address, {
+          balance: { address: connectedWallet.addresses[CHAIN_ID] },
+        }),
+      ) as [];
+      const res = await Promise.all(balances);
+
+      return res.map(val => val.balance);
+    }
+    return [];
+  };
+
   const actorRef = useActorRef(
     liquidityMachine.provide({
       actors: {
         loadPairList: fromPromise(() => loadPairList()),
         refetchPairList: fromPromise(({ input }) => refetchPairList(input)),
         loadTokenInfo: fromPromise(({ input }) => loadTokenInfo(input)),
+        loadBalancePair: fromPromise(({ input }) => loadBalancePair(input)),
       },
     }),
   );

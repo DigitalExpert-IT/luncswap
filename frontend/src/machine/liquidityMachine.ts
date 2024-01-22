@@ -5,12 +5,14 @@ type ContextType = {
   pairLiquidity: Pair[];
   tokensInfo: TokenInfoList;
   isAllPairsFetched: boolean;
+  userPairBalances: { lp_address: string; balance: string }[];
 };
 
 const initialContext: ContextType = {
   pairLiquidity: [],
   tokensInfo: {},
   isAllPairsFetched: false,
+  userPairBalances: [],
 };
 
 export const liquidityMachine = setup({
@@ -34,6 +36,7 @@ export const liquidityMachine = setup({
       isAllPairsFetched: boolean;
     }>;
     loadTokenInfo: PromiseActorLogic<TokenInfoList>;
+    loadBalancePair: PromiseActorLogic<string>;
   },
 }).createMachine({
   id: "liquidity",
@@ -80,7 +83,7 @@ export const liquidityMachine = setup({
             actions: assign({
               tokensInfo: ({ event }) => event.output,
             }),
-            target: "idle",
+            target: "load_balance_pair",
           },
         ],
         onError: {
@@ -104,6 +107,26 @@ export const liquidityMachine = setup({
           },
         ],
         onError: {},
+      },
+    },
+
+    load_balance_pair: {
+      tags: ["loading"],
+      invoke: {
+        src: "loadBalancePair",
+        input: ({ context }) => context.pairLiquidity,
+        onDone: [
+          {
+            actions: assign({
+              userPairBalances: ({ event, context }) =>
+                context.pairLiquidity.map((pair, id) => ({
+                  lp_address: pair.lp_address,
+                  balance: event.output[id],
+                })),
+            }),
+            target: "idle",
+          },
+        ],
       },
     },
   },
