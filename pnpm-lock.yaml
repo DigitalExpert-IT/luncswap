@@ -62,15 +62,24 @@ importers:
       '@terra-money/feather.js':
         specifier: ^1.2.1
         version: 1.2.1
+      '@terra-money/terra.js':
+        specifier: ^3.1.10
+        version: 3.1.10
       '@terra-money/wallet-kit':
         specifier: ^1.0.16
-        version: 1.0.16(@cosmjs/amino@0.31.3)(@terra-money/feather.js@1.2.1)(axios@0.27.2)(react@18.2.0)
+        version: 1.0.16(@cosmjs/amino@0.31.3)(@terra-money/feather.js@1.2.1)(axios@1.6.7)(react@18.2.0)
+      '@types/axios':
+        specifier: ^0.14.0
+        version: 0.14.0
       '@xstate/inspect':
         specifier: ^0.8.0
         version: 0.8.0(ws@8.16.0)(xstate@5.4.0)
       '@xstate/react':
         specifier: ^4.0.1
         version: 4.0.1(@types/react@18.2.42)(react@18.2.0)(xstate@5.4.0)
+      axios:
+        specifier: ^1.6.7
+        version: 1.6.7
       chakra-react-select:
         specifier: ^4.7.6
         version: 4.7.6(@chakra-ui/form-control@2.2.0)(@chakra-ui/icon@3.2.0)(@chakra-ui/layout@2.3.1)(@chakra-ui/media-query@3.3.0)(@chakra-ui/menu@2.2.1)(@chakra-ui/spinner@2.1.0)(@chakra-ui/system@2.6.2)(@emotion/react@11.11.1)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)
@@ -95,6 +104,9 @@ importers:
       match-sorter:
         specifier: ^6.3.1
         version: 6.3.1
+      mongodb:
+        specifier: ^6.3.0
+        version: 6.3.0
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -144,6 +156,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.15
         version: 18.2.17
+      '@types/serve-static':
+        specifier: ^1.15.5
+        version: 1.15.5
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.10.0
         version: 6.13.2(@typescript-eslint/parser@6.13.2)(eslint@8.55.0)(typescript@5.3.3)
@@ -2568,6 +2583,15 @@ packages:
       react: 18.2.0
     dev: false
 
+  /@classic-terra/terra.proto@1.1.0:
+    resolution: {integrity: sha512-bYhQG5LUaGF0KPRY9hYT/HEcd1QExZPQd6zLV/rQkCe/eDxfwFRLzZHpaaAdfWoAAZjsRWqJbUCqCg7gXBbJpw==}
+    dependencies:
+      '@improbable-eng/grpc-web': 0.14.1(google-protobuf@3.21.2)
+      google-protobuf: 3.21.2
+      long: 4.0.0
+      protobufjs: 6.11.4
+    dev: false
+
   /@cosmjs/amino@0.31.3:
     resolution: {integrity: sha512-36emtUq895sPRX8PTSOnG+lhJDCVyIcE0Tr5ct59sUbgQiI14y43vj/4WAlJ/utSOxy+Zhj9wxcs4AZfu0BHsw==}
     dependencies:
@@ -3598,6 +3622,12 @@ packages:
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
     dev: false
 
+  /@mongodb-js/saslprep@1.1.4:
+    resolution: {integrity: sha512-8zJ8N1x51xo9hwPh6AWnKdLGEC5N3lDa6kms1YHmFBoRhTpJR6HG8wWk0td1MVCu9cD4YBrvjZEtd5Obw0Fbnw==}
+    dependencies:
+      sparse-bitfield: 3.0.3
+    dev: false
+
   /@noble/hashes@1.3.2:
     resolution: {integrity: sha512-MVC8EAQp7MvEcm30KWENFjgR+Mkmf+D189XJTkFIlwohU5hcBbn1ZkKq7KVTi2Hme3PMGF390DaL52beVrIihQ==}
     engines: {node: '>= 16'}
@@ -4212,6 +4242,20 @@ packages:
       bech32: 2.0.0
     dev: false
 
+  /@terra-money/station-connector@1.0.16(@cosmjs/amino@0.31.3)(@terra-money/feather.js@1.2.1)(axios@1.6.7):
+    resolution: {integrity: sha512-m16a4KkUWF+Mhmf4LiBO1TvCdIabJFudbCC+Cr2JwknZnPQ2SmMHSfyBhS5SaJGWIhmHd4yZalRdNBr+QUc6hA==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@cosmjs/amino': ^0.31.0
+      '@terra-money/feather.js': ^1.0.8
+      axios: ^0.27.2
+    dependencies:
+      '@cosmjs/amino': 0.31.3
+      '@terra-money/feather.js': 1.2.1
+      axios: 1.6.7
+      bech32: 2.0.0
+    dev: false
+
   /@terra-money/station-wallet@1.0.16(@cosmjs/amino@0.31.3)(@terra-money/feather.js@1.2.1)(axios@0.27.2):
     resolution: {integrity: sha512-yofrC7TQFr5kRjgVLcBq++56mtYY/w1dFBFCcOyhgwi/t1Vx9r4S0ejjMm1wmhWQpkIsk49Nr7aowafn82Bdbw==}
     engines: {node: '>=16'}
@@ -4226,6 +4270,20 @@ packages:
       - axios
     dev: false
 
+  /@terra-money/station-wallet@1.0.16(@cosmjs/amino@0.31.3)(@terra-money/feather.js@1.2.1)(axios@1.6.7):
+    resolution: {integrity: sha512-yofrC7TQFr5kRjgVLcBq++56mtYY/w1dFBFCcOyhgwi/t1Vx9r4S0ejjMm1wmhWQpkIsk49Nr7aowafn82Bdbw==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@terra-money/feather.js': ^1.0.8
+    dependencies:
+      '@terra-money/feather.js': 1.2.1
+      '@terra-money/station-connector': 1.0.16(@cosmjs/amino@0.31.3)(@terra-money/feather.js@1.2.1)(axios@1.6.7)
+      '@terra-money/wallet-interface': 1.0.16(@terra-money/feather.js@1.2.1)
+    transitivePeerDependencies:
+      - '@cosmjs/amino'
+      - axios
+    dev: false
+
   /@terra-money/template-scaffolding@1.0.1:
     resolution: {integrity: sha512-ynbN2jqRQ5JP9dSaS4MPRGpQTc2RvRwhVrlV1YMLv9SCSkxutcBts86crvxyFJCdbDjgJrNEvigP9c8AXAwBOQ==}
     dependencies:
@@ -4233,9 +4291,40 @@ packages:
       request: 2.88.2
     dev: false
 
+  /@terra-money/terra.js@3.1.10:
+    resolution: {integrity: sha512-MqR16LjTUyVD4HnEavP1iBW0c1roCoRHH/E1x9P44pXzgtv2wsMeP+2un4Bnck4Nkv/46Xvy/BSKiY90ll3BKA==}
+    engines: {node: '>=14'}
+    dependencies:
+      '@classic-terra/terra.proto': 1.1.0
+      '@terra-money/terra.proto': 2.1.0
+      axios: 0.27.2
+      bech32: 2.0.0
+      bip32: 2.0.6
+      bip39: 3.1.0
+      bufferutil: 4.0.8
+      decimal.js: 10.4.3
+      jscrypto: 1.0.3
+      readable-stream: 3.6.2
+      secp256k1: 4.0.3
+      tmp: 0.2.1
+      utf-8-validate: 5.0.10
+      ws: 7.5.9(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /@terra-money/terra.proto@0.1.7:
     resolution: {integrity: sha512-NXD7f6pQCulvo6+mv6MAPzhOkUzRjgYVuHZE/apih+lVnPG5hDBU0rRYnOGGofwvKT5/jQoOENnFn/gioWWnyQ==}
     dependencies:
+      google-protobuf: 3.21.2
+      long: 4.0.0
+      protobufjs: 6.11.4
+    dev: false
+
+  /@terra-money/terra.proto@2.1.0:
+    resolution: {integrity: sha512-rhaMslv3Rkr+QsTQEZs64FKA4QlfO0DfQHaR6yct/EovenMkibDEQ63dEL6yJA6LCaEQGYhyVB9JO9pTUA8ybw==}
+    dependencies:
+      '@improbable-eng/grpc-web': 0.14.1(google-protobuf@3.21.2)
       google-protobuf: 3.21.2
       long: 4.0.0
       protobufjs: 6.11.4
@@ -4318,6 +4407,23 @@ packages:
       - '@cosmjs/amino'
     dev: false
 
+  /@terra-money/wallet-kit@1.0.16(@cosmjs/amino@0.31.3)(@terra-money/feather.js@1.2.1)(axios@1.6.7)(react@18.2.0):
+    resolution: {integrity: sha512-a3Df2awAqAD/DdpmLwSWGHpaxpUgi+Y19YP8fnBXyk3Xh3Ey3ZZCvQvCg344j6RKYBurjsQGr8/N7wB3otUWGg==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@terra-money/feather.js': ^1.0.8
+      axios: ^0.27.2
+      react: ^18.2.0
+    dependencies:
+      '@terra-money/feather.js': 1.2.1
+      '@terra-money/station-wallet': 1.0.16(@cosmjs/amino@0.31.3)(@terra-money/feather.js@1.2.1)(axios@1.6.7)
+      '@terra-money/wallet-interface': 1.0.16(@terra-money/feather.js@1.2.1)
+      axios: 1.6.7
+      react: 18.2.0
+    transitivePeerDependencies:
+      - '@cosmjs/amino'
+    dev: false
+
   /@tsconfig/node10@1.0.9:
     resolution: {integrity: sha512-jNsYVVxU8v5g43Erja32laIDHXeoNvFEpX33OK4d6hljo3jDhCBDhx5dhCCTMWUojscpAagGiRkBKxpdl9fxqA==}
 
@@ -4329,6 +4435,15 @@ packages:
 
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+
+  /@types/axios@0.14.0:
+    resolution: {integrity: sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==}
+    deprecated: This is a stub types definition for axios (https://github.com/mzabriskie/axios). axios provides its own type definitions, so you don't need @types/axios installed!
+    dependencies:
+      axios: 1.6.7
+    transitivePeerDependencies:
+      - debug
+    dev: false
 
   /@types/body-parser@1.19.5:
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
@@ -4494,6 +4609,16 @@ packages:
       '@types/mime': 3.0.4
       '@types/node': 20.11.4
     dev: true
+
+  /@types/webidl-conversions@7.0.3:
+    resolution: {integrity: sha512-CiJJvcRtIgzadHCYXw7dqEnMNRjhGZlYK05Mj9OyktqV8uVT8fD2BFOB7S1uwBE3Kj2Z+4UyPmFw/Ixgw/LAlA==}
+    dev: false
+
+  /@types/whatwg-url@11.0.4:
+    resolution: {integrity: sha512-lXCmTWSHJvf0TRSO58nm978b8HJ/EdsSsEKLd3ODHFjo+3VGAyyTp4v50nWvwtzBxSMQrVOK7tcuN0zGPLICMw==}
+    dependencies:
+      '@types/webidl-conversions': 7.0.3
+    dev: false
 
   /@typescript-eslint/eslint-plugin@6.13.2(@typescript-eslint/parser@6.13.2)(eslint@8.55.0)(typescript@5.3.3):
     resolution: {integrity: sha512-3+9OGAWHhk4O1LlcwLBONbdXsAhLjyCFogJY/cWy2lxdVJ2JrcTF2pTGMaLl2AE7U1l31n8Py4a8bx5DLf/0dQ==}
@@ -4906,6 +5031,16 @@ packages:
       - debug
     dev: false
 
+  /axios@1.6.7:
+    resolution: {integrity: sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==}
+    dependencies:
+      follow-redirects: 1.15.5
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
   /babel-plugin-macros@3.1.0:
     resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==}
     engines: {node: '>=10', npm: '>=6'}
@@ -5182,6 +5317,11 @@ packages:
       bs58: 4.0.1
       create-hash: 1.2.0
       safe-buffer: 5.2.1
+    dev: false
+
+  /bson@6.2.0:
+    resolution: {integrity: sha512-ID1cI+7bazPDyL9wYy9GaQ8gEEohWvcUl/Yf0dIdutJxnmInEEyCsb4awy/OiBfall7zBA179Pahi3vCdFze3Q==}
+    engines: {node: '>=16.20.1'}
     dev: false
 
   /buffer-xor@1.0.3:
@@ -6378,6 +6518,16 @@ packages:
         optional: true
     dev: false
 
+  /follow-redirects@1.15.5:
+    resolution: {integrity: sha512-vSFWUON1B+yAw1VN4xMfxgn5fTUiaOzAJCKBwIIgT/+7CuGy9+r+5gITvP62j3RmaD5Ph65UaERdOSRGUzZtgw==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
+
   /for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
     dependencies:
@@ -7296,6 +7446,10 @@ packages:
       timers-ext: 0.1.7
     dev: false
 
+  /memory-pager@1.5.0:
+    resolution: {integrity: sha512-ZS4Bp4r/Zoeq6+NLJpP+0Zzm0pR8whtGPf1XExKLJBAczGMnSi3It14OiNCStjQjM6NU1okjQGSxgEZN8eBYKg==}
+    dev: false
+
   /merge-descriptors@1.0.1:
     resolution: {integrity: sha512-cCi6g3/Zr1iqQi6ySbseM1Xvooa98N0w31jzUYrXPX2xqObmFGHJ0tQ5u74H3mVh7wLouTseZyYIq39g8cNp1w==}
     dev: false
@@ -7389,6 +7543,45 @@ packages:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
     engines: {node: '>=10'}
     hasBin: true
+    dev: false
+
+  /mongodb-connection-string-url@3.0.0:
+    resolution: {integrity: sha512-t1Vf+m1I5hC2M5RJx/7AtxgABy1cZmIPQRMXw+gEIPn/cZNF3Oiy+l0UIypUwVB5trcWHq3crg2g3uAR9aAwsQ==}
+    dependencies:
+      '@types/whatwg-url': 11.0.4
+      whatwg-url: 13.0.0
+    dev: false
+
+  /mongodb@6.3.0:
+    resolution: {integrity: sha512-tt0KuGjGtLUhLoU263+xvQmPHEGTw5LbcNC73EoFRYgSHwZt5tsoJC110hDyO1kjQzpgNrpdcSza9PknWN4LrA==}
+    engines: {node: '>=16.20.1'}
+    peerDependencies:
+      '@aws-sdk/credential-providers': ^3.188.0
+      '@mongodb-js/zstd': ^1.1.0
+      gcp-metadata: ^5.2.0
+      kerberos: ^2.0.1
+      mongodb-client-encryption: '>=6.0.0 <7'
+      snappy: ^7.2.2
+      socks: ^2.7.1
+    peerDependenciesMeta:
+      '@aws-sdk/credential-providers':
+        optional: true
+      '@mongodb-js/zstd':
+        optional: true
+      gcp-metadata:
+        optional: true
+      kerberos:
+        optional: true
+      mongodb-client-encryption:
+        optional: true
+      snappy:
+        optional: true
+      socks:
+        optional: true
+    dependencies:
+      '@mongodb-js/saslprep': 1.1.4
+      bson: 6.2.0
+      mongodb-connection-string-url: 3.0.0
     dev: false
 
   /ms@2.0.0:
@@ -8427,6 +8620,12 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
+  /sparse-bitfield@3.0.3:
+    resolution: {integrity: sha512-kvzhi7vqKTfkh0PZU+2D2PIllw2ymqJKujUcyPMd9Y75Nv4nPbGJZXNhxsgdQab2BmlDct1YnfQCguEvHr7VsQ==}
+    dependencies:
+      memory-pager: 1.5.0
+    dev: false
+
   /sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
     dev: false
@@ -8705,6 +8904,13 @@ packages:
     engines: {node: '>=0.8'}
     dependencies:
       psl: 1.9.0
+      punycode: 2.3.1
+    dev: false
+
+  /tr46@4.1.1:
+    resolution: {integrity: sha512-2lv/66T7e5yNyhAAC4NaKe5nVavzuGJQVVtRYLyQ2OI8tsJ61PMLlelehb0wi2Hx6+hT/OJUWZcw8MjlSRnxvw==}
+    engines: {node: '>=14'}
+    dependencies:
       punycode: 2.3.1
     dev: false
 
@@ -9104,6 +9310,19 @@ packages:
   /void-elements@3.1.0:
     resolution: {integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==}
     engines: {node: '>=0.10.0'}
+    dev: false
+
+  /webidl-conversions@7.0.0:
+    resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
+    engines: {node: '>=12'}
+    dev: false
+
+  /whatwg-url@13.0.0:
+    resolution: {integrity: sha512-9WWbymnqj57+XEuqADHrCJ2eSXzn8WXIW/YSGaZtb2WKAInQ6CHfaUUcTyyver0p8BDg5StLQq8h1vtZuwmOig==}
+    engines: {node: '>=16'}
+    dependencies:
+      tr46: 4.1.1
+      webidl-conversions: 7.0.0
     dev: false
 
   /which-typed-array@1.1.13:
