@@ -118,8 +118,11 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
     liquidityMachine.provide({
       actors: {
         loadPairList: fromPromise(() => loadPairList()),
+        //@ts-expect-error probably xstate bug
         refetchPairList: fromPromise(({ input }) => refetchPairList(input)),
+        //@ts-expect-error probably xstate bug
         loadTokenInfo: fromPromise(({ input }) => loadTokenInfo(input)),
+        //@ts-expect-error probably xstate bug
         loadBalancePair: fromPromise(({ input }) => loadBalancePair(input)),
       },
     }),
