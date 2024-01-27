@@ -1,13 +1,5 @@
 import { TxLog, TxInfo } from "@terra-money/terra.js";
-
-type PairInfo = {
-  type: "pair_info";
-  pairContractAddress: string;
-  lpTokenContractAddress: string;
-  factoryContractAddress: string;
-  blockHeight: number;
-  tx: TxInfo;
-};
+import { PairInfo } from "@/backend/model";
 
 class TxWrapper {
   private tx: TxInfo;
@@ -56,22 +48,34 @@ class TxWrapper {
         "_contract_address",
       );
       if (executedContractAddress === factoryContractAddress) {
-        let pairContractAddress = "";
+        let contractAddress = "";
         let lpTokenContractAddress = "";
+        let sender = "";
         for (const log of this.logList) {
           const eventsByType = log.eventsByType;
-          pairContractAddress =
+          contractAddress =
             eventsByType?.instantiate?._contract_address?.[0] ?? "";
           lpTokenContractAddress =
             eventsByType?.instantiate?._contract_address?.[1] ?? "";
+          sender = eventsByType?.message?.sender[0] ?? "";
+
+          if (
+            contractAddress !== "" &&
+            lpTokenContractAddress !== "" &&
+            sender !== ""
+          )
+            break;
         }
         return {
           type: "pair_info",
+          hash: this.tx.txhash,
           blockHeight: this.tx.height,
-          factoryContractAddress,
-          pairContractAddress,
-          lpTokenContractAddress,
+          timestamp: new Date(this.tx.timestamp),
           tx: this.tx,
+          sender,
+          contractAddress,
+          lpTokenContractAddress,
+          factoryContractAddress,
         };
       }
     }

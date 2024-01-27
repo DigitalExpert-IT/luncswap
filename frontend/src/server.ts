@@ -2,13 +2,14 @@
 import { config } from "dotenv";
 import { fileURLToPath } from "node:url";
 import { ViteDevServer } from "vite";
+import { createWorker } from "@/backend/worker";
+import { initializeDb } from "@/backend/db";
 import path from "path";
 import express from "express";
 import fs from "node:fs/promises";
 import compression from "compression";
 import serveStatic from "serve-static";
 import apiRoute from "@/backend/router";
-import { createWorker } from "@/backend/worker";
 
 config();
 
@@ -62,10 +63,10 @@ const compileHTML = (() => {
   };
 })();
 
-// run worker
-createWorker("pisco-1");
-
 const createServer = async () => {
+  const db = await initializeDb();
+  // run worker
+  createWorker("pisco-1", db);
   const app = express();
   app.use(express.static(resolve("public")));
 
