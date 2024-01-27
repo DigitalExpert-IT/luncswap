@@ -9,7 +9,7 @@ import express from "express";
 import fs from "node:fs/promises";
 import compression from "compression";
 import serveStatic from "serve-static";
-import apiRoute from "@/backend/router";
+import { setupRouter } from "@/backend/router";
 
 config();
 
@@ -82,7 +82,7 @@ const createServer = async () => {
     app.use(serveStatic(resolve("dist"), { index: false }));
   }
 
-  app.use("/api", apiRoute);
+  app.use("/api", setupRouter(db));
   app.get("*", async (req, res) => {
     const url = req.originalUrl;
     const htmlString = await compileHTML(url);

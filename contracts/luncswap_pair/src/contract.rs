@@ -341,6 +341,11 @@ pub fn execute_remove_liquidity(
     }
     .into();
 
+    let token1_reserve = TOKEN1.load(deps.storage)?;
+    let token1_reserve = token1_reserve.reserve;
+    let token2_reserve = TOKEN2.load(deps.storage)?;
+    let token2_reserve = token2_reserve.reserve;
+
     Ok(Response::new()
         .add_messages(vec![
             token1_transfer_msg,
@@ -348,6 +353,9 @@ pub fn execute_remove_liquidity(
             lp_token_burn_msg,
         ])
         .add_attributes(vec![
+            attr("event_type", "add_liquidity"),
+            attr("token1_reserve", token1_reserve),
+            attr("token2_reserve", token2_reserve),
             attr("token1_returned", token1_amount),
             attr("token2_returned", token2_amount),
             attr("liquidity_burned", amount),
@@ -436,10 +444,19 @@ pub fn execute_add_liquidity(
     })?;
 
     let mint_msg = mint_lp_tokens(&info.sender, liquidity_amount, &lp_token_addr)?;
+
+    let token1_reserve = TOKEN1.load(deps.storage)?;
+    let token1_reserve = token1_reserve.reserve;
+    let token2_reserve = TOKEN2.load(deps.storage)?;
+    let token2_reserve = token2_reserve.reserve;
+
     Ok(Response::new()
         .add_messages(transfer_msgs)
         .add_message(mint_msg)
         .add_attributes(vec![
+            attr("event_type", "add_liquidity"),
+            attr("token1_reserve", token1_reserve),
+            attr("token2_reserve", token2_reserve),
             attr("token1_amount", token1_amount),
             attr("token2_amount", token2_amount),
             attr("liquidity_received", liquidity_amount),
@@ -543,8 +560,16 @@ pub fn execute_swap(
         },
     )?;
 
+    let token1_reserve = TOKEN1.load(deps.storage)?;
+    let token1_reserve = token1_reserve.reserve;
+    let token2_reserve = TOKEN2.load(deps.storage)?;
+    let token2_reserve = token2_reserve.reserve;
+
     Ok(Response::new().add_messages(msgs).add_attributes(vec![
-        attr("native_sold", input_amount),
+        attr("event_type", "swap"),
+        attr("token1_reserve", token1_reserve),
+        attr("token2_reserve", token2_reserve),
+        attr("token_sold", input_amount),
         attr("token_bought", token_bought),
     ]))
 }

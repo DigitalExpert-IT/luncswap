@@ -1,5 +1,5 @@
 import { TxLog, TxInfo } from "@terra-money/terra.js";
-import { PairInfo } from "@/backend/model";
+import { PairInfo, PriceChangeInfo } from "@/backend/model";
 
 class TxWrapper {
   private tx: TxInfo;
@@ -77,6 +77,47 @@ class TxWrapper {
           lpTokenContractAddress,
           factoryContractAddress,
         };
+      }
+    }
+
+    return null;
+  }
+
+  public parsePriceChange(pairContractAddress: string): PriceChangeInfo | null {
+    if (this.tx.code !== 0) return null; // ignore failed tx
+    const result = {
+      type: "price_change",
+      timestamp: new Date(this.tx.timestamp),
+      tx: this.tx,
+      hash: this.tx.txhash,
+      blockHeight: this.tx.height,
+      contractAddress: pairContractAddress,
+      token1Reserve: "",
+      token2Reserve: "",
+      eventType: "",
+    } as PriceChangeInfo;
+
+    for (const log of this.logList) {
+      for (const event of log.events) {
+        if (event.type !== "wasm") continue;
+        if (
+          !event.attributes.some(item => {
+            return (
+              item.key === "event_type" &&
+              ["add_liquidity", "swap", "remove_liquidity"].includes(item.value)
+            );
+          })
+        ) {
+          continue;
+        }
+
+        for (const attr of event.attributes) {
+          if (attr.key === "token1_reserve") result.token1Reserve = attr.value;
+          if (attr.key === "token2_reserve") result.token2Reserve = attr.value;
+          if (attr.key === "event_type") result.eventType = attr.value;
+        }
+
+        return result;
       }
     }
 

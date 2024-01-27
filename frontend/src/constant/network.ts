@@ -14,7 +14,7 @@ export const lcdConfigMap = {
 } as const;
 
 export const factoryContractAddress = {
-  "pisco-1": "terra1tepxa0vatksmqnywmpsnzmp2nqpr9ed9scm62gex3maygeaegk0sdq6x9l",
+  "pisco-1": "terra1jnfvfm2e573zrdykrp4cxmm6kj56sf3e5e3x9pm6f3vt82lpjzkqx0cya5",
 };
 
 export const trustedTokens = {
