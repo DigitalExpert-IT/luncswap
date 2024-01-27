@@ -4,6 +4,7 @@ import ShortAddress from "@/components/ShortAddress";
 import WrapWallet from "@/components/WrapWallet";
 import { useExecuteContract } from "@/hooks";
 import { findEventAttribute } from "@/lib";
+import { getConfig } from "@/lib/config";
 import {
   Box,
   Button,
@@ -45,6 +46,7 @@ function TokenFactory() {
   const toast = useToast();
   const connectedWallet = useConnectedWallet();
   const [deployToken, { isLoading }] = useExecuteContract();
+  const { chainId } = getConfig()
 
   const {
     register,
@@ -57,7 +59,7 @@ function TokenFactory() {
       decimals: 6,
       initial_balances: [
         {
-          address: connectedWallet?.addresses["pisco-1"] ?? "",
+          address: connectedWallet?.addresses[chainId] ?? "",
           amount: "0",
         },
       ],
@@ -71,7 +73,7 @@ function TokenFactory() {
   useEffect(() => {
     if (connectedWallet) {
       initialbalancesFields.update(0, {
-        address: connectedWallet.addresses["pisco-1"],
+        address: connectedWallet.addresses[chainId],
         amount: "0",
       });
     }
@@ -98,7 +100,7 @@ function TokenFactory() {
       }
 
       const msg = new MsgInstantiateContract(
-        connectedWallet.addresses["pisco-1"],
+        connectedWallet.addresses[chainId],
         undefined,
         12410,
         {
@@ -109,9 +111,9 @@ function TokenFactory() {
           mint:
             val.mint.minter !== ""
               ? {
-                  minter: val.mint.minter,
-                  cap: val.mint.cap || undefined,
-                }
+                minter: val.mint.minter,
+                cap: val.mint.cap || undefined,
+              }
               : undefined,
           marketing: {
             project: val.marketing.project || undefined,
@@ -119,8 +121,8 @@ function TokenFactory() {
             marketing: val.marketing.marketing || undefined,
             logo: val.marketing.logo
               ? {
-                  url: val.marketing.logo,
-                }
+                url: val.marketing.logo,
+              }
               : undefined,
           },
         },

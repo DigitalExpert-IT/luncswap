@@ -1,14 +1,16 @@
+import { getConfig } from "@/lib/config";
 import { useLcdClient, useConnectedWallet } from "@terra-money/wallet-kit";
 import { useEffect, useState } from "react";
 
-const CHAIN_ID = "pisco-1";
+const { chainId } = getConfig()
+
 
 export const useTokenBalance = (tokenAddress: string) => {
   const wallet = useConnectedWallet();
   const [tokenBalance, setTokenBalance] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const lcd = useLcdClient();
-  const walletAddress = wallet?.addresses["pisco-1"];
+  const walletAddress = wallet?.addresses[chainId];
 
   useEffect(() => {
     const getTokenBalances = async () => {
@@ -19,7 +21,7 @@ export const useTokenBalance = (tokenAddress: string) => {
           return;
         }
         if (tokenAddress === "native") {
-          await lcd.bank.balance(wallet.addresses[CHAIN_ID]).then(([coins]) => {
+          await lcd.bank.balance(wallet.addresses[chainId]).then(([coins]) => {
             const numericPart = coins.toString().match(/\d+/);
             setTokenBalance(numericPart ? numericPart.toString() : "0");
           });
