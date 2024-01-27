@@ -135,9 +135,6 @@ importers:
       '@types/lodash':
         specifier: ^4.14.202
         version: 4.14.202
-      '@types/mustache':
-        specifier: ^4.2.5
-        version: 4.2.5
       '@types/node':
         specifier: ^20.11.4
         version: 20.11.4
@@ -4418,10 +4415,6 @@ packages:
   /@types/minimatch@5.1.2:
     resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
     dev: false
-
-  /@types/mustache@4.2.5:
-    resolution: {integrity: sha512-PLwiVvTBg59tGFL/8VpcGvqOu3L4OuveNvPi0EYbWchRdEVP++yRUXJPFl+CApKEq13017/4Nf7aQ5lTtHUNsA==}
-    dev: true
 
   /@types/node@10.12.18:
     resolution: {integrity: sha512-fh+pAqt4xRzPfqA6eh3Z2y6fyZavRIumvjhaCL753+TVkGKGhpPeyrJG2JftD0T9q4GF00KjefsQ+PQNDdWQaQ==}
