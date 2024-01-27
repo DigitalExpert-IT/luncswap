@@ -8,12 +8,19 @@ import {
   Image,
 } from "@chakra-ui/react";
 import { INavigation } from "@/constant/Navigation";
+import WrapWallet from "../WrapWallet";
+import { useConnectedWallet } from "@terra-money/wallet-kit";
+import { shortenAddress } from "@/utils";
 
 interface INavbar {
   data: INavigation[];
 }
 
+const CHAIN_ID = "pisco-1";
+
 export const Navbar: React.FC<INavbar> = ({ data }) => {
+  const connectedWallet = useConnectedWallet();
+
   return (
     <Stack
       as="nav"
@@ -28,13 +35,25 @@ export const Navbar: React.FC<INavbar> = ({ data }) => {
     >
       <Container maxW="container.xl">
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box display="flex" alignContent="center" alignItems="center">
+          <Box
+            display="flex"
+            alignContent="center"
+            alignItems="center"
+            flex={1}
+          >
             <Image src="/lunc.png" mr="1rem" />
             <Heading size="md" color="brand.500">
               Luncswap
             </Heading>
           </Box>
-          <Stack direction="row" spacing="2rem" display={{ base: "none" }}>
+          <Stack
+            flex={1}
+            justify="end"
+            align="center"
+            direction="row"
+            spacing="1rem"
+            display={{ base: "none", md: "flex" }}
+          >
             {data.map((item, idx) => (
               <Link
                 key={idx}
@@ -53,6 +72,13 @@ export const Navbar: React.FC<INavbar> = ({ data }) => {
                 </Text>
               </Link>
             ))}
+            <WrapWallet mb="0" bgColor="brand.500" width="30%">
+              <Box bg="brand.500" p="2" rounded="xl">
+                <Text fontWeight="bold" color="gray.900">
+                  {shortenAddress(connectedWallet?.addresses[CHAIN_ID] ?? "")}
+                </Text>
+              </Box>
+            </WrapWallet>
           </Stack>
         </Box>
       </Container>

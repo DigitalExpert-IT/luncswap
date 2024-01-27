@@ -30,7 +30,7 @@ const ModalConnectWallet = create(() => {
         <ModalBody>
           <Stack>
             {wallet.availableWallets.map(item => (
-              <Button onClick={() => wallet.connect(item.id)}>
+              <Button key={item.id} onClick={() => wallet.connect(item.id)}>
                 {item.name}
               </Button>
             ))}
