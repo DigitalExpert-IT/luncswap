@@ -1,5 +1,4 @@
-import { Box, Button, Flex, Image, Text } from "@chakra-ui/react";
-import { FaArrowLeftLong, FaArrowRightLong } from "react-icons/fa6";
+import { Box, Button, Flex, Image, Spinner, Text } from "@chakra-ui/react";
 import {
   Table,
   Thead,
@@ -13,10 +12,53 @@ import {
 import { FiPlus } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { LiquidityMachineContext } from "@/machine/liquidityMachineContext";
+import { useContext, useEffect, useRef } from "react";
+import { useSelector } from "@xstate/react";
+import { useInView } from "react-intersection-observer";
+import { Denom } from "@/interface";
 
 const AllPoolsTable = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { liquidityActor } = useContext(LiquidityMachineContext);
+  const { ref, inView } = useInView();
+  const { pairLiquidity, tokensInfo, isAllPairsFetched, isLoading } =
+    useSelector(liquidityActor, state => {
+      return {
+        tokensInfo: state.context.tokensInfo,
+        pairLiquidity: state.context.pairLiquidity,
+        isAllPairsFetched: state.context.isAllPairsFetched,
+        isLoading: state.hasTag("loading"),
+      };
+    });
+
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      liquidityActor.send({
+        type: "LOAD_PAIR_LIST",
+      });
+      isMounted.current = true;
+    } else if (!isLoading && inView && !isAllPairsFetched) {
+      liquidityActor.send({
+        type: "REFETCH_PAIR_LIST",
+      });
+    }
+  }, [inView, isLoading, liquidityActor, isAllPairsFetched]);
+
+  const pairIcon = (pair: Denom) => {
+    if (tokensInfo[pair?.cw20 as ""])
+      return tokensInfo[pair?.cw20 as ""]?.logo?.url;
+    return "/lunc.png";
+  };
+
+  const pairName = (pair: Denom) => {
+    if (pair.native) return "LUNC";
+    if (!tokensInfo[pair.cw20 as ""]) return <Spinner size="sm" />;
+    return tokensInfo[pair.cw20 as ""].name;
+  };
 
   return (
     <Box
@@ -46,7 +88,12 @@ const AllPoolsTable = () => {
           </Flex>
         </Button>
       </Flex>
-      <TableContainer px={10} borderRadius={20}>
+      <TableContainer
+        px={10}
+        borderRadius={20}
+        overflowY={"scroll"}
+        h={"380px"}
+      >
         <Table colorScheme="teal" bgColor={"#27262C"} borderRadius={15}>
           <Thead>
             <Tr
@@ -68,94 +115,50 @@ const AllPoolsTable = () => {
               </Th>
             </Tr>
           </Thead>
-          <Tbody>
-            <Tr>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                <Flex align={"center"}>
-                  <Flex position={"relative"}>
-                    <Image src="/ustc.png" w={4} h={4} />
-                    <Image
-                      src="/lunc.png"
-                      w={4}
-                      h={4}
-                      position={"relative"}
-                      left={"-5px"}
-                    />
+          <Tbody overflow={"scroll"}>
+            {pairLiquidity.map(pair => (
+              <Tr>
+                <Td borderBottomWidth={5} borderColor={"#191B1F"}>
+                  <Flex align={"center"}>
+                    <Flex position={"relative"}>
+                      <Image src={pairIcon(pair.assets[0])} w={4} h={4} />
+
+                      <Image
+                        src={pairIcon(pair.assets[1])}
+                        w={4}
+                        h={4}
+                        position={"relative"}
+                        left={"-5px"}
+                      />
+                    </Flex>
+                    <Flex gap={1}>
+                      <Text>{pairName(pair?.assets[0])}</Text>
+                      <Text>/</Text>
+                      <Text>{pairName(pair?.assets[1])}</Text>
+                    </Flex>
                   </Flex>
-                  <Text>USTC/LUNC</Text>
-                </Flex>
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-            </Tr>
-            <Tr>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                <Flex align={"center"}>
-                  <Flex position={"relative"}>
-                    <Image src="/ustc.png" w={4} h={4} />
-                    <Image
-                      src="/lunc.png"
-                      w={4}
-                      h={4}
-                      position={"relative"}
-                      left={"-5px"}
-                    />
-                  </Flex>
-                  <Text>USTC/LUNC</Text>
-                </Flex>
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-            </Tr>
-            <Tr>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                <Flex align={"center"}>
-                  <Flex position={"relative"}>
-                    <Image src="/ustc.png" w={4} h={4} />
-                    <Image
-                      src="/lunc.png"
-                      w={4}
-                      h={4}
-                      position={"relative"}
-                      left={"-5px"}
-                    />
-                  </Flex>
-                  <Text>USTC/LUNC</Text>
-                </Flex>
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-              <Td borderBottomWidth={5} borderColor={"#191B1F"}>
-                $9.09m
-              </Td>
-            </Tr>
+                </Td>
+                <Td borderBottomWidth={5} borderColor={"#191B1F"}>
+                  $0
+                </Td>
+                <Td borderBottomWidth={5} borderColor={"#191B1F"}>
+                  $0
+                </Td>
+                <Td borderBottomWidth={5} borderColor={"#191B1F"}>
+                  $0
+                </Td>
+              </Tr>
+            ))}
           </Tbody>
+          <Box ref={ref} />
           <Tfoot>
             <Tr>
               <Th colSpan={4}>
-                <Flex justifyContent={"center"} gap={3} align={"center"}>
-                  <FaArrowLeftLong />
-                  <Text>Page 2 of 3</Text>
-                  <FaArrowRightLong />
-                </Flex>
+                {isLoading && (
+                  <Flex justifyContent={"center"} w={"full"}>
+                    <Spinner />
+                  </Flex>
+                )}
               </Th>
             </Tr>
           </Tfoot>
