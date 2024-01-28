@@ -21,7 +21,6 @@ import { useContext, useState, useEffect, useMemo, useCallback } from "react";
 import WrapWallet from "@/components/WrapWallet";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useNavigate } from "react-router-dom";
-import { getConfig } from "@/lib/config";
 
 export const AddLiquidity = () => {
   const { t } = useTranslation();
