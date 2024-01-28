@@ -34,11 +34,11 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
       {
         pair_list: currentPairList.length
           ? {
-              after: {
-                token1: currentPairList[currentPairList.length - 1].assets[0],
-                token2: currentPairList[currentPairList.length - 1].assets[1],
-              },
-            }
+            after: {
+              token1: currentPairList[currentPairList.length - 1].assets[0],
+              token2: currentPairList[currentPairList.length - 1].assets[1],
+            },
+          }
           : {},
       },
     );
@@ -109,7 +109,7 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
       ) as [];
       const res = await Promise.all(balances);
 
-      return res.map(val => val.balance);
+      return res.map(val => val.balance.toString());
     }
     return [];
   };
@@ -118,11 +118,8 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
     liquidityMachine.provide({
       actors: {
         loadPairList: fromPromise(() => loadPairList()),
-        //@ts-expect-error probably xstate bug
         refetchPairList: fromPromise(({ input }) => refetchPairList(input)),
-        //@ts-expect-error probably xstate bug
         loadTokenInfo: fromPromise(({ input }) => loadTokenInfo(input)),
-        //@ts-expect-error probably xstate bug
         loadBalancePair: fromPromise(({ input }) => loadBalancePair(input)),
       },
     }),

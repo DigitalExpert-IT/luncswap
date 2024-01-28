@@ -34,9 +34,9 @@ export const liquidityMachine = setup({
     refetchPairList: PromiseActorLogic<{
       pairList: Pair[];
       isAllPairsFetched: boolean;
-    }>;
-    loadTokenInfo: PromiseActorLogic<TokenInfoList>;
-    loadBalancePair: PromiseActorLogic<string>;
+    }, Pair[]>;
+    loadTokenInfo: PromiseActorLogic<TokenInfoList, Pair[]>;
+    loadBalancePair: PromiseActorLogic<string[], Pair[]>;
   },
 }).createMachine({
   id: "liquidity",
@@ -77,7 +77,6 @@ export const liquidityMachine = setup({
       tags: ["loading"],
       invoke: {
         src: "loadTokenInfo",
-        //@ts-expect-error probably xstate bug
         input: ({ context }) => context.pairLiquidity,
         onDone: [
           {
@@ -97,7 +96,6 @@ export const liquidityMachine = setup({
       tags: ["loading"],
       invoke: {
         src: "refetchPairList",
-        //@ts-expect-error probably xstate bug
         input: ({ context }) => context.pairLiquidity,
         onDone: [
           {
@@ -116,7 +114,6 @@ export const liquidityMachine = setup({
       tags: ["loading"],
       invoke: {
         src: "loadBalancePair",
-        //@ts-expect-error probably xstate bug
         input: ({ context }) => context.pairLiquidity,
         onDone: [
           {
