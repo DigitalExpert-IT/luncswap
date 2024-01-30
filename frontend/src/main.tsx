@@ -14,6 +14,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider as NiceModalProvider } from "@ebay/nice-modal-react";
 import { piscoLCD } from "@/constant/Networks";
 import { SwapMachineProvider, TokenMachineProvider } from "./machine";
+import { LiquidityMachineProvider } from "./machine/liquidityMachineContext";
 
 const Home = React.lazy(() => import("@/routes/home"));
 
@@ -41,11 +42,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ChakraProvider theme={theme}>
         <TokenMachineProvider>
           <SwapMachineProvider>
-            <NiceModalProvider>
-              <Suspense fallback={<></>}>
-                <RouterProvider router={routes} />
-              </Suspense>
-            </NiceModalProvider>
+            <LiquidityMachineProvider>
+              <NiceModalProvider>
+                <Suspense fallback={<></>}>
+                  <RouterProvider router={routes} />
+                </Suspense>
+              </NiceModalProvider>
+            </LiquidityMachineProvider>
           </SwapMachineProvider>
         </TokenMachineProvider>
       </ChakraProvider>

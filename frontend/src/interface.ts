@@ -57,6 +57,10 @@ export type TokenMarketingInfo = {
   project: string | null;
 };
 
+export type TokenInfoList = {
+  [key: string]: TokenMarketingInfo & TokenInfo;
+};
+
 export type TokenMeta = {
   isNative?: boolean;
   info: TokenInfo;
