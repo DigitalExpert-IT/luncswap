@@ -1,6 +1,6 @@
 import React from "react";
 import { Navbar } from "@/components/layout/Navbar";
-import { Box, Image } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import { NAVIGATION } from "@/constant/Navigation";
 import { Footer } from "./Footer";
 
