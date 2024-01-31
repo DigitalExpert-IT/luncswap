@@ -1,6 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { Container, Box } from "@chakra-ui/react";
-import { BeltCard, Header } from "@/components/landigPage";
+import {
+  BeltCard,
+  Community,
+  Header,
+  ProjectExample,
+} from "@/components/landigPage";
 import { COMMUNIT_USER } from "@/constant/dummyCommunity";
 
 function Home() {
@@ -16,6 +21,8 @@ function Home() {
         />
       </Container>
       <BeltCard data={COMMUNIT_USER} />
+      <ProjectExample />
+      <Community />
     </Box>
   );
 }

@@ -4,11 +4,11 @@ export const COMMUNIT_USER = [
     value: "345k+",
   },
   {
-    title: "community user",
+    title: "total trade value",
     value: "345k+",
   },
   {
-    title: "community user",
+    title: "Total Trade",
     value: "345k+",
   },
 ];
