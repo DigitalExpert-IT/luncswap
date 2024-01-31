@@ -3,9 +3,9 @@ import { Text, Box, Stack, Container, Image, Heading } from "@chakra-ui/react";
 export const Footer = () => {
   return (
     <Box position="relative">
-      <Box position="absolute" top="-300px" right="10px">
-        <Image src="/rabbit-bull.png" />
-      </Box>
+      {/* <Box position="absolute" top="-300px" right="10px"> */}
+      {/*   <Image src="/rabbit-bull.png" /> */}
+      {/* </Box> */}
       <Stack
         bg="#010525"
         w="100%"
