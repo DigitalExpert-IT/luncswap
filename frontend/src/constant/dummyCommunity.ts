@@ -1,4 +1,4 @@
-export const COMMUNIT_USER = [
+export const COMMUNITY_USER = [
   {
     title: "community user",
     value: "345k+",
@@ -10,5 +10,18 @@ export const COMMUNIT_USER = [
   {
     title: "Total Trade",
     value: "345k+",
+  },
+];
+
+export const COMMUNITY_SOSMED = [
+  {
+    title: "join channel",
+    image: "/discord.png",
+    link: "#",
+  },
+  {
+    title: "join group",
+    image: "/telegram.png",
+    link: "#",
   },
 ];

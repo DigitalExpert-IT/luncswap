@@ -6,7 +6,7 @@ import {
   Header,
   ProjectExample,
 } from "@/components/landigPage";
-import { COMMUNIT_USER } from "@/constant/dummyCommunity";
+import { COMMUNITY_USER, COMMUNITY_SOSMED } from "@/constant/dummyCommunity";
 
 function Home() {
   const { t } = useTranslation();
@@ -20,9 +20,9 @@ function Home() {
           imageLink="/rabbit.png"
         />
       </Container>
-      <BeltCard data={COMMUNIT_USER} />
+      <BeltCard data={COMMUNITY_USER} />
       <ProjectExample />
-      <Community />
+      <Community data={COMMUNITY_SOSMED} />
     </Box>
   );
 }
