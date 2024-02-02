@@ -16,11 +16,14 @@ export const BeltCard: React.FC<BeltCardProps> = props => {
   return (
     <Box bg="brand.400" p="2rem" display="flex">
       <Container maxW="container.xl">
-        <Stack direction="row" justify="space-between">
+        <Stack
+          direction={{ base: "column", md: "row" }}
+          justify="space-between"
+        >
           {data.map((item, idx) => (
             <Box
               bg="navy.800"
-              w="30%"
+              w={{ base: "full", md: "30%" }}
               p="2rem"
               rounded="xl"
               key={idx}
