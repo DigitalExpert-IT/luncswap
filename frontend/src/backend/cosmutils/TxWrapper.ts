@@ -71,7 +71,6 @@ class TxWrapper {
           hash: this.tx.txhash,
           blockHeight: this.tx.height,
           timestamp: new Date(this.tx.timestamp),
-          tx: this.tx,
           sender,
           contractAddress,
           lpTokenContractAddress,
@@ -88,7 +87,6 @@ class TxWrapper {
     const result = {
       type: "price_change",
       timestamp: new Date(this.tx.timestamp),
-      tx: this.tx,
       hash: this.tx.txhash,
       blockHeight: this.tx.height,
       contractAddress: pairContractAddress,

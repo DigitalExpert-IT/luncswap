@@ -1,11 +1,8 @@
-import { TxInfo } from "@terra-money/terra.js";
-
 type Base = {
   hash: string;
   contractAddress: string;
   blockHeight: number;
   timestamp: Date;
-  tx: TxInfo;
 };
 
 export type PairInfo = Base & {
