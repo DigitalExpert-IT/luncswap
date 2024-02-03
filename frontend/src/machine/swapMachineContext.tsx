@@ -9,6 +9,7 @@ import { factoryContractAddress } from "@/constant/network";
 import { Coin, Dec, Msg, MsgExecuteContract } from "@terra-money/feather.js";
 import { useExecuteContract } from "@/hooks";
 import { useToast } from "@chakra-ui/react";
+import { getConfig } from "@/lib/config";
 
 type EventType = EventFrom<typeof swapMachine>;
 type SnapshotType = SnapshotFrom<typeof swapMachine>;
@@ -27,8 +28,8 @@ export const SwapMachineContext = createContext<{
   swapActor: undefined as any,
 });
 
-const CHAIN_ID = "pisco-1";
-const FACTORY_CONTRACT_ADDR = factoryContractAddress[CHAIN_ID];
+const { chainId } = getConfig()
+const FACTORY_CONTRACT_ADDR = factoryContractAddress[chainId as "pisco-1"];
 
 export function SwapMachineProvider(props: { children: React.ReactNode }) {
   const lcd = useLcdClient();
@@ -50,7 +51,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     outputAmount: Dec,
   ) => {
     if (!connectedWallet) return;
-    const walletAddr = connectedWallet.addresses[CHAIN_ID];
+    const walletAddr = connectedWallet.addresses[chainId];
     const msgs: Msg[] = [];
     if (!inputTokenMeta.isNative) {
       // increase allowance
@@ -69,11 +70,11 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
 
     const funds = inputTokenMeta.isNative
       ? [
-          Coin.fromAmino({
-            amount: inputTokenAmount.toFixed(0),
-            denom: inputTokenMeta.info.symbol,
-          }),
-        ]
+        Coin.fromAmino({
+          amount: inputTokenAmount.toFixed(0),
+          denom: inputTokenMeta.info.symbol,
+        }),
+      ]
       : [];
 
     const swapMsg = new MsgExecuteContract(
@@ -103,36 +104,36 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     if (!connectedWallet)
       return { token1Balance: new Dec(0), token2Balance: new Dec(0) };
     const nativeBalances = (
-      await lcd.bank.balance(connectedWallet.addresses[CHAIN_ID])
+      await lcd.bank.balance(connectedWallet.addresses[chainId])
     )[0].toArray();
 
     const token1Balance = token1.isNative
       ? new Dec(
-          nativeBalances
-            .find(item => item.denom === token1.info.symbol)
-            ?.amount.toNumber() ?? 0,
-        )
+        nativeBalances
+          .find(item => item.denom === token1.info.symbol)
+          ?.amount.toNumber() ?? 0,
+      )
       : new Dec(
-          (
-            await lcd.wasm.contractQuery<{ balance: string }>(token1.address, {
-              balance: { address: connectedWallet.addresses[CHAIN_ID] },
-            })
-          ).balance,
-        );
+        (
+          await lcd.wasm.contractQuery<{ balance: string }>(token1.address, {
+            balance: { address: connectedWallet.addresses[chainId] },
+          })
+        ).balance,
+      );
 
     const token2Balance = token2.isNative
       ? new Dec(
-          nativeBalances
-            .find(item => item.denom === token2.info.symbol)
-            ?.amount.toNumber() ?? 0,
-        )
+        nativeBalances
+          .find(item => item.denom === token2.info.symbol)
+          ?.amount.toNumber() ?? 0,
+      )
       : new Dec(
-          (
-            await lcd.wasm.contractQuery<{ balance: string }>(token2.address, {
-              balance: { address: connectedWallet.addresses[CHAIN_ID] },
-            })
-          ).balance,
-        );
+        (
+          await lcd.wasm.contractQuery<{ balance: string }>(token2.address, {
+            balance: { address: connectedWallet.addresses[chainId] },
+          })
+        ).balance,
+      );
 
     return { token1Balance, token2Balance };
   };
@@ -177,7 +178,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     maxToken2Amount: Dec,
   ) => {
     if (!connectedWallet) return;
-    const walletAddr = connectedWallet.addresses[CHAIN_ID];
+    const walletAddr = connectedWallet.addresses[chainId];
     const token1Denom = pair.assets[0] as any;
     const token2Denom = pair.assets[1] as any;
     const msgs: Msg[] = [];
@@ -241,17 +242,17 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
   };
 
   const createPair = async (input: CreatePairInputType) => {
-    const walletAddr = connectedWallet!.addresses[CHAIN_ID];
+    const walletAddr = connectedWallet!.addresses[chainId];
     const token1Denom = input.token1Meta.isNative
       ? { native: input.token1Meta.info.symbol }
       : {
-          cw20: input.token1Meta.address,
-        };
+        cw20: input.token1Meta.address,
+      };
     const token2Denom = input.token2Meta.isNative
       ? { native: input.token2Meta.info.symbol }
       : {
-          cw20: input.token2Meta.address,
-        };
+        cw20: input.token2Meta.address,
+      };
     const createPairMsg = new MsgExecuteContract(
       walletAddr,
       FACTORY_CONTRACT_ADDR,
