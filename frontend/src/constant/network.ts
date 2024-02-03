@@ -1,7 +1,20 @@
 import { TokenMeta } from "@/interface";
+import { LCDClientConfig } from "@terra-money/feather.js";
+
+const piscoLCD: LCDClientConfig = {
+  lcd: "https://pisco-lcd.terra.dev",
+  chainID: "pisco-1",
+  gasPrices: { uluna: 0.015 },
+  gasAdjustment: 2,
+  prefix: "terra",
+};
+
+export const lcdConfigMap = {
+  "pisco-1": piscoLCD,
+} as const;
 
 export const factoryContractAddress = {
-  "pisco-1": "terra1tepxa0vatksmqnywmpsnzmp2nqpr9ed9scm62gex3maygeaegk0sdq6x9l",
+  "pisco-1": "terra1jnfvfm2e573zrdykrp4cxmm6kj56sf3e5e3x9pm6f3vt82lpjzkqx0cya5",
 };
 
 export const trustedTokens = {
