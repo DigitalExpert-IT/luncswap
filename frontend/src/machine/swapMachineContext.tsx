@@ -264,11 +264,14 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
       },
     );
     await executeContract([createPairMsg]);
-    // wait 10 sec
-    await sleep(1000 * 10);
-    const pair = await lcd.wasm.contractQuery<Pair>(FACTORY_CONTRACT_ADDR, {
-      pair: { token1: token1Denom, token2: token2Denom },
-    });
+    let pair: Pair | undefined = undefined;
+    while (!pair) {
+      // wait 10 sec
+      await sleep(1000 * 5);
+      pair = await lcd.wasm.contractQuery<Pair>(FACTORY_CONTRACT_ADDR, {
+        pair: { token1: token1Denom, token2: token2Denom },
+      });
+    }
 
     await addLiquidity(pair, input.token1Amount, input.token2Amount);
     return [input.token1Meta, input.token2Meta] as [TokenMeta, TokenMeta];
