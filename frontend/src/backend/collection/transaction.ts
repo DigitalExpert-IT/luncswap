@@ -78,6 +78,39 @@ class CollectionTransaction {
     return data.map(item => {
       return {
         hash: item.hash,
+        contractAddress: item.contractAddress,
+        timestamp: item.timestamp,
+        token1Price: new Dec(item.token1Reserve)
+          .div(new Dec(item.token2Reserve))
+          .toString(),
+        token2Price: new Dec(item.token2Reserve)
+          .div(new Dec(item.token1Reserve))
+          .toString(),
+      };
+    });
+  }
+
+  public async getStatisticByTimeRange(
+    contractAddress: string,
+    start: Date,
+    end: Date,
+  ) {
+    const col = this.db.collection(this.collectionName);
+    const data = await col
+      .find({
+        type: "price_change",
+        contractAddress,
+        timestamp: {
+          $gte: start,
+          $lte: end,
+        },
+      })
+      .toArray();
+    return data.map(item => {
+      return {
+        contractAddress: item.contractAddress,
+        hash: item.hash,
+        timestamp: item.timestamp,
         token1Price: new Dec(item.token1Reserve)
           .div(new Dec(item.token2Reserve))
           .toString(),
