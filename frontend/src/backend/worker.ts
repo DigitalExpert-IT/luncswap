@@ -41,6 +41,9 @@ class Worker {
     return +blockInfo.block.header.height;
   }
 
+  // TODO
+  // refactor using while / for loop / anything other than recursion
+  // this still use recursion that may fail because of callstack limit
   private async run(blockHeight = 0) {
     if (blockHeight === 0) {
       blockHeight = await this.txCol.getLatestBlock();
@@ -53,6 +56,9 @@ class Worker {
     }
 
     console.log("checking on block", blockHeight);
+    // TODO
+    // check transaction list on block range for example
+    // obtain all tx list on block 1-100
     const txList = await this.lcd.tx.txInfosByHeight(blockHeight);
     for (const tx of txList) {
       console.log("checking on tx", tx.txhash);
