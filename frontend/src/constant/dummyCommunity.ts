@@ -25,3 +25,21 @@ export const COMMUNITY_SOSMED = [
     link: "#",
   },
 ];
+
+export const COMMING_PROJECT = [
+  {
+    title: "Property Investment",
+    image:
+      "https://ik.imagekit.io/msxxxaegj/metashot/metaxot-lobby.jpg?updatedAt=1706614894307",
+  },
+  {
+    title: "Dummy Project 1",
+    image:
+      "https://ik.imagekit.io/msxxxaegj/metashot/metaxot-lobby.jpg?updatedAt=1706614894307",
+  },
+  {
+    title: "Dummy Project 2",
+    image:
+      "https://ik.imagekit.io/msxxxaegj/metashot/metaxot-lobby.jpg?updatedAt=1706614894307",
+  },
+];

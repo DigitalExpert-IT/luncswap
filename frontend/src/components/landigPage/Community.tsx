@@ -6,6 +6,7 @@ import {
   Heading,
   Text,
   Image,
+  Link,
   Icon,
 } from "@chakra-ui/react";
 import { Trans, useTranslation } from "react-i18next";
@@ -26,51 +27,7 @@ export const Community: React.FC<CommunityProps> = props => {
   const { t } = useTranslation();
 
   return (
-    <Box position="relative">
-      <Box position="absolute">
-        <Image src="/moon.png" objectFit="cover" />
-        <Icon
-          as={FaDiscord}
-          pos="absolute"
-          w={20}
-          h={20}
-          color="brand.300"
-          transform="rotate(-20deg)"
-          top="-10%"
-          left="70%"
-          right="0"
-        />
-        <Icon
-          as={FaTelegramPlane}
-          pos="absolute"
-          w={20}
-          h={20}
-          color="purple.500"
-          transform="rotate(10deg)"
-          top="-10%"
-          left="95%"
-          right="0"
-        />
-        <Icon
-          as={BiSolidLike}
-          pos="absolute"
-          w="49px"
-          h="49px"
-          color="brand.400"
-          top="10%"
-          right="-67vw"
-        />
-        <Icon
-          as={FaUserCheck}
-          pos="absolute"
-          w={20}
-          h={20}
-          color="purple.500"
-          transform="rotate(20deg)"
-          top="30%"
-          right="-69vw"
-        />
-      </Box>
+    <Box>
       <Container maxW="container.xl">
         <Stack
           border="1px"
@@ -81,7 +38,58 @@ export const Community: React.FC<CommunityProps> = props => {
           align="center"
           w="100%"
           p="2rem"
+          position="relative"
         >
+          <Box
+            position="absolute"
+            left="-15%"
+            top={{ base: "1%" }}
+            w={{ base: 40, md: "full" }}
+          >
+            <Image src="/moon.png" objectFit="cover" />
+          </Box>
+          <Icon
+            as={FaDiscord}
+            pos="absolute"
+            w={{ base: 10, md: 20 }}
+            h={{ base: 10, md: 20 }}
+            color="brand.300"
+            transform="rotate(-20deg)"
+            top={{ base: "-2%", md: "-8%" }}
+            left="5%"
+            right="0"
+          />
+
+          <Icon
+            as={FaTelegramPlane}
+            pos="absolute"
+            w={{ base: 10, md: 20 }}
+            h={{ base: 10, md: 20 }}
+            color="purple.500"
+            transform="rotate(10deg)"
+            top={{ base: "-2%", md: "-8%" }}
+            left={{ base: "20%", md: "12%" }}
+            right="0"
+          />
+          <Icon
+            as={BiSolidLike}
+            pos="absolute"
+            w={{ base: 10, md: 20 }}
+            h={{ base: 10, md: 20 }}
+            color="brand.400"
+            top="10%"
+            right={{ base: "-5%", md: "-3%" }}
+          />
+          <Icon
+            as={FaUserCheck}
+            pos="absolute"
+            w={{ base: 10, md: 20 }}
+            h={{ base: 10, md: 20 }}
+            color="purple.500"
+            transform="rotate(20deg)"
+            top={{ base: "15%", md: "25%" }}
+            right="-4%"
+          />
           <Box w={{ base: "full", md: "70%" }}>
             <Heading fontWeight="bold" size="2xl">
               <Trans
@@ -121,20 +129,26 @@ export const Community: React.FC<CommunityProps> = props => {
                 <Box my="2rem">
                   <Image src={item.image} alt={item.title} w={40} h={40} />
                 </Box>
-                <Box
+                <Link
+                  href={item.link}
                   w="100%"
-                  roundedBottom="xl"
-                  bg="rgba(115, 112, 125, 0.5)"
-                  p="1rem"
+                  _hover={{ textDecoration: "none", color: "navy.500" }}
                 >
-                  <Text
-                    fontSize="xl"
-                    fontWeight="bold"
-                    textTransform="uppercase"
+                  <Box
+                    w="100%"
+                    roundedBottom="xl"
+                    bg="rgba(115, 112, 125, 0.5)"
+                    p="1rem"
                   >
-                    {item.title}
-                  </Text>
-                </Box>
+                    <Text
+                      fontSize="xl"
+                      fontWeight="bold"
+                      textTransform="uppercase"
+                    >
+                      {item.title}
+                    </Text>
+                  </Box>
+                </Link>
               </Box>
             ))}
           </Stack>

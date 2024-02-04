@@ -1,4 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
+import "./global.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import "@/locales/index";
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";

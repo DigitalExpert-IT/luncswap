@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Container, Box } from "@chakra-ui/react";
 import {
   BeltCard,
+  CommingProject,
   Community,
   Header,
   ProjectExample,
@@ -23,6 +24,7 @@ function Home() {
       <BeltCard data={COMMUNITY_USER} />
       <ProjectExample />
       <Community data={COMMUNITY_SOSMED} />
+      <CommingProject />
     </Box>
   );
 }
