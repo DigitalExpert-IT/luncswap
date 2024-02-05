@@ -5,8 +5,8 @@ import Statistics from "./Statistics";
 function Root() {
   return (
     <LayoutMain>
-        <Outlet />
-        <Statistics />
+      <Outlet />
+      <Statistics />
     </LayoutMain>
   );
 }
