@@ -3,12 +3,13 @@ import { INavigation } from "@/constant/Navigation";
 import WrapWallet from "../WrapWallet";
 import { useConnectedWallet } from "@terra-money/wallet-kit";
 import { shortenAddress } from "@/utils";
+import { getConfig } from "@/lib/config";
 
 interface INavbar {
   data: INavigation[];
 }
 
-const CHAIN_ID = "pisco-1";
+const { chainId } = getConfig()
 
 export const Navbar: React.FC<INavbar> = ({ data }) => {
   const connectedWallet = useConnectedWallet();
@@ -66,7 +67,7 @@ export const Navbar: React.FC<INavbar> = ({ data }) => {
             <WrapWallet mb="0" bgColor="brand.500" width="30%">
               <Box bg="brand.500" p="2" rounded="xl">
                 <Text fontWeight="bold" color="gray.900">
-                  {shortenAddress(connectedWallet?.addresses[CHAIN_ID] ?? "")}
+                  {shortenAddress(connectedWallet?.addresses[chainId] ?? "")}
                 </Text>
               </Box>
             </WrapWallet>

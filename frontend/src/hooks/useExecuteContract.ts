@@ -1,3 +1,4 @@
+import { getConfig } from "@/lib/config";
 import { LCDClient, Msg, TxInfo } from "@terra-money/feather.js";
 import { PostResponse, useLcdClient, useWallet } from "@terra-money/wallet-kit";
 import { useCallback, useState } from "react";
@@ -9,13 +10,16 @@ const sleep = (ms = 500) =>
     }, ms);
   });
 
+
+const { chainId } = getConfig()
+
 const waitForTx = async (
   tx: PostResponse,
   lcd: LCDClient,
   retries = 1,
 ): Promise<TxInfo> => {
   try {
-    const txInfo = await lcd.tx.txInfo(tx.txhash, "pisco-1");
+    const txInfo = await lcd.tx.txInfo(tx.txhash, chainId);
     return txInfo;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
@@ -43,7 +47,7 @@ export const useExecuteContract = () => {
       setLoading(true);
       try {
         const tx = await wallet.post({
-          chainID: "pisco-1",
+          chainID: chainId,
           msgs,
         });
         const txInfo = await waitForTx(tx, lcd);

@@ -1,21 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { config } from "dotenv";
+import { fileURLToPath } from "node:url";
+import { ViteDevServer } from "vite";
+import { createWorker } from "@/backend/worker";
+import { initializeDb } from "@/backend/db";
 import path from "path";
 import express from "express";
 import fs from "node:fs/promises";
-import { fileURLToPath } from "node:url";
-import { ViteDevServer } from "vite";
 import compression from "compression";
 import serveStatic from "serve-static";
+import { setupRouter } from "@/backend/router";
 
 config();
 
 const isDev = process.env.NODE_ENV !== "production";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const resolve = (p: string) => path.resolve(__dirname, p);
-
 let vite: ViteDevServer;
 
 // create script to inject env within window.__PUBLIC_ENV__ object
@@ -43,7 +44,7 @@ const compileHTML = (() => {
     const injectedScript = compileEnvScript();
 
     if (isDev) {
-      const html = resolve("./index.html");
+      const html = resolve("../index.html");
       const htmlString = await fs.readFile(html, { encoding: "utf-8" });
       const compiledHTMLString = htmlString.replace(
         "%injectedScript%",
@@ -63,6 +64,9 @@ const compileHTML = (() => {
 })();
 
 const createServer = async () => {
+  const db = await initializeDb();
+  // run worker
+  createWorker("pisco-1", db);
   const app = express();
   app.use(express.static(resolve("public")));
 
@@ -78,6 +82,7 @@ const createServer = async () => {
     app.use(serveStatic(resolve("dist"), { index: false }));
   }
 
+  app.use("/api", setupRouter(db));
   app.get("*", async (req, res) => {
     const url = req.originalUrl;
     const htmlString = await compileHTML(url);

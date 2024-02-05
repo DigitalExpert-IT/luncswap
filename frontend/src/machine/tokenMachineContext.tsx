@@ -5,6 +5,7 @@ import { useLcdClient } from "@terra-money/wallet-kit";
 import { TokenInfo, TokenMarketingInfo, TokenMeta } from "@/interface";
 import { nativeCoin, trustedTokens } from "@/constant/network";
 import { useActorRef } from "@xstate/react";
+import { getConfig } from "@/lib/config";
 
 type EventType = EventFrom<typeof tokenMachine>;
 type SnapshotType = SnapshotFrom<typeof tokenMachine>;
@@ -16,7 +17,7 @@ export const TokenMachineContext = createContext<{
   tokenActor: undefined as any,
 });
 
-const CHAIN_ID = "pisco-1";
+const { chainId } = getConfig()
 
 export function TokenMachineProvider(props: { children: React.ReactNode }) {
   const lcd = useLcdClient();
@@ -48,7 +49,7 @@ export function TokenMachineProvider(props: { children: React.ReactNode }) {
   };
 
   const fetchTokenList = async () => {
-    const trustedTokenList = trustedTokens[CHAIN_ID] ?? [];
+    const trustedTokenList = trustedTokens[chainId as "pisco-1"] ?? [];
     const promises = trustedTokenList.map(tokenAddr => {
       return Promise.all([
         lcd.wasm.contractQuery<TokenInfo>(tokenAddr, { token_info: {} }),
@@ -67,7 +68,7 @@ export function TokenMachineProvider(props: { children: React.ReactNode }) {
         };
       },
     );
-    return [nativeCoin[CHAIN_ID]].concat(tokenMetaList);
+    return [nativeCoin[chainId]].concat(tokenMetaList);
   };
 
   const actorRef = useActorRef(
