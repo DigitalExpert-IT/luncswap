@@ -7,6 +7,7 @@ import ErrorPage from "@/routes/errorPage.tsx";
 import Root from "@/routes/root";
 import devtoolsRoute from "@/routes/devtools";
 import swapRoute from "@/routes/addLiquidity";
+import myLiquidityRoute from "@/routes/myLiquidity"
 import { WalletProvider } from "@terra-money/wallet-kit";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -30,6 +31,7 @@ const routes = createBrowserRouter([
       },
       devtoolsRoute,
       swapRoute,
+      myLiquidityRoute
     ],
   },
 ]);

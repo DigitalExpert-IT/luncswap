@@ -32,7 +32,7 @@ class Worker {
         this.pairContractSet.add(pairAddress);
       }
 
-      this.run();
+      this.run().catch(() => this.run());
     });
   }
 

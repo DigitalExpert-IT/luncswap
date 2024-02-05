@@ -78,7 +78,7 @@ const AllPoolsTable = () => {
           borderRadius={10}
           color={"black"}
           fontWeight={"700"}
-          onClick={() => navigate("/addLiquidity")}
+          onClick={() => navigate("/myLiquidity")}
         >
           <Flex align={"center"} gap={3}>
             <Text fontSize={20}>

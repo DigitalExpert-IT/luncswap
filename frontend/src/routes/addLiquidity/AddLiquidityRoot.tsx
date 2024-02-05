@@ -2,7 +2,7 @@ import { Container, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 import "@fontsource/galindo";
 import { useTranslation } from "react-i18next";
 import BannerInfo from "@/components/BannerInfo";
-import { AddLiquidity } from "./addLiquidity";
+import { AddLiquidity } from "./AddLiquidity";
 
 const Swap = () => {
   const { t } = useTranslation();

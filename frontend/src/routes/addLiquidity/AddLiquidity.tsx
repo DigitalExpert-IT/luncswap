@@ -5,24 +5,26 @@ import { useSelector } from "@xstate/react";
 import { Dec } from "@terra-money/feather.js";
 import { useTranslation } from "react-i18next";
 import TokenSelect from "@/components/TokenSelect";
-import { IoMdArrowRoundBack } from "react-icons/io";
 import {
   Box,
   Text,
-  Icon,
   Stack,
   Input,
   Button,
   Flex,
   Spinner,
 } from "@chakra-ui/react";
-import { SwapMachineContext, TokenMachineContext } from "@/machine";
-import { useContext, useState, useEffect, useMemo, useCallback } from "react";
+import { LiquidityMachineContext, SwapMachineContext, TokenMachineContext } from "@/machine";
+import { useContext, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import WrapWallet from "@/components/WrapWallet";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
-import { useNavigate } from "react-router-dom";
 
-export const AddLiquidity = () => {
+interface AddLiquidity {
+  token1?: string,
+  token2?: string
+}
+
+export const AddLiquidity = (props: AddLiquidity) => {
   const { t } = useTranslation();
   const [inputAddress, setInputAddress] = useState("");
   const [outputAddress, setOutputAddress] = useState("");
@@ -31,6 +33,16 @@ export const AddLiquidity = () => {
   const { tokenActor } = useContext(TokenMachineContext);
   const { swapActor } = useContext(SwapMachineContext);
   const tokenList = useSelector(tokenActor, state => state.context.tokenList);
+  const { token1, token2 } = props;
+
+  const { liquidityActor } = useContext(LiquidityMachineContext)
+
+  const liquidityState = useSelector(liquidityActor, state => state)
+
+  console.log({ tokenList })
+  console.log({ props })
+
+  const isMounted = useRef(false)
 
   const {
     isLoading,
@@ -52,6 +64,26 @@ export const AddLiquidity = () => {
       outputTokenReserve: state.context.pairInfo?.token2_reserve ?? "0",
     };
   });
+
+  const findToken = (tokenAddr: string) => tokenActor.send({
+    type: "SEARCH_TOKEN",
+    value: { address: tokenAddr },
+  });
+
+  useEffect(() => {
+    const a = () => {
+      if (!isMounted.current && !isLoading && token1 && token2 && tokenList.length > 0) {
+        debugger
+        if (!tokenList.find((token) => token.address === token1)) return findToken(token1)
+        if (!tokenList.find((token) => token.address === token2)) return findToken(token2)
+        setInputAddress(token1);
+        setOutputAddress(token2);
+        isMounted.current = true
+      }
+    }
+    a()
+
+  }, [isLoading, token1, token2, tokenList.length])
 
   const { tokenBalance: inputTokenBalance, isLoading: inputIsLoading } =
     useTokenBalance(inputAddress);
@@ -153,40 +185,15 @@ export const AddLiquidity = () => {
   const onMaxInputClicked = () => {
     setInputAmount(inputTokenBalance);
   };
+
   const onMaxOutputClicked = () => {
     setOutputAmount(outputTokenBalance);
   };
 
-  const navigate = useNavigate();
-
   return (
     <Box
-      bgColor="navy.700"
-      border={"2px solid #A4A4BE"}
-      borderRadius="20"
-      w="50%"
       position={"relative"}
     >
-      <Box display="flex" alignItems="center" p="1rem">
-        <Box display="flex" alignContent="center" alignItems="center">
-          <Icon
-            as={IoMdArrowRoundBack}
-            color="yellow"
-            aria-label="back"
-            cursor="pointer"
-            mr={5}
-            w={6}
-            h={6}
-            _hover={{
-              cursor: "pointer",
-            }}
-            onClick={() => navigate("/")}
-          />
-          <Text fontWeight="700" fontSize="xl">
-            {t("swap.addLiquidity.title")}
-          </Text>
-        </Box>
-      </Box>
       <Box p="1rem">
         <Box bgColor="navy.500" p="1rem" rounded="xl" mb="10">
           <Text color="brand.400">{t("swap.addLiquidity.tip")}</Text>
@@ -318,7 +325,7 @@ export const AddLiquidity = () => {
           <Button
             bgColor={"brand.400"}
             w={"100%"}
-            mb={10}
+            my={2}
             borderRadius={12}
             color={"black"}
             fontWeight={"700"}

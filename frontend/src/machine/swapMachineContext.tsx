@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActorRef, EventFrom, SnapshotFrom, fromPromise } from "xstate";
-import { CreatePairInputType, swapMachine } from "./swapMachine";
+import { CreatePairInputType, RemoveLiquidityInputType, swapMachine } from "./swapMachine";
 import React, { createContext } from "react";
 import { useActorRef } from "@xstate/react";
 import { useConnectedWallet, useLcdClient } from "@terra-money/wallet-kit";
@@ -241,6 +241,22 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
     });
   };
 
+  const removeLiquidity = async (input: RemoveLiquidityInputType) => {
+    const { amount, min_token1, min_token2, pairAddress } = input
+    const walletAddr = connectedWallet!.addresses[CHAIN_ID];
+    const removeLiquidity = new MsgExecuteContract(
+      walletAddr,
+      pairAddress,
+      {
+        remove_liquidity: {
+          amount, min_token1, min_token2
+        },
+      },
+    );
+    console.log(removeLiquidity)
+    await executeContract([removeLiquidity]);
+  }
+
   const createPair = async (input: CreatePairInputType) => {
     const walletAddr = connectedWallet!.addresses[chainId];
     const token1Denom = input.token1Meta.isNative
@@ -298,6 +314,7 @@ export function SwapMachineProvider(props: { children: React.ReactNode }) {
           addLiquidity(input.pair, input.token1Amount, input.maxToken2Amount),
         ),
         createPair: fromPromise(({ input }) => createPair(input)),
+        removeLiquidity: fromPromise(({ input }) => removeLiquidity(input)),
       },
       actions: {
         errorCb: ({ event }: any) => {

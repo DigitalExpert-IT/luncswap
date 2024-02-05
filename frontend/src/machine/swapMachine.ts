@@ -9,6 +9,13 @@ export type CreatePairInputType = {
   token2Amount: Dec;
 };
 
+export type RemoveLiquidityInputType = {
+  pairAddress: string
+  amount: Dec,
+  min_token1: Dec,
+  min_token2: Dec,
+}
+
 type ContextType = {
   pair: Pair | undefined;
   pairInfo: PairInfo | undefined;
@@ -40,25 +47,30 @@ export const swapMachine = setup({
     events: {} as
       | { type: "SWAP"; value: { inputKind: 1 | 2 } }
       | {
-          type: "LOAD_PAIR";
-          value: [TokenMeta, TokenMeta];
-        }
+        type: "LOAD_PAIR";
+        value: [TokenMeta, TokenMeta];
+      }
       | {
-          type: "CALCULATE_OUTPUT";
-          value: { tokenMeta: TokenMeta; amount: Dec };
-        }
+        type: "CALCULATE_OUTPUT";
+        value: { tokenMeta: TokenMeta; amount: Dec };
+      }
       | {
-          type: "CALCULATE_INPUT";
-          value: { tokenMeta: TokenMeta; amount: Dec };
-        }
+        type: "CALCULATE_INPUT";
+        value: { tokenMeta: TokenMeta; amount: Dec };
+      }
       | {
-          type: "ADD_LIQUIDITY";
-          value: { token1Amount: Dec; maxToken2Amount: Dec };
-        }
+        type: "ADD_LIQUIDITY";
+        value: { token1Amount: Dec; maxToken2Amount: Dec };
+      }
       | {
-          type: "CREATE_PAIR";
-          value: CreatePairInputType;
-        },
+        type: "CREATE_PAIR";
+        value: CreatePairInputType;
+      }
+      | {
+        type: "REMOVE_LIQUIDITY";
+        value: RemoveLiquidityInputType
+        }
+    ,
     context: {} as ContextType,
   },
   actions: {
@@ -90,6 +102,8 @@ export const swapMachine = setup({
       void,
       { pair: Pair; token1Amount: Dec; maxToken2Amount: Dec }
     >;
+    removeLiquidity: PromiseActorLogic<
+      void, RemoveLiquidityInputType>;
     createPair: PromiseActorLogic<[TokenMeta, TokenMeta], CreatePairInputType>;
   },
   guards: {
@@ -319,6 +333,10 @@ export const swapMachine = setup({
         ADD_LIQUIDITY: {
           target: "add_liquidity",
         },
+        REMOVE_LIQUIDITY: {
+          target: "remove_liquidity"
+        }
+        
       },
       always: [
         {
@@ -328,6 +346,22 @@ export const swapMachine = setup({
           target: "no_liquidity",
         },
       ],
+    },
+    remove_liquidity: {
+      tags: ["loading"],
+      invoke: {
+        src: "removeLiquidity",
+        input: ({ event }) => {
+          console.log({event})
+          assertEvent(event, "REMOVE_LIQUIDITY");
+          return {
+            pairAddress: event.value.pairAddress,
+            amount: event.value.amount,
+            min_token1: event.value.min_token1,
+            min_token2: event.value.min_token2
+          }
+        }
+      }
     },
     add_liquidity: {
       tags: ["loading"],
