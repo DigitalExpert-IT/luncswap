@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = props => {
       <HStack align="center">
         <Box flex={2}>
           <Heading
-            fontSize={{ base: "25px", md: "45px", lg: "85px" }}
+            fontSize={{ base: "30px", md: "45px", lg: "85px" }}
             lineHeight="130%"
             fontWeight="extrabold"
             fontFamily="inter, sans-serif"

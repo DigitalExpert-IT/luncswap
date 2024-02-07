@@ -1,13 +1,18 @@
 import { useTranslation } from "react-i18next";
 import { Container, Box } from "@chakra-ui/react";
 import {
+  COMMUNITY_USER,
+  COMMUNITY_SOSMED,
+  PARTNERSHIP,
+} from "@/constant/content";
+import {
   BeltCard,
   CommingProject,
   Community,
   Header,
   ProjectExample,
+  Partnership,
 } from "@/components/landigPage";
-import { COMMUNITY_USER, COMMUNITY_SOSMED } from "@/constant/dummyCommunity";
 
 function Home() {
   const { t } = useTranslation();
@@ -25,6 +30,7 @@ function Home() {
       <ProjectExample />
       <Community data={COMMUNITY_SOSMED} />
       <CommingProject />
+      <Partnership data={PARTNERSHIP} />
     </Box>
   );
 }

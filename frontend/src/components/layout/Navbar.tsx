@@ -9,7 +9,7 @@ interface INavbar {
   data: INavigation[];
 }
 
-const { chainId } = getConfig()
+const { chainId } = getConfig();
 
 export const Navbar: React.FC<INavbar> = ({ data }) => {
   const connectedWallet = useConnectedWallet();

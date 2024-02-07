@@ -43,3 +43,18 @@ export const COMMING_PROJECT = [
       "https://ik.imagekit.io/msxxxaegj/metashot/metaxot-lobby.jpg?updatedAt=1706614894307",
   },
 ];
+
+export const PARTNERSHIP = [
+  {
+    title: "luncswap validator",
+    link: "#",
+    image:
+      "https://ik.imagekit.io/msxxxaegj/Luncswap/lunc-validator.png?updatedAt=1707170781367",
+  },
+  {
+    title: "luncswap validator",
+    link: "#",
+    image:
+      "https://ik.imagekit.io/msxxxaegj/Luncswap/lunc-validator.png?updatedAt=1707170781367",
+  },
+];

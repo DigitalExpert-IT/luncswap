@@ -1,4 +1,4 @@
-import { COMMING_PROJECT } from "@/constant/dummyCommunity";
+import { COMMING_PROJECT } from "@/constant/content";
 import { Box, Heading, Image, Text } from "@chakra-ui/react";
 import Slider from "react-slick";
 
@@ -34,7 +34,7 @@ export const CommingProject = () => {
           color="navy.800"
           fontFamily="Inter, sans-serif"
           fontWeight="extrabold"
-          size="2xl"
+          size={{ base: "xl", md: "2xl" }}
         >
           Our Upcoming Projects
         </Heading>
