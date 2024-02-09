@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import useScreen from "@/hooks/useScreen";
-import { Trans, useTranslation } from "react-i18next";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useTranslation, Trans } from "react-i18next";
+import { useScroll, useTransform } from "framer-motion";
 import { Box, Image, Stack, Text, Heading } from "@chakra-ui/react";
+import MotionBox from "./MotionBox";
 
 export const ProjectExample = () => {
   const { isMobile } = useScreen();
@@ -12,51 +13,10 @@ export const ProjectExample = () => {
   const [refOffsetTop, setRefOffsetTop] = useState<number>(0);
   const { scrollY } = useScroll();
 
-  const textMove = useTransform(
-    scrollY,
-    [refOffsetTop - 600, refOffsetTop + 200],
-    [isMobile ? refHeight / 6 : 0, refHeight / 6],
-  );
-
   const textOpa = useTransform(
     scrollY,
-    [
-      refOffsetTop - 600,
-      refOffsetTop + 200,
-      refOffsetTop + 800,
-      refOffsetTop + 900,
-    ],
-    [isMobile ? 1 : 0, 1, 1, isMobile ? 1 : 0],
-  );
-
-  const textEvent = useTransform(
-    scrollY,
-    [
-      refOffsetTop - 600,
-      refOffsetTop + 200,
-      refOffsetTop + 600,
-      refOffsetTop + 800,
-    ],
-    ["none", "visible", "visible", "none"],
-  );
-
-  const swapOpacity = useTransform(
-    scrollY,
-    [
-      refOffsetTop + refHeight / 4 - 800,
-      refOffsetTop + refHeight / 4 - 500,
-      refOffsetTop + refHeight / 4 + 300,
-    ],
-    [1, 0, 1],
-  );
-  const swapEvent = useTransform(
-    scrollY,
-    [
-      refOffsetTop + refHeight / 4 - 800,
-      refOffsetTop + refHeight / 4 + 200,
-      refOffsetTop + refHeight,
-    ],
-    ["visible", "none", "visible"],
+    [refOffsetTop / 2 + 100, refOffsetTop + 100],
+    [1, 0],
   );
 
   useEffect(() => {
@@ -67,60 +27,35 @@ export const ProjectExample = () => {
       }
     };
 
+    const getScroll = () => {
+      console.log("scrolled: ", window.scrollY);
+    };
+
     getRefHeight();
 
     window.addEventListener("resize", getRefHeight);
+    window.addEventListener("scroll", getScroll);
 
-    return () => window.removeEventListener("resize", getRefHeight);
+    return () => {
+      window.removeEventListener("resize", getRefHeight);
+      window.removeEventListener("scroll", getScroll);
+    };
   }, []);
 
   return (
-    <Box position="relative" ref={scrollRef}>
+    <Box position="relative" ref={scrollRef} my="2rem">
       <Stack
         align="center"
         p={{ base: "1rem", md: "2rem", lg: "2rem", xl: "5rem" }}
       >
         <Box w={isMobile ? "full" : "40%"} position="relative">
-          <Box
-            display={{ base: "block", md: "none" }}
-            position="absolute"
-            backdropFilter="auto"
-            backdropBlur="10px"
-            rounded="xl"
-            bg="rgba(115, 112, 125, 0.1)"
-            p="2rem"
-            textAlign="center"
-            w="100%"
-            h="100%"
-          >
-            <motion.div
-              style={{
-                y: textMove,
-                opacity: textOpa,
-                pointerEvents: textEvent,
-              }}
-            >
-              <Heading color="brand.500">
-                {t("landingPage.project.community")}
-              </Heading>
-              <Text>{t("landingPage.project.subCommunity")}</Text>
-              <Heading color="brand.500">
-                {t("landingPage.project.easyToUse")}
-              </Heading>
-              <Text>{t("landingPage.project.subEasy")}</Text>
-              <Heading color="brand.500">
-                {t("landingPage.project.maintained")}
-              </Heading>
-              <Text>{t("landingPage.project.subMaintained")}</Text>
-            </motion.div>
-          </Box>
           {/* left tooltip */}
-          {/* <Stack
+          <Stack
             position="absolute"
-            left="-20%"
+            left={{ base: "none", md: "-40%", lg: "-40%", xl: "-30%" }}
             top="5%"
-            maxW="30%"
-            display={{ base: "none", md: "none", lg: "none", xl: "block" }}
+            maxW={{ base: "none", md: "50%", xl: "40%" }}
+            display={{ base: "none", md: "block", lg: "block", xl: "block" }}
           >
             <Box
               backdropFilter="auto"
@@ -130,13 +65,17 @@ export const ProjectExample = () => {
               p="1rem"
               textAlign="center"
             >
-              <Text color="brand.500" fontWeight="bold" fontSize="2xl">
-                Community
+              <Text
+                color="brand.500"
+                fontWeight="bold"
+                fontSize={{ base: "none", md: "md", lg: "md", xl: "2xl" }}
+              >
+                {t("landingPage.project.community")}
               </Text>
-              <Text>Our community will make your crypto ideas grow</Text>
+              <Text fontSize="xs">{t("landingPage.project.subCommunity")}</Text>
             </Box>
             <Box w="125px" textAlign="right">
-              <Text fontSize="xl">
+              <Text fontSize={{ base: "none", md: "sm" }}>
                 <Trans
                   i18nKey="landingPage.project.things"
                   components={{
@@ -152,7 +91,7 @@ export const ProjectExample = () => {
                 />
               </Text>
             </Box>
-          </Stack> */}
+          </Stack>
 
           {/* right tooltip */}
           {/* <Stack
@@ -240,15 +179,43 @@ export const ProjectExample = () => {
               </Text>
             </Box>
           </Stack> */}
+          <MotionBox
+            style={{
+              opacity: textOpa,
+            }}
+            display={isMobile ? "flex" : "none"}
+            flexDir={"column"}
+            justifyContent={"center"}
+            position={"absolute"}
+            backdropFilter="auto"
+            backdropBlur="10px"
+            rounded="xl"
+            bg="rgba(50, 50, 50, 0.5)"
+            top={0}
+            p="2rem"
+            textAlign="center"
+            w="100%"
+            height={"100%"}
+            opacity={"inherit"}
+          >
+            <Heading color="brand.500">
+              {t("landingPage.project.community")}
+            </Heading>
+            <Text>{t("landingPage.project.subCommunity")}</Text>
+            <Heading color="brand.500">
+              {t("landingPage.project.easyToUse")}
+            </Heading>
+            <Text>{t("landingPage.project.subEasy")}</Text>
+            <Heading color="brand.500">
+              {t("landingPage.project.maintained")}
+            </Heading>
+            <Text>{t("landingPage.project.subMaintained")}</Text>
+          </MotionBox>
           <Box>
-            <motion.div
-              style={{ opacity: swapOpacity, pointerEvents: swapEvent }}
-            >
-              <Image
-                src="https://ik.imagekit.io/msxxxaegj/Luncswap/swap.png?updatedAt=1706092359001"
-                objectFit="cover"
-              />
-            </motion.div>
+            <Image
+              src="https://ik.imagekit.io/msxxxaegj/Luncswap/swap.png?updatedAt=1706092359001"
+              objectFit="cover"
+            />
           </Box>
         </Box>
       </Stack>
