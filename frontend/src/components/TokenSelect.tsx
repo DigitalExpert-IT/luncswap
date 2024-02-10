@@ -33,7 +33,8 @@ function TokenSelect(props: Props) {
   };
 
   useMount(() => {
-    tokenActor.send({ type: "LOAD_LIST" });
+    if (!tokenList.length) tokenActor.send({ type: "LOAD_LIST" });
+
   });
 
   return (

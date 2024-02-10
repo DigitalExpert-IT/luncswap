@@ -5,7 +5,7 @@ import { AddLiquidity } from "./AddLiquidity";
 
 const ModalAddLiquidity = create(() => {
     const modal = useModal();
-    const { token1, token2 } = modal.args;
+    const args = modal.args;
 
     return (
         <Modal isOpen={modal.visible} onClose={modal.hide} size="xl">
@@ -18,7 +18,7 @@ const ModalAddLiquidity = create(() => {
                     Add Liquidity
                 </ModalHeader>
                 <ModalBody pb="8" pt={5}>
-                    <AddLiquidity token1={token1} token2={token2} />
+                    <AddLiquidity token1={args?.token1} token2={args?.token2} />
                 </ModalBody>
             </ModalContent>
         </Modal>

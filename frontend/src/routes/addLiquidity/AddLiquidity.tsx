@@ -24,7 +24,7 @@ interface AddLiquidity {
   token2?: string
 }
 
-export const AddLiquidity = (props: AddLiquidity) => {
+export const AddLiquidity = (props: AddLiquidity | undefined) => {
   const { t } = useTranslation();
   const [inputAddress, setInputAddress] = useState("");
   const [outputAddress, setOutputAddress] = useState("");
@@ -33,7 +33,6 @@ export const AddLiquidity = (props: AddLiquidity) => {
   const { tokenActor } = useContext(TokenMachineContext);
   const { swapActor } = useContext(SwapMachineContext);
   const tokenList = useSelector(tokenActor, state => state.context.tokenList);
-  const { token1, token2 } = props;
 
   const { liquidityActor } = useContext(LiquidityMachineContext)
 
@@ -71,19 +70,18 @@ export const AddLiquidity = (props: AddLiquidity) => {
   });
 
   useEffect(() => {
-    const a = () => {
-      if (!isMounted.current && !isLoading && token1 && token2 && tokenList.length > 0) {
+    setTimeout(() => {
+      if (!isMounted.current && !isLoading && props?.token1 && props?.token2 && tokenList.length > 0) {
         debugger
-        if (!tokenList.find((token) => token.address === token1)) return findToken(token1)
-        if (!tokenList.find((token) => token.address === token2)) return findToken(token2)
-        setInputAddress(token1);
-        setOutputAddress(token2);
+        if (!tokenList.find((token) => token.address === props?.token1)) return findToken(props?.token1)
+        if (!tokenList.find((token) => token.address === props?.token2)) return findToken(props?.token2)
+        setInputAddress(props?.token1);
+        setOutputAddress(props?.token2);
         isMounted.current = true
       }
-    }
-    a()
+    }, 100)
 
-  }, [isLoading, token1, token2, tokenList.length])
+  }, [isLoading, props?.token1, props?.token2, tokenList.length])
 
   const { tokenBalance: inputTokenBalance, isLoading: inputIsLoading } =
     useTokenBalance(inputAddress);
