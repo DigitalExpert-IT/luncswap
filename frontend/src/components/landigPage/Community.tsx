@@ -27,7 +27,7 @@ export const Community: React.FC<CommunityProps> = props => {
   const { t } = useTranslation();
 
   return (
-    <Box>
+    <Box mt={{ base: "none", md: "7rem" }}>
       <Container maxW="container.xl">
         <Stack
           border="1px"
@@ -78,7 +78,7 @@ export const Community: React.FC<CommunityProps> = props => {
             h={{ base: 10, md: 20 }}
             color="brand.400"
             top="10%"
-            right={{ base: "-5%", md: "-3%" }}
+            right={{ base: "-1%", md: "-1%" }}
           />
           <Icon
             as={FaUserCheck}
@@ -88,7 +88,7 @@ export const Community: React.FC<CommunityProps> = props => {
             color="purple.500"
             transform="rotate(20deg)"
             top={{ base: "15%", md: "25%" }}
-            right="-4%"
+            right={{ base: "-1%", md: "-1%", lg: "-1%" }}
           />
           <Box w={{ base: "full", md: "70%" }}>
             <Heading fontWeight="bold" size="2xl">

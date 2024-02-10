@@ -28,7 +28,7 @@ function Home() {
       </Container>
       <BeltCard data={COMMUNITY_USER} />
       <ProjectExample />
-      {/* <Community data={COMMUNITY_SOSMED} /> */}
+      <Community data={COMMUNITY_SOSMED} />
       <CommingProject />
       <Partnership data={PARTNERSHIP} />
     </Box>

@@ -6,11 +6,13 @@
   "project": {
     "community": "Community",
     "subCommunity": "Our community will make your crypto ideas grow",
-    "easyToUse" : "Easy to Use",
+    "things": "Things you <strong>must know</strong> about luncswap",
+    "easyToUse": "Easy to Use",
     "subEasy": "Our swap is easy to use even your new in crypto world",
+    "whyChooseLuncswap": "Why <strong>choose</strong> luncswap?",
     "maintained": "Maintained",
     "subMaintained": "Our Developer Keep update with new tech to keep swap reliable",
-    "things": "Things you <strong>must know</strong> about luncswap"
+    "whatMakesLuncswap": "What makes luncswap <strong>different</strong>?"
   },
   "community": {
     "title": "Grow With Our <strong>Community</strong>",

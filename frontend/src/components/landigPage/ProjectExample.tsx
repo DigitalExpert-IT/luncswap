@@ -9,7 +9,7 @@ export const ProjectExample = () => {
   const { isMobile } = useScreen();
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [refHeight, setRefHeight] = useState<number>(0);
+  // const [setRefHeight] = useState<number>(0);
   const [refOffsetTop, setRefOffsetTop] = useState<number>(0);
   const { scrollY } = useScroll();
 
@@ -22,23 +22,17 @@ export const ProjectExample = () => {
   useEffect(() => {
     const getRefHeight = () => {
       if (scrollRef.current) {
-        setRefHeight(scrollRef.current?.clientHeight);
+        // setRefHeight(scrollRef.current?.clientHeight);
         setRefOffsetTop(scrollRef.current?.offsetTop);
       }
-    };
-
-    const getScroll = () => {
-      console.log("scrolled: ", window.scrollY);
     };
 
     getRefHeight();
 
     window.addEventListener("resize", getRefHeight);
-    window.addEventListener("scroll", getScroll);
 
     return () => {
       window.removeEventListener("resize", getRefHeight);
-      window.removeEventListener("scroll", getScroll);
     };
   }, []);
 
@@ -48,13 +42,16 @@ export const ProjectExample = () => {
         align="center"
         p={{ base: "1rem", md: "2rem", lg: "2rem", xl: "5rem" }}
       >
-        <Box w={isMobile ? "full" : "40%"} position="relative">
+        <Box
+          w={{ base: "full", md: "50%", lg: "50%", xl: "40%" }}
+          position="relative"
+        >
           {/* left tooltip */}
           <Stack
             position="absolute"
-            left={{ base: "none", md: "-40%", lg: "-40%", xl: "-30%" }}
+            left={{ base: "none", md: "-40%", lg: "-30%", xl: "-30%" }}
             top="5%"
-            maxW={{ base: "none", md: "50%", xl: "40%" }}
+            maxW={{ base: "none", md: "50%", lg: "40%", xl: "40%" }}
             display={{ base: "none", md: "block", lg: "block", xl: "block" }}
           >
             <Box
@@ -68,14 +65,16 @@ export const ProjectExample = () => {
               <Text
                 color="brand.500"
                 fontWeight="bold"
-                fontSize={{ base: "none", md: "md", lg: "md", xl: "2xl" }}
+                fontSize={{ base: "none", md: "md", lg: "xl", xl: "2xl" }}
               >
                 {t("landingPage.project.community")}
               </Text>
-              <Text fontSize="xs">{t("landingPage.project.subCommunity")}</Text>
+              <Text fontSize={{ base: "xs", md: "sm", lg: "md", xl: "xl" }}>
+                {t("landingPage.project.subCommunity")}
+              </Text>
             </Box>
-            <Box w="125px" textAlign="right">
-              <Text fontSize={{ base: "none", md: "sm" }}>
+            <Box w={{ base: "none", md: "75%", lg: "70%" }} textAlign="right">
+              <Text fontSize={{ base: "none", md: "xl", lg: "xl", xl: "2xl" }}>
                 <Trans
                   i18nKey="landingPage.project.things"
                   components={{
@@ -94,17 +93,21 @@ export const ProjectExample = () => {
           </Stack>
 
           {/* right tooltip */}
-          {/* <Stack
+          <Stack
             position="absolute"
-            right="-30%"
+            right={{ base: "none", md: "-52%", lg: "-42%" }}
             top="40%"
-            maxW="30%"
-            display={{ base: "none", md: "none", lg: "none", xl: "block" }}
+            maxW={{ base: "none", md: "50%", lg: "40%", xl: "40%" }}
+            display={{ base: "none", md: "block", lg: "block", xl: "block" }}
           >
-            <Box w="125px" textAlign="left" display="flex">
-              <Text fontSize="xl">
+            <Box
+              w={{ base: "none", md: "75%", lg: "70%" }}
+              textAlign="left"
+              display="flex"
+            >
+              <Text fontSize={{ base: "none", md: "xl", lg: "xl", xl: "2xl" }}>
                 <Trans
-                  i18nKey="landingPage.project.things"
+                  i18nKey="landingPage.project.whyChooseLuncswap"
                   components={{
                     strong: (
                       <Text
@@ -126,24 +129,28 @@ export const ProjectExample = () => {
               p="1rem"
               textAlign="center"
             >
-              <Text color="brand.500" fontWeight="bold" fontSize="2xl">
-                Easy to Use
+              <Text
+                color="brand.500"
+                fontWeight="bold"
+                fontSize={{ base: "none", md: "md", lg: "xl", xl: "2xl" }}
+              >
+                {t("landingPage.project.easyToUse")}
               </Text>
-              <Text>
-                Our swap is easy to use even you are new in crypto world
+              <Text fontSize={{ base: "xs", md: "sm", lg: "md", xl: "xl" }}>
+                {t("landingPage.project.subEasy")}
               </Text>
             </Box>
-          </Stack> */}
+          </Stack>
 
           {/* bottom tooltip */}
-          {/* <Stack
+          <Stack
             position="absolute"
             left="-10%"
-            bottom="-13%"
-            maxW="70%"
+            bottom={{ base: "none", md: "-20%", lg: "-12%", xl: "-8%" }}
+            maxW={{ base: "none", md: "100%" }}
             direction="row"
             align="center"
-            display={{ base: "none", md: "none", lg: "none", xl: "flex" }}
+            display={{ base: "none", md: "flex", lg: "flex", xl: "flex" }}
           >
             <Box
               backdropFilter="auto"
@@ -154,17 +161,21 @@ export const ProjectExample = () => {
               textAlign="center"
               flex={1}
             >
-              <Text color="brand.500" fontWeight="bold" fontSize="2xl">
-                Maintained
+              <Text
+                color="brand.500"
+                fontWeight="bold"
+                fontSize={{ base: "none", md: "md", lg: "xl", xl: "2xl" }}
+              >
+                {t("landingPage.project.maintained")}
               </Text>
-              <Text>
-                Our Developer Keep update with new tech to keep swap reliable
+              <Text fontSize={{ base: "xs", md: "sm", lg: "md", xl: "xl" }}>
+                {t("landingPage.project.subMaintained")}
               </Text>
             </Box>
-            <Box w="500px" flex={1}>
-              <Text fontSize="xl">
+            <Box w={{ base: "none", md: "80%", lg: "80%" }} flex={1}>
+              <Text fontSize={{ base: "none", md: "lg", lg: "xl", xl: "2xl" }}>
                 <Trans
-                  i18nKey="landingPage.project.things"
+                  i18nKey="landingPage.project.whatMakesLuncswap"
                   components={{
                     strong: (
                       <Text
@@ -178,7 +189,7 @@ export const ProjectExample = () => {
                 />
               </Text>
             </Box>
-          </Stack> */}
+          </Stack>
           <MotionBox
             style={{
               opacity: textOpa,
