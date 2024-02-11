@@ -5,7 +5,7 @@ import TxWrapper from "@/backend/cosmutils/TxWrapper";
 import CollectionTransaction from "@/backend/collection/transaction";
 
 const sleep = (ms: number) =>
-  new Promise(resolve => {
+  new Promise<void>(resolve => {
     setTimeout(resolve, ms);
   });
 
@@ -24,44 +24,34 @@ class Worker {
 
     this.factoryAddress = factoryContractAddress[chainID as "pisco-1"];
     if (!this.factoryAddress) {
-      throw Error(`No Factory Contract on chain ${chainID}`);
+      throw new Error(`No Factory Contract on chain ${chainID}`);
     }
 
-    this.txCol.getPairList().then(pairList => {
-      for (const pairAddress of pairList) {
-        this.pairContractSet.add(pairAddress);
-      }
-
-      this.run();
-    });
+    this.initialize();
   }
 
-  private async getCurrentBlockHeight() {
-    const blockInfo = await this.lcd.tendermint.blockInfo();
-    return +blockInfo.block.header.height;
-  }
-
-  // TODO
-  // refactor using while / for loop / anything other than recursion
-  // this still use recursion that may fail because of callstack limit
-  private async run(blockHeight = 0) {
+  private async initialize() {
+    let blockHeight = await this.txCol.getLatestBlock();
     if (blockHeight === 0) {
-      blockHeight = await this.txCol.getLatestBlock();
-      if (blockHeight === 0) {
-        const contractHistory = await this.lcd.wasm.contractHistory(
-          this.factoryAddress,
-        );
-        blockHeight = contractHistory[0][0].updated?.block_height ?? 0;
-      }
+      const contractHistory = await this.lcd.wasm.contractHistory(
+        this.factoryAddress,
+      );
+      blockHeight = contractHistory[0][0]?.updated?.block_height ?? 0;
     }
 
-    console.log("checking on block", blockHeight);
-    // TODO
-    // check transaction list on block range for example
-    // obtain all tx list on block 1-100
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await this.processBlock(blockHeight);
+      await sleep(1000 * 60);
+      blockHeight++;
+    }
+  }
+
+  private async processBlock(blockHeight: number) {
+    console.log("Checking on block", blockHeight);
     const txList = await this.lcd.tx.txInfosByHeight(blockHeight);
     for (const tx of txList) {
-      console.log("checking on tx", tx.txhash);
+      console.log("Checking on tx", tx.txhash);
       const txw = new TxWrapper(tx);
       const pairInfo = txw.parsePairInfo(this.factoryAddress);
       if (pairInfo) {
@@ -76,12 +66,6 @@ class Worker {
         }
       }
     }
-    const currentBlockHeight = await this.getCurrentBlockHeight();
-    if (currentBlockHeight <= blockHeight) {
-      console.log("sleeping for 1 minute");
-      await sleep(1000 * 60);
-    }
-    await this.run(blockHeight + 1);
   }
 }
 
