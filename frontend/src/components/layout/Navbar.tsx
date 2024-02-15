@@ -1,12 +1,4 @@
-import {
-  Box,
-  Text,
-  Container,
-  Stack,
-  Link,
-  Heading,
-  Image,
-} from "@chakra-ui/react";
+import { Box, Text, Container, Stack, Link, Image } from "@chakra-ui/react";
 import { INavigation } from "@/constant/Navigation";
 import WrapWallet from "../WrapWallet";
 import { useConnectedWallet } from "@terra-money/wallet-kit";
@@ -17,7 +9,7 @@ interface INavbar {
   data: INavigation[];
 }
 
-const { chainId } = getConfig()
+const { chainId } = getConfig();
 
 export const Navbar: React.FC<INavbar> = ({ data }) => {
   const connectedWallet = useConnectedWallet();
@@ -42,10 +34,9 @@ export const Navbar: React.FC<INavbar> = ({ data }) => {
             alignItems="center"
             flex={1}
           >
-            <Image src="/lunc.png" mr="1rem" />
-            <Heading size="md" color="brand.500">
-              Luncswap
-            </Heading>
+            <Link href="/">
+              <Image src="/lunclogo.png" w={60} />
+            </Link>
           </Box>
           <Stack
             flex={1}
@@ -66,7 +57,7 @@ export const Navbar: React.FC<INavbar> = ({ data }) => {
                   textTransform="uppercase"
                   fontSize="sm"
                   _hover={{
-                    color: "yellow",
+                    color: "brand.500",
                   }}
                 >
                   {item.name}

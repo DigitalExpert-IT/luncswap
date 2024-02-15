@@ -11,15 +11,7 @@ export interface INavigation {
 
 export const NAVIGATION: Array<INavigation> = [
   {
-    name: "about us",
-    link: "#",
-  },
-  {
-    name: "service",
-    link: "#",
-  },
-  {
-    name: "contact",
-    link: "#",
+    name: "Swap",
+    link: "/swap",
   },
 ];

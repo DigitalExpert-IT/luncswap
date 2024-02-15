@@ -1,4 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
+import "./global.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import "@/locales/index";
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
@@ -6,7 +9,8 @@ import theme from "@/theme";
 import ErrorPage from "@/routes/errorPage.tsx";
 import Root from "@/routes/root";
 import devtoolsRoute from "@/routes/devtools";
-import swapRoute from "@/routes/addLiquidity";
+import liqiudityRoute from "@/routes/addLiquidity";
+import swapRoute from "@/routes/swap";
 import { WalletProvider } from "@terra-money/wallet-kit";
 import { ChakraProvider } from "@chakra-ui/react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -29,6 +33,7 @@ const routes = createBrowserRouter([
         element: <Home />,
       },
       devtoolsRoute,
+      liqiudityRoute,
       swapRoute,
     ],
   },

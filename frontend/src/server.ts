@@ -66,7 +66,7 @@ const compileHTML = (() => {
 const createServer = async () => {
   const db = await initializeDb();
   // run worker
-  createWorker("pisco-1", db);
+  createWorker("pisco-1", db, 9450400);
   const app = express();
   app.use(express.static(resolve("public")));
 

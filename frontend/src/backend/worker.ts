@@ -5,16 +5,23 @@ import TxWrapper from "@/backend/cosmutils/TxWrapper";
 import CollectionTransaction from "@/backend/collection/transaction";
 
 const sleep = (ms: number) =>
-  new Promise(resolve => {
-    setTimeout(resolve, ms);
-  });
+  new Promise<void>(resolve => setTimeout(resolve, ms));
 
 class Worker {
   private lcd: LCDClient;
   private pairContractSet = new Set<string>();
   private factoryAddress = "";
   private txCol: CollectionTransaction;
-  constructor(chainID: string, db: Db) {
+  private readonly blockRange = 100;
+  private startBlock: number;
+  private endBlock: number;
+
+  constructor(
+    chainID: string,
+    db: Db,
+    startBlock: number = 1,
+    endBlock: number = startBlock + 99,
+  ) {
     this.txCol = new CollectionTransaction(db);
     const lcdConfig = lcdConfigMap[chainID as "pisco-1"];
     this.lcd = new LCDClient({
@@ -24,16 +31,22 @@ class Worker {
 
     this.factoryAddress = factoryContractAddress[chainID as "pisco-1"];
     if (!this.factoryAddress) {
-      throw Error(`No Factory Contract on chain ${chainID}`);
+      throw new Error(`No Factory Contract found for chain ${chainID}`);
     }
 
-    this.txCol.getPairList().then(pairList => {
-      for (const pairAddress of pairList) {
-        this.pairContractSet.add(pairAddress);
-      }
+    this.startBlock = startBlock;
+    this.endBlock = endBlock;
+    this.initialize();
+  }
 
-      this.run();
-    });
+  private async initialize() {
+    await this.fetchInitialPairList();
+    this.run();
+  }
+
+  private async fetchInitialPairList() {
+    const pairList = await this.txCol.getPairList();
+    pairList.forEach(pairAddress => this.pairContractSet.add(pairAddress));
   }
 
   private async getCurrentBlockHeight() {
@@ -41,55 +54,72 @@ class Worker {
     return +blockInfo.block.header.height;
   }
 
-  // TODO
-  // refactor using while / for loop / anything other than recursion
-  // this still use recursion that may fail because of callstack limit
-  private async run(blockHeight = 0) {
-    if (blockHeight === 0) {
-      blockHeight = await this.txCol.getLatestBlock();
-      if (blockHeight === 0) {
-        const contractHistory = await this.lcd.wasm.contractHistory(
-          this.factoryAddress,
-        );
-        blockHeight = contractHistory[0][0].updated?.block_height ?? 0;
+  private async run() {
+    let currentBlock = this.startBlock;
+    while (currentBlock <= this.endBlock) {
+      console.log(
+        `Checking transactions from block ${currentBlock} to block ${this.endBlock}...`,
+      );
+
+      try {
+        await this.processTransactionsInRange(currentBlock, this.endBlock);
+      } catch (error) {
+        console.error(`Error processing transactions: ${error}`);
       }
+
+      const currentBlockHeight = await this.getCurrentBlockHeight();
+      if (currentBlockHeight <= this.endBlock) {
+        console.log("Sleeping for 1 minute...");
+        await sleep(1000 * 60);
+      }
+
+      currentBlock += this.blockRange;
+      this.endBlock = Math.min(
+        this.endBlock + this.blockRange,
+        currentBlockHeight,
+      );
     }
+  }
 
-    console.log("checking on block", blockHeight);
-    // TODO
-    // check transaction list on block range for example
-    // obtain all tx list on block 1-100
-    const txList = await this.lcd.tx.txInfosByHeight(blockHeight);
-    for (const tx of txList) {
-      console.log("checking on tx", tx.txhash);
-      const txw = new TxWrapper(tx);
-      const pairInfo = txw.parsePairInfo(this.factoryAddress);
-      if (pairInfo) {
-        this.pairContractSet.add(pairInfo.contractAddress);
-        await this.txCol.insertPairInfo(pairInfo);
-      }
+  private async processTransactionsInRange(
+    startBlock: number,
+    endBlock: number,
+  ) {
+    for (let blockHeight = startBlock; blockHeight <= endBlock; blockHeight++) {
+      const txList = await this.lcd.tx.txInfosByHeight(blockHeight);
 
-      for (const pairAddress of this.pairContractSet) {
-        const priceChangeInfo = txw.parsePriceChange(pairAddress);
-        if (priceChangeInfo) {
-          await this.txCol.insertPriceChangeInfo(priceChangeInfo);
+      for (const tx of txList) {
+        console.log(
+          `Processing transaction ${tx.txhash} from block ${blockHeight}...`,
+        );
+        const txw = new TxWrapper(tx);
+        const pairInfo = txw.parsePairInfo(this.factoryAddress);
+        if (pairInfo) {
+          this.pairContractSet.add(pairInfo.contractAddress);
+          await this.txCol.insertPairInfo(pairInfo);
+        }
+
+        for (const pairAddress of this.pairContractSet) {
+          const priceChangeInfo = txw.parsePriceChange(pairAddress);
+          if (priceChangeInfo) {
+            await this.txCol.insertPriceChangeInfo(priceChangeInfo);
+          }
         }
       }
     }
-    const currentBlockHeight = await this.getCurrentBlockHeight();
-    if (currentBlockHeight <= blockHeight) {
-      console.log("sleeping for 1 minute");
-      await sleep(1000 * 60);
-    }
-    await this.run(blockHeight + 1);
   }
 }
 
 export const createWorker = (() => {
   let worker: Worker;
-  return (chainId: string, db: Db) => {
+  return (
+    chainId: string,
+    db: Db,
+    startBlock: number,
+    endBlock: number = startBlock + 99,
+  ) => {
     if (worker) return worker;
-    worker = new Worker(chainId, db);
+    worker = new Worker(chainId, db, startBlock, endBlock);
     return worker;
   };
 })();

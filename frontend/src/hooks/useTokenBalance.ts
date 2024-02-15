@@ -2,8 +2,7 @@ import { getConfig } from "@/lib/config";
 import { useLcdClient, useConnectedWallet } from "@terra-money/wallet-kit";
 import { useEffect, useState } from "react";
 
-const { chainId } = getConfig()
-
+const { chainId } = getConfig();
 
 export const useTokenBalance = (tokenAddress: string) => {
   const wallet = useConnectedWallet();
