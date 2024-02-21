@@ -6,10 +6,19 @@ import { useTranslation } from "react-i18next";
 import BannerInfo from "@/components/BannerInfo";
 import AllPoolsTable from "@/routes/swap/allPoolsTable";
 import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
-import { Flex, Heading, Text, VStack } from "@chakra-ui/react";
+import {
+  Flex,
+  Heading,
+  Text,
+  VStack,
+  useDisclosure,
+  Button,
+} from "@chakra-ui/react";
+import { DrawerPool } from "@/components/Drawer";
 
 const Swap = () => {
   const { t } = useTranslation();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [sideContent, setSideContent] = useState("");
 
   const SideMenuContent = () => {
@@ -47,6 +56,8 @@ const Swap = () => {
       >
         <SwapForm setSideContent={setSideContent} sideContent={sideContent} />
         <SideMenuContent />
+        <Button onClick={onOpen}>open</Button>
+        <DrawerPool isOpen={isOpen} onClose={onClose} />
       </Flex>
     </VStack>
   );
