@@ -8,8 +8,8 @@ import {
   // useDisclosure,
   Box,
   Flex,
-  Text,
-  Button,
+  // Text,
+  // Button,
   Th,
   TableContainer,
   Td,
@@ -21,15 +21,13 @@ import {
   Tr,
   Spinner,
 } from "@chakra-ui/react";
-import { FiPlus } from "react-icons/fi";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+// import { useTranslation } from "react-i18next";
+// import { useNavigate } from "react-router-dom";
 import { LiquidityMachineContext } from "@/machine/liquidityMachineContext";
 import React, { useContext, useEffect, useRef } from "react";
 import { useSelector } from "@xstate/react";
 import { useInView } from "react-intersection-observer";
 import { Denom } from "@/interface";
-import { upperCase } from "lodash";
 
 interface DrawerPoolProps {
   isOpen: boolean;
@@ -37,8 +35,8 @@ interface DrawerPoolProps {
 }
 
 export const DrawerPool: React.FC<DrawerPoolProps> = props => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+  // const { t } = useTranslation();
+  // const navigate = useNavigate();
   const { liquidityActor } = useContext(LiquidityMachineContext);
   const { ref, inView } = useInView();
   const { pairLiquidity, tokensInfo, isAllPairsFetched, isLoading } =
@@ -72,11 +70,11 @@ export const DrawerPool: React.FC<DrawerPoolProps> = props => {
     return "/lunc.png";
   };
 
-  const pairName = (pair: Denom) => {
-    if (pair.native) return "LUNC";
-    if (!tokensInfo[pair.cw20 as ""]) return <Spinner size="sm" />;
-    return tokensInfo[pair.cw20 as ""].name;
-  };
+  // const pairName = (pair: Denom) => {
+  //   if (pair.native) return "LUNC";
+  //   if (!tokensInfo[pair.cw20 as ""]) return <Spinner size="sm" />;
+  //   return tokensInfo[pair.cw20 as ""].name;
+  // };
   return (
     <Drawer placement="bottom" onClose={props.onClose} isOpen={props.isOpen}>
       <DrawerOverlay />
@@ -177,7 +175,7 @@ export const DrawerPool: React.FC<DrawerPoolProps> = props => {
                   </Tr>
                 ))}
               </Tbody>
-              {/* <Box ref={ref} /> */}
+              <Box ref={ref} />
               <Tfoot>
                 <Tr>
                   <Th colSpan={4}>
