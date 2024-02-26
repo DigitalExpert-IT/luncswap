@@ -5,7 +5,6 @@ import {
   DrawerHeader,
   DrawerBody,
   Heading,
-  // useDisclosure,
   Box,
   Flex,
   Text,
@@ -33,6 +32,7 @@ import { upperCase } from "lodash";
 
 interface DrawerPoolProps {
   isOpen: boolean;
+  title: string;
   onClose: () => void;
 }
 
@@ -84,7 +84,7 @@ export const DrawerPool: React.FC<DrawerPoolProps> = props => {
         {/* <DrawerOverlay /> */}
         <DrawerHeader background="brand.400" roundedTop="2xl">
           <Heading color="black" textTransform="uppercase">
-            All pools
+            {props.title}
           </Heading>
         </DrawerHeader>
         <DrawerBody p="0">
