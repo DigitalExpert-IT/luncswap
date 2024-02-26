@@ -8,6 +8,7 @@ import {
   Th,
   Td,
   TableContainer,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import { FiPlus } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
@@ -20,6 +21,7 @@ import { Denom } from "@/interface";
 
 const AllPoolsTable = () => {
   const { t } = useTranslation();
+  const [isLargerThan800] = useMediaQuery("(min-width: 800px)");
   const navigate = useNavigate();
   const { liquidityActor } = useContext(LiquidityMachineContext);
   const { ref, inView } = useInView();
@@ -131,7 +133,7 @@ const AllPoolsTable = () => {
                         left={"-5px"}
                       />
                     </Flex>
-                    <Flex gap={1}>
+                    <Flex gap={1} display={!isLargerThan800 ? "none" : "block"}>
                       <Text>{pairName(pair?.assets[0])}</Text>
                       <Text>/</Text>
                       <Text>{pairName(pair?.assets[1])}</Text>
