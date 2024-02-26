@@ -54,10 +54,14 @@ const Swap = () => {
         flexDir={{ base: "column", lg: "row" }}
         justifyContent={"center"}
       >
-        <SwapForm setSideContent={setSideContent} sideContent={sideContent} />
+        <SwapForm
+          setSideContent={setSideContent}
+          sideContent={sideContent}
+          onOpen={onOpen}
+        />
         <SideMenuContent />
         <Button onClick={onOpen}>open</Button>
-        <DrawerPool isOpen={isOpen} onClose={onClose} />
+        <DrawerPool isOpen={isOpen} onClose={onClose} title={sideContent} />
       </Flex>
     </VStack>
   );
