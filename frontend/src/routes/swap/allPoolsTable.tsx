@@ -9,6 +9,7 @@ import {
   Td,
   TableContainer,
   useMediaQuery,
+  IconButton,
 } from "@chakra-ui/react";
 import { FiPlus } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
@@ -18,13 +19,14 @@ import { useContext, useEffect, useRef } from "react";
 import { useSelector } from "@xstate/react";
 import { useInView } from "react-intersection-observer";
 import { Denom } from "@/interface";
+import { HiOutlinePlus } from "react-icons/hi2";
 
 const AllPoolsTable = () => {
   const { t } = useTranslation();
-  const [isLargerThan800] = useMediaQuery("(min-width: 800px)");
   const navigate = useNavigate();
   const { liquidityActor } = useContext(LiquidityMachineContext);
   const { ref, inView } = useInView();
+  const [isLargerThan800] = useMediaQuery("(min-width: 800px)");
   const { pairLiquidity, tokensInfo, isAllPairsFetched, isLoading } =
     useSelector(liquidityActor, state => {
       return {
@@ -68,10 +70,27 @@ const AllPoolsTable = () => {
       w={"100%"}
       bgColor={"#191B1F"}
       borderRadius={20}
-      border={"2px solid #A4A4BE"}
-      h={"480px"}
+      border={isLargerThan800 ? "2px solid #A4A4BE" : "none"}
+      h={isLargerThan800 ? "480px" : "full"}
+      pos="relative"
     >
-      <Flex px={10} py={4} justifyContent={"space-between"}>
+      <IconButton
+        display={isLargerThan800 ? "none" : "flex"}
+        pos="absolute"
+        bgColor="brand.300"
+        bottom={5}
+        right={10}
+        rounded="full"
+        icon={<HiOutlinePlus />}
+        aria-label="navigation liquidity"
+        onClick={() => navigate("/addLiquidity")}
+      />
+      <Flex
+        px={10}
+        py={4}
+        justifyContent={"space-between"}
+        display={isLargerThan800 ? "flex" : "none"}
+      >
         <Text fontWeight={"700"} fontSize={"2xl"}>
           {t("swap.poolsTable.title")}
         </Text>
@@ -91,12 +110,16 @@ const AllPoolsTable = () => {
         </Button>
       </Flex>
       <TableContainer
-        px={10}
-        borderRadius={20}
+        px={isLargerThan800 ? 10 : 0}
+        borderRadius={isLargerThan800 ? 20 : 0}
         overflowY={"scroll"}
         h={"380px"}
       >
-        <Table colorScheme="teal" bgColor={"#27262C"} borderRadius={15}>
+        <Table
+          colorScheme="teal"
+          bgColor={"#27262C"}
+          borderRadius={isLargerThan800 ? 15 : 0}
+        >
           <Thead>
             <Tr
               color={"brand.400"}
@@ -133,7 +156,7 @@ const AllPoolsTable = () => {
                         left={"-5px"}
                       />
                     </Flex>
-                    <Flex gap={1} display={!isLargerThan800 ? "none" : "block"}>
+                    <Flex gap={1} display={{ base: "none", md: "flex" }}>
                       <Text>{pairName(pair?.assets[0])}</Text>
                       <Text>/</Text>
                       <Text>{pairName(pair?.assets[1])}</Text>
