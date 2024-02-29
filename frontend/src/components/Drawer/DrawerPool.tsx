@@ -22,8 +22,13 @@ export const DrawerPool: React.FC<DrawerPoolProps> = props => {
       <DrawerContent rounded="2xl">
         <DrawerCloseButton />
         <DrawerHeader background="brand.400" roundedTop="2xl">
-          <Heading color="black" textTransform="uppercase">
-            {props.title}
+          <Heading
+            color="black"
+            textTransform="uppercase"
+            size="md"
+            fontWeight="bold"
+          >
+            {props.title.replace(/_/g, " ")}
           </Heading>
         </DrawerHeader>
         <DrawerBody p="0">{props.children}</DrawerBody>
