@@ -14,10 +14,7 @@ pub fn execute_add_pair(
     let pair_key = get_pair_key(&[msg.token1_denom.clone(), msg.token2_denom.clone()]);
 
     if let Some(_) = PAIRS.may_load(deps.storage, &pair_key)? {
-        return Err(cosmwasm_std::StdError::GenericErr {
-            msg: "Duplicate pair".into(),
-        }
-        .into());
+        return Err(cosmwasm_std::StdError::generic_err("Duplicate pair").into());
     }
 
     // if token 2 are native but token 1 is non native

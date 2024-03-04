@@ -1,5 +1,5 @@
-#[cfg(not(feature = "library"))]
-use cosmwasm_std::{entry_point, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+// #[cfg(not(feature = "library"))]
+use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 use cw2::set_contract_version;
 use cw20_base::{
     contract::{execute as cw20_execute, instantiate as cw20_intantiate, query as cw20_query},

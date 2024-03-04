@@ -713,9 +713,7 @@ fn get_input_price(
     fee_percent: Decimal,
 ) -> StdResult<Uint128> {
     if input_reserve == Uint128::zero() || output_reserve == Uint128::zero() {
-        return Err(StdError::GenericErr {
-            msg: "No Liquidity".into(),
-        });
+        return Err(StdError::generic_err("No Liquidity"));
     };
 
     let fee_percent = fee_decimal_to_uint128(fee_percent)?;
