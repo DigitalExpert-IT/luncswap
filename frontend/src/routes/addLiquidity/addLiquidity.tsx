@@ -181,7 +181,7 @@ export const AddLiquidity = () => {
             _hover={{
               cursor: "pointer",
             }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/swap")}
           />
           <Text fontWeight="700" fontSize="xl">
             {t("swap.addLiquidity.title")}
