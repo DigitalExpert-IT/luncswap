@@ -8,12 +8,11 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [features]
-backtraces = ["cosmwasm-std/backtraces"]
 # use library feature to disable all init/handle/query exports
 library = []
 
 [dependencies]
-cosmwasm-std = "1.5.0"
+cosmwasm-std = { version = "1.5.3" }
 cw-storage-plus = "1.2.0"
 cw2 = "1.1.2"
 cw20 = "1.1.2"

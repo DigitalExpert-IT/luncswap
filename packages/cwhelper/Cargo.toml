@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.75"
-cosmwasm-std = "1.5.0"
+cosmwasm-std = { version = "1.5.3" }
 cw20 = { version = "1.1.1" }
 cw20-base = { version = "1.1.1", features = ["library"] }
 
