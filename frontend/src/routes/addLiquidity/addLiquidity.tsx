@@ -166,6 +166,7 @@ export const AddLiquidity = () => {
       borderRadius="20"
       w={{ base: "100%", md: "100%", lg: "50%" }}
       position={"relative"}
+      mt={{ base: "5rem", md: "none" }}
     >
       <Box display="flex" alignItems="center" p="1rem">
         <Box display="flex" alignContent="center" alignItems="center">

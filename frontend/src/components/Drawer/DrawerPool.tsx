@@ -20,12 +20,13 @@ export const DrawerPool: React.FC<DrawerPoolProps> = props => {
     <Drawer placement="bottom" onClose={props.onClose} isOpen={props.isOpen}>
       <DrawerOverlay />
       <DrawerContent rounded="2xl">
-        <DrawerCloseButton />
+        <DrawerCloseButton color="black" />
         <DrawerHeader background="brand.400" roundedTop="2xl">
           <Heading
             color="black"
             textTransform="uppercase"
-            size="md"
+            fontSize="15px"
+            lineHeight="17.86px"
             fontWeight="bold"
           >
             {props.title.replace(/_/g, " ")}

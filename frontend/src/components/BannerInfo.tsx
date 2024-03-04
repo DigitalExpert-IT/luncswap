@@ -5,7 +5,11 @@ import { FaArrowRightLong } from "react-icons/fa6";
 const BannerInfo = () => {
   const { t } = useTranslation();
   return (
-    <Box position={"relative"} display={{ base: "none", md: "block" }}>
+    <Box
+      position={"relative"}
+      display={{ base: "none", md: "block" }}
+      mt="3rem"
+    >
       <Image
         src="fire-bg-2.png"
         position={"absolute"}
