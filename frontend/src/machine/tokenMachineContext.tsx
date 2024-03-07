@@ -17,7 +17,7 @@ export const TokenMachineContext = createContext<{
   tokenActor: undefined as any,
 });
 
-const { chainId } = getConfig()
+const { chainId } = getConfig();
 
 export function TokenMachineProvider(props: { children: React.ReactNode }) {
   const lcd = useLcdClient();

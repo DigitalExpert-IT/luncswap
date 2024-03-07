@@ -164,8 +164,9 @@ export const AddLiquidity = () => {
       bgColor="navy.700"
       border={"2px solid #A4A4BE"}
       borderRadius="20"
-      w="50%"
+      w={{ base: "100%", md: "100%", lg: "50%" }}
       position={"relative"}
+      mt={{ base: "5rem", md: "none" }}
     >
       <Box display="flex" alignItems="center" p="1rem">
         <Box display="flex" alignContent="center" alignItems="center">
@@ -180,7 +181,7 @@ export const AddLiquidity = () => {
             _hover={{
               cursor: "pointer",
             }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/swap")}
           />
           <Text fontWeight="700" fontSize="xl">
             {t("swap.addLiquidity.title")}

@@ -6,18 +6,45 @@ import { useTranslation } from "react-i18next";
 import BannerInfo from "@/components/BannerInfo";
 import AllPoolsTable from "@/routes/swap/allPoolsTable";
 import { SIDE_SWAP_CONTENTS } from "@/constant/dataEnums";
-import { Flex, Heading, Text, VStack } from "@chakra-ui/react";
+import { DrawerPool } from "@/components/Drawer";
+import {
+  Flex,
+  Heading,
+  Text,
+  VStack,
+  useDisclosure,
+  useMediaQuery,
+} from "@chakra-ui/react";
 
 const Swap = () => {
   const { t } = useTranslation();
+  const [isLargerThan800] = useMediaQuery("(min-width: 800px)");
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [sideContent, setSideContent] = useState("");
 
   const SideMenuContent = () => {
     switch (sideContent) {
       case SIDE_SWAP_CONTENTS.ALL_POOLS:
-        return <AllPoolsTable />;
+        if (!isLargerThan800) {
+          return (
+            <DrawerPool isOpen={isOpen} onClose={onClose} title={sideContent}>
+              <AllPoolsTable />
+            </DrawerPool>
+          );
+        } else {
+          return <AllPoolsTable />;
+        }
+
       case SIDE_SWAP_CONTENTS.GRAPH:
-        return <Graph />;
+        if (!isLargerThan800) {
+          return (
+            <DrawerPool isOpen={isOpen} onClose={onClose} title={sideContent}>
+              <Graph />
+            </DrawerPool>
+          );
+        } else {
+          return <Graph />;
+        }
       default:
         return null;
     }
@@ -45,7 +72,11 @@ const Swap = () => {
         flexDir={{ base: "column", lg: "row" }}
         justifyContent={"center"}
       >
-        <SwapForm setSideContent={setSideContent} sideContent={sideContent} />
+        <SwapForm
+          setSideContent={setSideContent}
+          sideContent={sideContent}
+          onOpen={onOpen}
+        />
         <SideMenuContent />
       </Flex>
     </VStack>

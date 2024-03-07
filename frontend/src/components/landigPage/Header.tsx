@@ -37,14 +37,14 @@ export const Header: React.FC<HeaderProps> = props => {
           </Heading>
           <Text
             fontSize={{ base: "12px", md: "15px", lg: "24px" }}
-            my="17px"
+            my="3rem"
             fontWeight="bold"
             fontFamily="inter, sans-serif"
             lineHeight="150%"
           >
             {subTitle}
           </Text>
-          <Button colorScheme="brand" size={{ base: "sm", md: "md" }}>
+          <Button colorScheme="brand" size={{ base: "sm", md: "lg" }}>
             Launch App
           </Button>
         </Box>

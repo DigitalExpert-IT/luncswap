@@ -10,6 +10,7 @@ import {
   FormControl,
   InputGroup,
   IconButton,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import React, {
   Dispatch,
@@ -70,9 +71,11 @@ const menuContents = [
 const SwapForm = ({
   setSideContent,
   sideContent,
+  onOpen,
 }: {
   setSideContent: Dispatch<SetStateAction<string>>;
   sideContent: string;
+  onOpen: () => void;
 }) => {
   const { t } = useTranslation();
   const [inputAddress, setInputAddress] = useState("");
@@ -80,6 +83,7 @@ const SwapForm = ({
   const [inputAmount, setInputAmount] = useState("");
   const [outputAmount, setOutputAmount] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isLargerThan800] = useMediaQuery("(min-width: 800px)");
 
   const { swapActor } = useContext(SwapMachineContext);
   const { tokenActor } = useContext(TokenMachineContext);
@@ -235,7 +239,12 @@ const SwapForm = ({
   }, [outputAddress]);
 
   const onClickMenu = (contentName: string) => () => {
-    setSideContent(contentName === sideContent ? "" : contentName);
+    if (!isLargerThan800) {
+      setSideContent(contentName === sideContent ? "" : contentName);
+      onOpen();
+    } else {
+      setSideContent(contentName === sideContent ? "" : contentName);
+    }
   };
 
   const onSwap = () => {

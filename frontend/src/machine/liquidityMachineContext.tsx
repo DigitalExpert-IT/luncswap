@@ -34,11 +34,11 @@ export function LiquidityMachineProvider(props: { children: React.ReactNode }) {
       {
         pair_list: currentPairList.length
           ? {
-            after: {
-              token1: currentPairList[currentPairList.length - 1].assets[0],
-              token2: currentPairList[currentPairList.length - 1].assets[1],
-            },
-          }
+              after: {
+                token1: currentPairList[currentPairList.length - 1].assets[0],
+                token2: currentPairList[currentPairList.length - 1].assets[1],
+              },
+            }
           : {},
       },
     );
