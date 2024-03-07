@@ -34,11 +34,11 @@ export const Partnership: React.FC<PartnershipProps> = props => {
           {t("landingPage.partnership.title")}
         </Heading>
       </Box>
-      <Wrap mt="3rem" spacing="2rem" justify="center">
+      <Wrap mt="3rem" spacing="3rem">
         {data.map((item, idx) => (
           <WrapItem key={idx}>
             <Link href={item.link}>
-              <Box>
+              <Box w="60" h="60">
                 <Image src={item.image} alt={item.title} objectFit="cover" />
               </Box>
             </Link>

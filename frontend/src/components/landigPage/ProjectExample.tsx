@@ -146,6 +146,7 @@ export const ProjectExample = () => {
           <Stack
             position="absolute"
             left="-10%"
+            top="90%"
             bottom={{ base: "none", md: "-20%", lg: "-12%", xl: "-8%" }}
             maxW={{ base: "none", md: "100%" }}
             direction="row"

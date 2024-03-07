@@ -55,6 +55,6 @@ export const PARTNERSHIP = [
     title: "luncswap validator",
     link: "#",
     image:
-      "https://ik.imagekit.io/msxxxaegj/Luncswap/lunc-validator.png?updatedAt=1707170781367",
+      "https://ik.imagekit.io/msxxxaegj/image_gn/validator.png?updatedAt=1708512271545",
   },
 ];

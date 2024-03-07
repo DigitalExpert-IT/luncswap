@@ -14,7 +14,12 @@ export const BeltCard: React.FC<BeltCardProps> = props => {
   const { data } = props;
 
   return (
-    <Box bg="brand.400" p="2rem" display="flex">
+    <Box
+      bg="brand.400"
+      p="2rem"
+      display="flex"
+      mt={{ base: "2rem", md: "10rem" }}
+    >
       <Container maxW="container.xl">
         <Stack
           direction={{ base: "column", md: "row" }}

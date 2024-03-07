@@ -31,10 +31,13 @@ export const liquidityMachine = setup({
       pairList: Pair[];
       isAllPairsFetched: boolean;
     }>;
-    refetchPairList: PromiseActorLogic<{
-      pairList: Pair[];
-      isAllPairsFetched: boolean;
-    }, Pair[]>;
+    refetchPairList: PromiseActorLogic<
+      {
+        pairList: Pair[];
+        isAllPairsFetched: boolean;
+      },
+      Pair[]
+    >;
     loadTokenInfo: PromiseActorLogic<TokenInfoList, Pair[]>;
     loadBalancePair: PromiseActorLogic<string[], Pair[]>;
   },
