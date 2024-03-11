@@ -15,6 +15,8 @@ export type PairInfo = Base & {
 export type PriceChangeInfo = Base & {
   type: "price_change";
   eventType: string;
+  token1SwapAmount: string;
+  token2SwapAmount: string;
   token1Reserve: string;
   token2Reserve: string;
 };

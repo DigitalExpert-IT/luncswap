@@ -90,6 +90,8 @@ class TxWrapper {
       hash: this.tx.txhash,
       blockHeight: this.tx.height,
       contractAddress: pairContractAddress,
+      token1SwapAmount: "",
+      token2SwapAmount: "",
       token1Reserve: "",
       token2Reserve: "",
       eventType: "",
