@@ -1,9 +1,14 @@
 FROM --platform=linux/amd64 node:18-alpine as BUILD_IMAGE
 WORKDIR /app/react-app
 
+ARG CHAIN_ID
+
+ENV PUBLIC_CHAIN_ID=${CHAIN_ID}
+
 COPY package.json .
 
-RUN npm install
+RUN npm install -g npm@latest
+RUN npm install --legacy-peer-deps
 
 COPY . .
 
@@ -17,6 +22,7 @@ EXPOSE 3000
 COPY package.json .
 COPY vite.config.ts .
 
-RUN npm install typescript
+RUN npm install typescript --force
+
 EXPOSE 3000
-CMD ["npm", "run", "preview"]
+CMD ["npm", "run", "dev"]

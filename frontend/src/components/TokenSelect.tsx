@@ -1,10 +1,10 @@
 import { Box, Flex, Icon, Spinner, Text, Avatar } from "@chakra-ui/react";
-import { useModal } from "@ebay/nice-modal-react";
+// import { useModal } from "@ebay/nice-modal-react";
 import { useContext, useMemo } from "react";
 import { HiChevronDown } from "react-icons/hi2";
 import { TokenMachineContext } from "@/machine";
 import { useSelector } from "@xstate/react";
-import ModalTokenSelect from "./ModalTokenSelect";
+// import ModalTokenSelect from "./ModalTokenSelect";
 import { useMount } from "@/hooks";
 
 type Props = {
@@ -20,17 +20,16 @@ function TokenSelect(props: Props) {
       tokenList: state.context.tokenList,
     };
   });
-  const modal = useModal(ModalTokenSelect);
+  // const modal = useModal(ModalTokenSelect);
 
   const selectedToken = useMemo(() => {
     return tokenList.find(item => item.address === props.value);
   }, [props.value, tokenList]);
 
-  const handleClick = async () => {
-    if (isLoading) return;
-    const selectedAddr = await modal.show();
-    props.onChange(selectedAddr as string);
-  };
+  //   if (isLoading) return;
+  //   const selectedAddr = await modal.show();
+  //   props.onChange(selectedAddr as string);
+  // };
 
   useMount(() => {
     tokenActor.send({ type: "LOAD_LIST" });
@@ -38,7 +37,7 @@ function TokenSelect(props: Props) {
 
   return (
     <Flex
-      onClick={handleClick}
+      // onClick={handleClick}
       width="max-content"
       py="2"
       bg="navy.500"
