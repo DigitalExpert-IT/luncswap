@@ -7,7 +7,7 @@ import {
 } from "@/constant/content";
 import {
   BeltCard,
-  CommingProject,
+  // CommingProject,
   Community,
   Header,
   ProjectExample,
@@ -29,7 +29,7 @@ function Home() {
       <BeltCard data={COMMUNITY_USER} />
       <ProjectExample />
       <Community data={COMMUNITY_SOSMED} />
-      <CommingProject />
+      {/* <CommingProject /> */}
       <Partnership data={PARTNERSHIP} />
     </Box>
   );
